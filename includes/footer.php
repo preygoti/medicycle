@@ -26,6 +26,6 @@ $isPortalPage = in_array($currentDir, ['admin', 'supplier', 'ngo', 'delivery']) 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- MediCycle App Scripts -->
-<script src="<?php echo BASE_URL; ?>/assets/js/main.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/js/main.js?v=<?php echo file_exists(__DIR__ . '/../assets/js/main.js') ? filemtime(__DIR__ . '/../assets/js/main.js') : time(); ?>"></script>
 </body>
 </html>

@@ -27,13 +27,48 @@ try {
     $featuredSupplies = [];
 }
 
+// Handle contact inquiry submission from unified #contact section
+$contactSuccess = false;
+$contactErrors = [];
+$cName = $cEmail = $cSubject = $cMessage = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
+    if (!verify_csrf_token()) {
+        $contactErrors[] = 'Security token invalid or expired. Please refresh.';
+    } else {
+        $cName = clean($_POST['name'] ?? '');
+        $cEmail = clean($_POST['email'] ?? '');
+        $cSubject = clean($_POST['subject'] ?? '');
+        $cMessage = clean($_POST['message'] ?? '');
+
+        if (empty($cName)) $contactErrors[] = 'Please enter your name.';
+        if (empty($cEmail) || !filter_var($cEmail, FILTER_VALIDATE_EMAIL)) $contactErrors[] = 'Please enter a valid email address.';
+        if (empty($cSubject)) $contactErrors[] = 'Please enter the inquiry subject.';
+        if (strlen($cMessage) < 10) $contactErrors[] = 'Message must be at least 10 characters.';
+
+        if (empty($contactErrors)) {
+            $contactSuccess = true;
+            try {
+                create_notification(
+                    $pdo,
+                    1,
+                    "Inquiry: {$cSubject}",
+                    "From {$cName} ({$cEmail}): " . substr($cMessage, 0, 100) . '...',
+                    'index.php#contact'
+                );
+            } catch (Exception $e) {}
+            $cName = $cEmail = $cSubject = $cMessage = '';
+        }
+    }
+}
+
 $pageTitle = 'MediCycle - Smart Medical Supply Redistribution';
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/navbar.php';
 ?>
 
 <!-- 1. HERO SECTION -->
-<section class="hero-section text-center text-lg-start">
+<section id="home" class="hero-section text-center text-lg-start">
     <div class="container py-lg-4">
         <div class="row align-items-center gy-5">
             <div class="col-lg-7">
@@ -133,16 +168,17 @@ include __DIR__ . '/includes/navbar.php';
     </div>
 </section>
 
-<!-- 2. PROBLEM & MISSION SECTION -->
-<section class="py-5 bg-white">
+<!-- 2. ABOUT & PROBLEM SECTION -->
+<section id="about" class="py-5 bg-white">
     <div class="container py-3">
         <div class="text-center mx-auto mb-5" style="max-width: 720px;">
             <span class="text-teal fw-bold text-uppercase small letter-spacing-1">Why MediCycle Exists</span>
             <h2 class="fw-bold text-dark mt-1">Healthcare Surplus Shouldn't Become Waste</h2>
-            <p class="text-muted">Every day, valuable unopened clinical consumables expire on hospital shelves while charitable community clinics face critical supply shortages.</p>
+            <div class="heading-accent-line mx-auto"></div>
+            <p class="text-muted page-headline">Every day, valuable unopened clinical consumables expire on hospital shelves while charitable community clinics face critical supply shortages.</p>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 mb-5">
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow-sm p-4 text-center">
                     <div class="stat-icon red mx-auto mb-3" style="width: 56px; height: 56px; border-radius: 14px;">
@@ -171,16 +207,67 @@ include __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
         </div>
+
+        <!-- Academic OEP System Architecture Card -->
+        <div class="card border-0 shadow-sm bg-light p-4 p-md-5 rounded-4">
+            <div class="text-center mb-4">
+                <span class="badge bg-secondary text-uppercase px-3 py-1">Academic Context</span>
+                <h4 class="fw-bold text-dark mt-2">Open Ended Project (OEP) System Design</h4>
+                <div class="heading-accent-line mx-auto" style="width: 40px; height: 3px; margin: 0.4rem auto 0.8rem;"></div>
+                <p class="text-muted small mx-auto" style="max-width: 600px;">
+                    Engineered in compliance with Web Technology OEP curriculum guidelines, demonstrating modern native PHP, MySQL relational architecture, responsive Bootstrap styling, and client-server validation.
+                </p>
+            </div>
+
+            <div class="row g-3 text-center">
+                <div class="col-md">
+                    <div class="card p-3 border bg-white h-100 shadow-sm">
+                        <div class="fw-bold text-teal mb-1">Member 1</div>
+                        <div class="small fw-semibold text-dark">Auth & Sessions</div>
+                        <div class="text-muted small" style="font-size:0.75rem;">Password hashing, session locks, role redirection, and CSRF protection</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card p-3 border bg-white h-100 shadow-sm">
+                        <div class="fw-bold text-primary mb-1">Member 2</div>
+                        <div class="small fw-semibold text-dark">UI/UX & Design</div>
+                        <div class="text-muted small" style="font-size:0.75rem;">Bootstrap 5 theme, responsive dashboards, interactive components & Chart.js</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card p-3 border bg-white h-100 shadow-sm">
+                        <div class="fw-bold text-success mb-1">Member 3</div>
+                        <div class="small fw-semibold text-dark">Database & CRUD</div>
+                        <div class="text-muted small" style="font-size:0.75rem;">Normalized MySQL schema, transactions, search queries & relational foreign keys</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card p-3 border bg-white h-100 shadow-sm">
+                        <div class="fw-bold text-warning mb-1">Member 4</div>
+                        <div class="small fw-semibold text-dark">Handover Pipeline</div>
+                        <div class="text-muted small" style="font-size:0.75rem;">Supply requests, supplier approvals, handover codes & receipt confirmations</div>
+                    </div>
+                </div>
+                <div class="col-md">
+                    <div class="card p-3 border bg-white h-100 shadow-sm">
+                        <div class="fw-bold text-danger mb-1">Member 5</div>
+                        <div class="small fw-semibold text-dark">Smart AI & Reports</div>
+                        <div class="text-muted small" style="font-size:0.75rem;">Recommendation scoring, priority algorithm, demand analytics & validation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 
 <!-- 3. HOW IT WORKS: 4-STEP DIRECT WORKFLOW -->
-<section class="py-5 bg-teal-subtle">
+<section id="how-it-works" class="py-5 bg-teal-subtle">
     <div class="container py-3">
         <div class="text-center mx-auto mb-5" style="max-width: 700px;">
             <span class="text-teal fw-bold text-uppercase small letter-spacing-1">Direct Redistribution Model</span>
             <h2 class="fw-bold text-dark mt-1">How MediCycle Works</h2>
-            <p class="text-muted">A streamlined, 4-step direct peer workflow connecting verified healthcare providers with NGOs.</p>
+            <div class="heading-accent-line mx-auto"></div>
+            <p class="text-muted page-headline">A streamlined, 4-step direct peer workflow connecting verified healthcare providers with NGOs.</p>
         </div>
 
         <div class="row g-4">
@@ -362,13 +449,14 @@ include __DIR__ . '/includes/navbar.php';
     </div>
 </section>
 
-<!-- 6. STRICT SAFETY SCOPE: ALLOWED VS PROHIBITED -->
-<section class="py-5 bg-white">
+<!-- 4. STRICT SAFETY SCOPE: ALLOWED VS PROHIBITED -->
+<section id="safety" class="py-5 bg-white">
     <div class="container py-3">
         <div class="text-center mx-auto mb-5" style="max-width: 720px;">
             <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill fw-semibold mb-2">Safety Protocols</span>
             <h2 class="fw-bold text-dark">Strict Consumable Safety Scope</h2>
-            <p class="text-muted">MediCycle is built exclusively for non-drug healthcare consumables. Prescription drugs, controlled substances, and opened packages are strictly barred.</p>
+            <div class="heading-accent-line mx-auto"></div>
+            <p class="text-muted page-headline">MediCycle is built exclusively for non-drug healthcare consumables. Prescription drugs, controlled substances, and opened packages are strictly barred.</p>
         </div>
 
         <div class="row g-4">
@@ -405,14 +493,15 @@ include __DIR__ . '/includes/navbar.php';
     </div>
 </section>
 
-<!-- 7. LIVE SURPLUS INVENTORY HIGHLIGHT -->
-<section class="py-5 bg-teal-subtle">
+<!-- 5. LIVE SURPLUS INVENTORY HIGHLIGHT -->
+<section id="supplies" class="py-5 bg-teal-subtle">
     <div class="container py-3">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
                 <span class="text-teal fw-bold text-uppercase small">Surplus Medical Inventory</span>
                 <h2 class="fw-bold text-dark mb-1">Available Medical Supplies</h2>
-                <p class="text-muted mb-0 small">Eligible surplus lots ready for immediate request and direct collection</p>
+                <div class="heading-accent-line start" style="width: 50px; height: 3px; margin: 0.35rem 0 0.6rem;"></div>
+                <p class="text-muted mb-0 small page-headline">Eligible surplus lots ready for immediate request and direct collection</p>
             </div>
             <div>
                 <?php if (is_logged_in() && $_SESSION['role'] === 'ngo'): ?>
@@ -485,8 +574,161 @@ include __DIR__ . '/includes/navbar.php';
     </div>
 </section>
 
-<!-- 8. FINAL CALL TO ACTION -->
-<section class="py-5 bg-white text-center">
+<!-- 6. CONTACT & HELP DESK SECTION -->
+<section id="contact" class="py-5 bg-white border-top">
+    <div class="container py-3">
+        <div class="text-center mx-auto mb-5" style="max-width: 720px;">
+            <span class="badge bg-teal-light text-primary px-3 py-2 rounded-pill fw-semibold mb-2" style="background:#ccfbf1; color:#0f766e;">
+                Support & Coordination Desk
+            </span>
+            <h2 class="fw-bold text-dark mt-1">Get in Touch with MediCycle</h2>
+            <div class="heading-accent-line mx-auto"></div>
+            <p class="text-muted page-headline">Have questions about healthcare supplier onboarding, NGO verification, or logistics partnerships? We are here to help.</p>
+        </div>
+
+        <div class="row g-5">
+            <!-- Contact Inquiry Form -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm p-4 p-md-5 h-100">
+                    <h4 class="fw-bold text-dark mb-4">
+                        <i class="fas fa-paper-plane text-teal me-2" style="color:#0f766e;"></i>Send Us an Inquiry
+                    </h4>
+
+                    <?php if ($contactSuccess): ?>
+                        <div class="alert alert-success shadow-sm mb-4">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Thank you! Your inquiry has been received by the MediCycle coordination desk. We will respond promptly.
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($contactErrors)): ?>
+                        <div class="alert alert-danger shadow-sm mb-4">
+                            <ul class="mb-0 ps-3 small">
+                                <?php foreach ($contactErrors as $err): ?>
+                                    <li><?php echo e($err); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
+                    <form action="<?php echo BASE_URL; ?>/index.php#contact" method="POST" class="needs-validation" novalidate>
+                        <?php echo csrf_field(); ?>
+                        <input type="hidden" name="contact_submit" value="1">
+
+                        <div class="mb-3">
+                            <label for="c_name" class="form-label small fw-semibold">Your Name *</label>
+                            <input type="text" class="form-control" id="c_name" name="name" value="<?php echo e($cName); ?>" placeholder="Full Name" required>
+                            <div class="invalid-feedback">Name is required.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="c_email" class="form-label small fw-semibold">Email Address *</label>
+                            <input type="email" class="form-control" id="c_email" name="email" value="<?php echo e($cEmail); ?>" placeholder="email@organization.org" required>
+                            <div class="invalid-feedback">Valid email required.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="c_subject" class="form-label small fw-semibold">Inquiry Subject *</label>
+                            <input type="text" class="form-control" id="c_subject" name="subject" value="<?php echo e($cSubject); ?>" placeholder="e.g. Hospital Onboarding Verification" required>
+                            <div class="invalid-feedback">Subject is required.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="c_message" class="form-label small fw-semibold">Detailed Message *</label>
+                            <textarea class="form-control" id="c_message" name="message" rows="4" placeholder="How can the MediCycle network assist your organization?" required minlength="10"><?php echo e($cMessage); ?></textarea>
+                            <div class="invalid-feedback">Message must be at least 10 characters.</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-paper-plane me-1"></i> Send Inquiry
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FAQs & Coordination Info -->
+            <div class="col-lg-6">
+                <!-- Contact info cards -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <div class="text-teal mb-1"><i class="fas fa-hospital me-1"></i> <strong>Supplier Desk</strong></div>
+                            <small class="text-muted d-block">suppliers@medicycle.org</small>
+                            <small class="text-muted">+91 79 2630 1100</small>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 border rounded-3 bg-light h-100">
+                            <div class="text-success mb-1"><i class="fas fa-hand-holding-heart me-1"></i> <strong>NGO Liaison</strong></div>
+                            <small class="text-muted d-block">ngos@medicycle.org</small>
+                            <small class="text-muted">+91 79 2630 1101</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-question-circle text-teal me-2"></i>Frequently Asked Questions</h5>
+                    <div class="accordion shadow-sm" id="faqAccordion">
+                        <div class="accordion-item border-0 border-bottom">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                    Who can register as a Supplier on MediCycle?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-secondary small">
+                                    Any verified hospital, licensed surgical clinic, pharmacy network, or authorized distributor with surplus unexpired consumables may register.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0 border-bottom">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                    Are medical supplies sold or charged for?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-secondary small">
+                                    MediCycle is designed for benevolent redistribution of surplus consumables to charitable healthcare facilities, free community health posts, and disaster relief operations. Supplies are donated to prevent landfill waste.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0 border-bottom">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                    Why are prescription drugs excluded?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-secondary small">
+                                    Strict safety protocol: We exclude pharmaceuticals, controlled drugs, and biologics to eliminate pharmaceutical diversion and cold-chain storage risks. Only non-drug consumables are managed.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item border-0">
+                            <h2 class="accordion-header" id="faq4">
+                                <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                    How does direct collection handover work?
+                                </button>
+                            </h2>
+                            <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-secondary small">
+                                    When a supplier accepts an NGO's request, the system generates an encrypted Handover Code. The NGO presents this code upon pickup to confirm physical possession and update inventory.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 7. FINAL CALL TO ACTION -->
+<section class="py-5 bg-light text-center">
     <div class="container py-4">
         <div class="mx-auto" style="max-width: 680px;">
             <h2 class="fw-bold text-dark mb-3">Ready to Join the Movement?</h2>

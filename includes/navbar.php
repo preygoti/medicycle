@@ -13,17 +13,16 @@ if ($currentUser && isset($pdo)) {
 $currentScript = basename($_SERVER['PHP_SELF'] ?? '');
 $currentDir = basename(dirname($_SERVER['PHP_SELF'] ?? ''));
 
-$isHomeActive = ($currentScript === 'index.php' && $currentDir !== 'supplier' && $currentDir !== 'ngo');
-$isAboutActive = ($currentScript === 'about.php');
-$isHowItWorksActive = ($currentScript === 'how-it-works.php');
-$isContactActive = ($currentScript === 'contact.php');
+$isLanding = ($currentScript === 'index.php' && $currentDir !== 'supplier' && $currentDir !== 'ngo');
 $isLoginActive = ($currentScript === 'login.php');
 $isRegisterActive = ($currentScript === 'register.php');
 $isDashActive = ($currentDir === 'supplier' || $currentDir === 'ngo');
+
+$navPrefix = $isLanding ? '' : BASE_URL . '/index.php';
 ?>
 <nav class="navbar navbar-expand-lg navbar-medicycle sticky-top">
     <div class="container-fluid px-3 px-lg-4">
-        <a class="navbar-brand" href="<?php echo BASE_URL; ?>/index.php">
+        <a class="navbar-brand" href="<?php echo $navPrefix; ?>#home">
             <i class="fas fa-hand-holding-medical"></i> MediCycle
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,18 +30,24 @@ $isDashActive = ($currentDir === 'supplier' || $currentDir === 'ngo');
         </button>
         
         <div class="collapse navbar-collapse" id="navbarMain">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="mainNavLinks">
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $isHomeActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/index.php">Home</a>
+                    <a class="nav-link <?php echo $isLanding ? 'active' : ''; ?>" data-bookmark="home" href="<?php echo $navPrefix; ?>#home">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $isAboutActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/about.php">About</a>
+                    <a class="nav-link" data-bookmark="about" href="<?php echo $navPrefix; ?>#about">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $isHowItWorksActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/how-it-works.php">How It Works</a>
+                    <a class="nav-link" data-bookmark="how-it-works" href="<?php echo $navPrefix; ?>#how-it-works">How It Works</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link <?php echo $isContactActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/contact.php">Contact</a>
+                    <a class="nav-link" data-bookmark="safety" href="<?php echo $navPrefix; ?>#safety">Safety</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bookmark="supplies" href="<?php echo $navPrefix; ?>#supplies">Supplies</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bookmark="contact" href="<?php echo $navPrefix; ?>#contact">Contact</a>
                 </li>
             </ul>
 

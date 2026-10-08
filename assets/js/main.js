@@ -91,4 +91,96 @@ document.addEventListener('DOMContentLoaded', function () {
             bsAlert.close();
         });
     }, 6000);
+
+    // 5. Bookmark Navigation & ScrollSpy for Single-Page Unified Landing
+    const mainNavLinks = document.querySelectorAll('#mainNavLinks .nav-link[data-bookmark]');
+    if (mainNavLinks.length > 0) {
+        const sections = [];
+        mainNavLinks.forEach(function (link) {
+            const id = link.getAttribute('data-bookmark');
+            const sec = document.getElementById(id);
+            if (sec) {
+                sections.push({ id: id, link: link, el: sec });
+            }
+        });
+
+        // Smooth scroll on bookmark link click
+        mainNavLinks.forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('data-bookmark');
+                const targetEl = document.getElementById(targetId);
+                if (targetEl) {
+                    e.preventDefault();
+                    const navbarOffset = 70;
+                    const elementPosition = targetEl.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - navbarOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+
+                    // Update URL hash cleanly
+                    if (history.pushState) {
+                        history.pushState(null, null, '#' + targetId);
+                    } else {
+                        location.hash = '#' + targetId;
+                    }
+
+                    // Update active state immediately
+                    mainNavLinks.forEach(function (l) { l.classList.remove('active'); });
+                    this.classList.add('active');
+
+                    // Collapse mobile menu if open
+                    const navbarCollapse = document.getElementById('navbarMain');
+                    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    }
+                }
+            });
+        });
+
+        // Dynamic ScrollSpy tracking for active headline line
+        if (sections.length > 0) {
+            let isScrolling = false;
+            const onScroll = function () {
+                const scrollPos = window.pageYOffset + 120;
+                let current = sections[0];
+                for (let i = 0; i < sections.length; i++) {
+                    if (sections[i].el.offsetTop <= scrollPos) {
+                        current = sections[i];
+                    }
+                }
+                if (current) {
+                    mainNavLinks.forEach(function (l) { l.classList.remove('active'); });
+                    current.link.classList.add('active');
+                }
+            };
+
+            window.addEventListener('scroll', function () {
+                if (!isScrolling) {
+                    window.requestAnimationFrame(function () {
+                        onScroll();
+                        isScrolling = false;
+                    });
+                    isScrolling = true;
+                }
+            }, { passive: true });
+
+            // Initial trigger if loaded with hash
+            if (window.location.hash) {
+                const hashId = window.location.hash.substring(1);
+                const hashTarget = document.getElementById(hashId);
+                if (hashTarget) {
+                    setTimeout(function () {
+                        const navbarOffset = 70;
+                        const elementPosition = hashTarget.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - navbarOffset;
+                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+                    }, 150);
+                }
+            }
+        }
+    }
 });
