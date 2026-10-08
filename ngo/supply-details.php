@@ -30,7 +30,9 @@ if (!$supply) {
 }
 
 $requestedQty = '';
-$purpose = 'Rural Primary Health Outreach';
+$purpose = '';
+$urgency = '';
+$collectionDate = '';
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -39,11 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $requestedQty = (int)($_POST['requested_quantity'] ?? 0);
         $purpose = clean($_POST['purpose'] ?? '');
-        $urgency = clean($_POST['urgency'] ?? 'Medium');
+        $urgency = clean($_POST['urgency'] ?? '');
         $collectionDate = clean($_POST['preferred_collection_date'] ?? '');
-        if (empty($collectionDate)) {
-            $collectionDate = date('Y-m-d', strtotime('+2 days'));
-        }
         $message = clean($_POST['message'] ?? '');
 
         if ($requestedQty <= 0) {
@@ -53,7 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (empty($purpose)) {
-            $errors[] = 'Please select or enter the clinical purpose for these supplies.';
+            $errors[] = 'Please select the clinical purpose for these supplies.';
+        }
+
+        if (empty($urgency)) {
+            $errors[] = 'Please select an urgency level.';
+        }
+
+        if (empty($collectionDate)) {
+            $errors[] = 'Please select a preferred pickup / collection date.';
         }
 
         if (empty($errors)) {
@@ -209,27 +216,32 @@ include __DIR__ . '/../includes/navbar.php';
                         <div class="mb-3">
                             <label for="purpose" class="form-label small fw-semibold">Clinical Purpose / Outreach Need *</label>
                             <select class="form-select" id="purpose" name="purpose" required>
-                                <option value="Rural Health Camp">Free Mobile Rural Health Camp</option>
-                                <option value="Slum Outreach Clinic">Urban Slum Charitable Dispensary</option>
-                                <option value="Primary Health Center">Primary Outpatient Dressing Replenishment</option>
-                                <option value="Disaster Relief Operations">Disaster Relief / Emergency Preparedness</option>
-                                <option value="Maternal & Child Care">Maternal & Child Care Outreach</option>
+                                <option value="">Select Clinical Purpose...</option>
+                                <option value="Rural Health Camp" <?php echo $purpose === 'Rural Health Camp' ? 'selected' : ''; ?>>Free Mobile Rural Health Camp</option>
+                                <option value="Slum Outreach Clinic" <?php echo $purpose === 'Slum Outreach Clinic' ? 'selected' : ''; ?>>Urban Slum Charitable Dispensary</option>
+                                <option value="Primary Health Center" <?php echo $purpose === 'Primary Health Center' ? 'selected' : ''; ?>>Primary Outpatient Dressing Replenishment</option>
+                                <option value="Disaster Relief Operations" <?php echo $purpose === 'Disaster Relief Operations' ? 'selected' : ''; ?>>Disaster Relief / Emergency Preparedness</option>
+                                <option value="Maternal & Child Care" <?php echo $purpose === 'Maternal & Child Care' ? 'selected' : ''; ?>>Maternal & Child Care Outreach</option>
                             </select>
+                            <div class="invalid-feedback">Please select a clinical purpose.</div>
                         </div>
 
                         <div class="row g-2 mb-3">
                             <div class="col-sm-6">
                                 <label for="urgency" class="form-label small fw-semibold">Urgency Level *</label>
                                 <select class="form-select" id="urgency" name="urgency" required>
-                                    <option value="Low">Low - Routine stock</option>
-                                    <option value="Medium" selected>Medium - Normal need</option>
-                                    <option value="High">High - Urgent need</option>
-                                    <option value="Critical">Critical - Immediate</option>
+                                    <option value="">Select Urgency...</option>
+                                    <option value="Low" <?php echo $urgency === 'Low' ? 'selected' : ''; ?>>Low - Routine stock</option>
+                                    <option value="Medium" <?php echo $urgency === 'Medium' ? 'selected' : ''; ?>>Medium - Normal need</option>
+                                    <option value="High" <?php echo $urgency === 'High' ? 'selected' : ''; ?>>High - Urgent need</option>
+                                    <option value="Critical" <?php echo $urgency === 'Critical' ? 'selected' : ''; ?>>Critical - Immediate</option>
                                 </select>
+                                <div class="invalid-feedback">Please select an urgency level.</div>
                             </div>
                             <div class="col-sm-6">
                                 <label for="preferred_collection_date" class="form-label small fw-semibold">Preferred Pickup Date *</label>
-                                <input type="date" class="form-control" id="preferred_collection_date" name="preferred_collection_date" value="<?php echo date('Y-m-d', strtotime('+2 days')); ?>" min="<?php echo date('Y-m-d'); ?>" required>
+                                <input type="date" class="form-control" id="preferred_collection_date" name="preferred_collection_date" value="<?php echo e($collectionDate); ?>" min="<?php echo date('Y-m-d'); ?>" required>
+                                <div class="invalid-feedback">Pickup date is required.</div>
                             </div>
                         </div>
 

@@ -22,10 +22,10 @@ $formData = [
     'supply_name' => '',
     'category_id' => '',
     'required_quantity' => '',
-    'unit' => 'Packs',
-    'urgency' => 'Medium',
+    'unit' => '',
+    'urgency' => '',
     'required_by' => '',
-    'city' => $defaultCity,
+    'city' => '',
     'description' => ''
 ];
 
@@ -173,6 +173,7 @@ include __DIR__ . '/../includes/navbar.php';
                         <div class="col-md-4">
                             <label for="urgency" class="form-label small fw-semibold">Clinical Urgency *</label>
                             <select class="form-select" id="urgency" name="urgency" required>
+                                <option value="">Select Urgency...</option>
                                 <option value="Low" <?php echo $formData['urgency'] === 'Low' ? 'selected' : ''; ?>>Low Priority</option>
                                 <option value="Medium" <?php echo $formData['urgency'] === 'Medium' ? 'selected' : ''; ?>>Medium (Routine Need)</option>
                                 <option value="High" <?php echo $formData['urgency'] === 'High' ? 'selected' : ''; ?>>High (Outreach Camp)</option>
@@ -187,7 +188,7 @@ include __DIR__ . '/../includes/navbar.php';
 
                         <div class="col-md-6">
                             <label for="city" class="form-label small fw-semibold">Delivery City / Clinic District *</label>
-                            <input type="text" class="form-control" id="city" name="city" value="<?php echo e($formData['city']); ?>" placeholder="e.g. Vadodara" required>
+                            <input type="text" class="form-control" id="city" name="city" value="<?php echo e($formData['city']); ?>" placeholder="e.g. Pune, Maharashtra" required>
                         </div>
                     </div>
 

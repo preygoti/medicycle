@@ -36,7 +36,36 @@ define('SESSION_LIFETIME', 7200); // 2 hours
 // Safety scope: Disallowed categories/items warning
 define('ELIGIBLE_SCOPE_NOTICE', 'MediCycle handles strictly eligible, unexpired, unopened non-drug medical consumables (PPE, dressings, bandages, sterile kits). Prescription medications and opened consumables are prohibited.');
 
+// Load .env file variables if present
+$envFile = APP_ROOT . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#')) continue;
+        if (strpos($line, '=') !== false) {
+            list($key, $val) = explode('=', $line, 2);
+            $key = trim($key);
+            $val = trim($val, " \t\n\r\0\x0B\"'");
+            if (getenv($key) === false) {
+                putenv("{$key}={$val}");
+                $_ENV[$key] = $val;
+            }
+        }
+    }
+}
+
+// SMTP Mail Settings
+define('SMTP_HOST', getenv('SMTP_HOST') ?: 'smtp.gmail.com');
+define('SMTP_PORT', (int)(getenv('SMTP_PORT') ?: 587));
+define('SMTP_ENCRYPTION', getenv('SMTP_ENCRYPTION') ?: 'tls');
+define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: '');
+define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: '');
+define('SMTP_FROM_EMAIL', getenv('SMTP_FROM_EMAIL') ?: 'no-reply@medicycle.org');
+define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'MediCycle Platform');
+
 // Require database connection
 require_once __DIR__ . '/database.php';
 require_once APP_ROOT . '/includes/session.php';
 require_once APP_ROOT . '/includes/functions.php';
+require_once APP_ROOT . '/includes/mail.php';

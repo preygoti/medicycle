@@ -38,6 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $user = $stmt->fetch();
                 
                 if ($user && password_verify($password, $user['password'])) {
+                    // Check if email has been verified via 6-digit OTP
+                    if ((int)($user['email_verified'] ?? 1) === 0) {
+                        $_SESSION['pending_verification_email'] = $user['email'];
+                        set_flash('warning', 'Please verify your email address before signing in. A 6-digit verification code was sent to your inbox.');
+                        header('Location: ' . BASE_URL . '/verify-email.php?email=' . urlencode($user['email']));
+                        exit;
+                    }
+
                     if ($user['status'] === 'suspended' || $user['status'] === 'inactive') {
                         $errors[] = 'Your account has been deactivated or suspended. Please contact the administrator.';
                     } else {
@@ -112,14 +120,14 @@ include __DIR__ . '/includes/navbar.php';
                         </div>
                     <?php endif; ?>
 
-                    <form action="<?php echo BASE_URL; ?>/login.php<?php echo isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : ''; ?>" method="POST" class="needs-validation" novalidate>
+                    <form action="<?php echo BASE_URL; ?>/login.php<?php echo isset($_GET['redirect']) ? '?redirect=' . urlencode($_GET['redirect']) : ''; ?>" method="POST" class="needs-validation" novalidate autocomplete="off">
                         <?php echo csrf_field(); ?>
 
                         <div class="mb-3">
                             <label for="email" class="form-label small fw-semibold">Email Address</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light text-muted"><i class="fas fa-envelope"></i></span>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo e($email); ?>" placeholder="name@hospital.org" required>
+                                <input type="email" class="form-control" id="email" name="email" value="<?php echo e($email); ?>" placeholder="name@hospital.org" required autofocus>
                                 <div class="invalid-feedback">Please enter a valid email address.</div>
                             </div>
                         </div>
@@ -132,6 +140,9 @@ include __DIR__ . '/includes/navbar.php';
                             <div class="input-group">
                                 <span class="input-group-text bg-light text-muted"><i class="fas fa-key"></i></span>
                                 <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="toggleLoginPassword(this)">
+                                    <i class="far fa-eye"></i>
+                                </button>
                                 <div class="invalid-feedback">Please enter your password.</div>
                             </div>
                         </div>
@@ -177,6 +188,19 @@ include __DIR__ . '/includes/navbar.php';
 function fillDemo(email, pass) {
     document.getElementById('email').value = email;
     document.getElementById('password').value = pass;
+}
+function toggleLoginPassword(btn) {
+    const input = document.getElementById('password');
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
 }
 </script>
 

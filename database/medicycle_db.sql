@@ -13,6 +13,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     role ENUM('supplier', 'ngo') NOT NULL,
+    email_verified TINYINT(1) DEFAULT 1,
     status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -133,7 +134,22 @@ CREATE TABLE notifications (
     INDEX idx_notif_user_read (user_id, is_read)
 ) ENGINE=InnoDB;
 
--- 8. IMPACT METRICS TABLE
+-- 8. EMAIL OTP VERIFICATION TABLE
+CREATE TABLE email_otps (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT DEFAULT NULL,
+    email VARCHAR(100) NOT NULL,
+    otp_hash VARCHAR(255) NOT NULL,
+    otp_type ENUM('registration', 'password_reset') NOT NULL,
+    expires_at DATETIME NOT NULL,
+    attempts INT DEFAULT 0,
+    is_used TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_otp_lookup (email, otp_type, is_used),
+    INDEX idx_otp_expires (expires_at)
+) ENGINE=InnoDB;
+
+-- 9. IMPACT METRICS TABLE
 CREATE TABLE impact_metrics (
     id INT AUTO_INCREMENT PRIMARY KEY,
     request_id INT NOT NULL,

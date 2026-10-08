@@ -24,13 +24,13 @@ $formData = [
     'category_id' => '',
     'description' => '',
     'quantity' => '',
-    'unit' => 'Boxes (100 pcs)',
-    'condition_status' => 'New / Unopened',
-    'packaging_status' => 'Original Factory Seal',
+    'unit' => '',
+    'condition_status' => '',
+    'packaging_status' => '',
     'expiry_date' => '',
     'batch_number' => '',
-    'storage_requirements' => 'Room Temperature (15-25°C)',
-    'location' => $defaultLocation
+    'storage_requirements' => '',
+    'location' => ''
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -47,7 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!is_numeric($formData['quantity']) || (int)$formData['quantity'] <= 0) {
             $errors[] = 'Quantity must be a positive whole number.';
         }
-        if (empty($formData['unit'])) $errors[] = 'Unit specification is required.';
+        if (empty($formData['unit'])) $errors[] = 'Unit specification is required (e.g. Boxes, Packs, Cartons).';
+        if (empty($formData['condition_status'])) $errors[] = 'Please select physical condition status.';
+        if (empty($formData['packaging_status'])) $errors[] = 'Please select packaging seal status.';
         if (empty($formData['expiry_date'])) {
             $errors[] = 'Expiry date is required.';
         } else {
@@ -67,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     (int)$formData['quantity']
                 );
 
-                // If supplier is verified, list directly as 'Available', else 'Pending' for admin inspection
-                $initialStatus = ($userOrg['verification_status'] === 'verified') ? 'Available' : 'Pending';
+                // Supply is immediately listed as 'Available' for NGOs to discover
+                $initialStatus = 'Available';
 
                 $stmt = $pdo->prepare("INSERT INTO medical_supplies 
                     (supplier_id, category_id, supply_name, description, quantity, unit, condition_status, packaging_status, expiry_date, batch_number, storage_requirements, location, status, priority_score, priority_level, created_at) 
@@ -85,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $formData['packaging_status'],
                     $formData['expiry_date'],
                     $formData['batch_number'],
-                    $formData['storage_requirements'],
+                    $formData['storage_requirements'] ?: 'Standard Room Temperature (15-25°C)',
                     $formData['location'],
                     $initialStatus,
                     $priority['score'],
@@ -94,16 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $newSupplyId = $pdo->lastInsertId();
 
-                // Notify admin of the new batch
-                create_notification(
-                    $pdo,
-                    1, // Admin
-                    'New Supply Batch Listed',
-                    "{$userOrg['organization_name']} added {$formData['supply_name']} ({$formData['quantity']} {$formData['unit']}).",
-                    'admin/supplies.php'
-                );
-
-                set_flash('success', "Medical supply '{$formData['supply_name']}' successfully added to inventory with {$priority['level']} priority rating.");
+                set_flash('success', "Medical supply '{$formData['supply_name']}' successfully added to available inventory!");
                 header('Location: ' . BASE_URL . '/supplier/inventory.php');
                 exit;
 
@@ -206,19 +199,23 @@ include __DIR__ . '/../includes/navbar.php';
                         <div class="col-md-6">
                             <label for="condition_status" class="form-label small fw-semibold">Physical Condition *</label>
                             <select class="form-select" id="condition_status" name="condition_status" required>
+                                <option value="">Select Condition...</option>
                                 <option value="New / Unopened" <?php echo $formData['condition_status'] === 'New / Unopened' ? 'selected' : ''; ?>>New / Unopened (Factory Condition)</option>
                                 <option value="Sterile Sealed" <?php echo $formData['condition_status'] === 'Sterile Sealed' ? 'selected' : ''; ?>>Sterile Sealed (Intact Blister / Peel Pack)</option>
                                 <option value="Surplus Stock" <?php echo $formData['condition_status'] === 'Surplus Stock' ? 'selected' : ''; ?>>Surplus Overstock (Intact Outer Carton)</option>
                             </select>
+                            <div class="invalid-feedback">Please select the condition status.</div>
                         </div>
 
                         <div class="col-md-6">
                             <label for="packaging_status" class="form-label small fw-semibold">Packaging Seal Status *</label>
                             <select class="form-select" id="packaging_status" name="packaging_status" required>
+                                <option value="">Select Seal Status...</option>
                                 <option value="Original Factory Seal" <?php echo $formData['packaging_status'] === 'Original Factory Seal' ? 'selected' : ''; ?>>Original Factory Seal (100% Intact)</option>
                                 <option value="Tamper Evident Packaging" <?php echo $formData['packaging_status'] === 'Tamper Evident Packaging' ? 'selected' : ''; ?>>Tamper-Evident Packaging (Validated)</option>
                                 <option value="Intact Outer Box" <?php echo $formData['packaging_status'] === 'Intact Outer Box' ? 'selected' : ''; ?>>Intact Outer Box (Undamaged)</option>
                             </select>
+                            <div class="invalid-feedback">Please select packaging status.</div>
                         </div>
                     </div>
 
@@ -238,7 +235,7 @@ include __DIR__ . '/../includes/navbar.php';
 
                         <div class="col-md-4">
                             <label for="location" class="form-label small fw-semibold">Pickup City / Hub *</label>
-                            <input type="text" class="form-control" id="location" name="location" value="<?php echo e($formData['location']); ?>" placeholder="e.g. Ahmedabad" required>
+                            <input type="text" class="form-control" id="location" name="location" value="<?php echo e($formData['location']); ?>" placeholder="e.g. Mumbai, Maharashtra" required>
                             <div class="invalid-feedback">Pickup city is required.</div>
                         </div>
                     </div>
