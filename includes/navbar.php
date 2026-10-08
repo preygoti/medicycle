@@ -10,6 +10,16 @@ if ($currentUser && isset($pdo)) {
     $unreadNotifCount = get_unread_notifications_count($pdo, $currentUser['id']);
     $recentNotifs = get_user_notifications($pdo, $currentUser['id'], 4);
 }
+$currentScript = basename($_SERVER['PHP_SELF'] ?? '');
+$currentDir = basename(dirname($_SERVER['PHP_SELF'] ?? ''));
+
+$isHomeActive = ($currentScript === 'index.php' && $currentDir !== 'supplier' && $currentDir !== 'ngo');
+$isAboutActive = ($currentScript === 'about.php');
+$isHowItWorksActive = ($currentScript === 'how-it-works.php');
+$isContactActive = ($currentScript === 'contact.php');
+$isLoginActive = ($currentScript === 'login.php');
+$isRegisterActive = ($currentScript === 'register.php');
+$isDashActive = ($currentDir === 'supplier' || $currentDir === 'ngo');
 ?>
 <nav class="navbar navbar-expand-lg navbar-medicycle sticky-top">
     <div class="container-fluid px-3 px-lg-4">
@@ -23,16 +33,16 @@ if ($currentUser && isset($pdo)) {
         <div class="collapse navbar-collapse" id="navbarMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php">Home</a>
+                    <a class="nav-link <?php echo $isHomeActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/index.php">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/about.php">About</a>
+                    <a class="nav-link <?php echo $isAboutActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/about.php">About</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/how-it-works.php">How It Works</a>
+                    <a class="nav-link <?php echo $isHowItWorksActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/how-it-works.php">How It Works</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/contact.php">Contact</a>
+                    <a class="nav-link <?php echo $isContactActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/contact.php">Contact</a>
                 </li>
             </ul>
 
@@ -115,12 +125,12 @@ if ($currentUser && isset($pdo)) {
                 <?php else: ?>
                     <!-- Guest Navigation Links -->
                     <li class="nav-item me-2">
-                        <a class="nav-link" href="<?php echo BASE_URL; ?>/login.php">
+                        <a class="nav-link <?php echo $isLoginActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/login.php">
                             <i class="fas fa-sign-in-alt me-1"></i> Login
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-primary" href="<?php echo BASE_URL; ?>/register.php">
+                        <a class="btn <?php echo $isRegisterActive ? 'btn-primary shadow-sm active' : 'btn-primary'; ?>" href="<?php echo BASE_URL; ?>/register.php">
                             <i class="fas fa-user-plus me-1"></i> Register
                         </a>
                     </li>

@@ -90,7 +90,8 @@ include __DIR__ . '/../includes/navbar.php';
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-bold text-dark mb-1">Clinic & NGO Portal</h3>
-                <p class="text-muted small mb-0">Overview for <?php echo e($_SESSION['org_name']); ?></p>
+                <div class="heading-accent-line start" style="width: 45px; height: 3px; margin: 0.35rem 0 0.5rem;"></div>
+                <p class="text-muted small mb-0 page-headline">Overview for <?php echo e($_SESSION['org_name']); ?></p>
             </div>
             <div class="d-flex gap-2">
                 <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="btn btn-primary">

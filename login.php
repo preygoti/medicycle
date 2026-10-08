@@ -104,8 +104,9 @@ include __DIR__ . '/includes/navbar.php';
                         <div class="rounded-circle bg-teal-light d-inline-flex p-3 text-primary mb-2" style="background:#ccfbf1;">
                             <i class="fas fa-lock fs-3" style="color:#0f766e;"></i>
                         </div>
-                        <h3 class="fw-bold text-dark">Welcome to MediCycle</h3>
-                        <p class="text-muted small">Sign in to your medical supply redistribution account</p>
+                        <h3 class="fw-bold text-dark mb-1">Welcome to MediCycle</h3>
+                        <div class="heading-accent-line mx-auto" style="width: 45px; height: 3px; margin: 0.4rem auto 0.75rem;"></div>
+                        <p class="text-muted small page-headline">Sign in to your medical supply redistribution account</p>
                     </div>
 
                     <?php echo render_flash_messages(); ?>

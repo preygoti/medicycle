@@ -95,7 +95,8 @@ include __DIR__ . '/../includes/navbar.php';
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-bold text-dark mb-1">Medical Supply Inventory</h3>
-                <p class="text-muted small mb-0">Manage, search, edit, and monitor your listed lots</p>
+                <div class="heading-accent-line start" style="width: 45px; height: 3px; margin: 0.35rem 0 0.5rem;"></div>
+                <p class="text-muted small mb-0 page-headline">Manage, search, edit, and monitor your listed lots</p>
             </div>
             <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-primary">
                 <i class="fas fa-plus-circle me-1"></i> Add New Consumable

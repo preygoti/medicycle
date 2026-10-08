@@ -119,22 +119,61 @@ h1, h2, h3, h4, h5, h6 {
 
 .navbar-nav .nav-link {
     font-weight: 500;
-    font-size: 0.92rem;
+    font-size: 0.94rem;
     color: #475569;
-    padding: 0.5rem 0.85rem;
+    padding: 0.55rem 0.95rem;
     border-radius: 6px;
-    transition: all 0.15s ease-in-out;
+    position: relative;
+    transition: all 0.2s ease-in-out;
 }
 
 .navbar-nav .nav-link:hover {
     color: var(--primary-color) !important;
-    background-color: var(--primary-bg);
+    background-color: rgba(15, 118, 110, 0.05);
 }
 
 .navbar-nav .nav-link.active {
     color: var(--primary-color) !important;
-    font-weight: 600;
-    background-color: var(--primary-bg);
+    font-weight: 700;
+    background-color: rgba(15, 118, 110, 0.06);
+}
+
+/* Prominent indicator line below the active page heading */
+.navbar-nav .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 12px;
+    right: 12px;
+    height: 3.5px;
+    background: linear-gradient(90deg, #0F766E, #14B8A6);
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(15, 118, 110, 0.35);
+}
+
+/* Page Heading Accent Headline/Underline */
+.heading-accent-line {
+    width: 60px;
+    height: 3.5px;
+    background: linear-gradient(90deg, #0F766E, #14B8A6);
+    border-radius: 4px;
+    margin: 0.65rem auto 1.15rem;
+    display: block;
+}
+
+.heading-accent-line.start {
+    margin: 0.65rem 0 1.15rem;
+}
+
+.heading-accent-line.hero {
+    background: linear-gradient(90deg, #5EEAD4, #14B8A6);
+    box-shadow: 0 0 14px rgba(94, 234, 212, 0.5);
+}
+
+.page-headline {
+    font-size: 1.05rem;
+    color: #64748B;
+    line-height: 1.6;
 }
 
 /* Buttons */
@@ -319,6 +358,8 @@ h1, h2, h3, h4, h5, h6 {
     background-color: var(--sidebar-active);
     color: #FFFFFF !important;
     font-weight: 600;
+    border-left: 4px solid var(--accent-cyan);
+    padding-left: calc(1.15rem - 4px);
 }
 
 .app-sidebar .nav-link.active i {

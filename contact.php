@@ -56,7 +56,8 @@ include __DIR__ . '/includes/navbar.php';
             Support & Community
         </span>
         <h1 class="fw-bold text-dark mb-2">Get in Touch with MediCycle</h1>
-        <p class="text-muted mx-auto" style="max-width: 600px;">
+        <div class="heading-accent-line mx-auto"></div>
+        <p class="text-muted mx-auto page-headline" style="max-width: 600px;">
             Have questions about healthcare supplier onboarding, NGO verification, or logistics partnerships? We are here to help.
         </p>
     </div>

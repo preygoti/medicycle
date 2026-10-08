@@ -41,6 +41,7 @@ include __DIR__ . '/includes/navbar.php';
                     Turn Medical Surplus Into<br>
                     <span style="color: #5EEAD4;">Community Impact.</span>
                 </h1>
+                <div class="heading-accent-line start hero"></div>
                 <p class="hero-subtitle mb-4">
                     MediCycle directly connects hospitals and healthcare suppliers with verified NGOs and charitable clinics. We redirect unexpired, unopened healthcare consumables before they go to waste.
                 </p>

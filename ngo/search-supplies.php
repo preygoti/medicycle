@@ -75,7 +75,8 @@ include __DIR__ . '/../includes/navbar.php';
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-bold text-dark mb-1">Search Available Medical Supplies</h3>
-                <p class="text-muted small mb-0">Browse and request eligible, unexpired non-drug consumables</p>
+                <div class="heading-accent-line start" style="width: 45px; height: 3px; margin: 0.35rem 0 0.5rem;"></div>
+                <p class="text-muted small mb-0 page-headline">Browse and request eligible, unexpired non-drug consumables</p>
             </div>
             <a href="<?php echo BASE_URL; ?>/ngo/post-requirement.php" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-bullhorn me-1"></i> Post Specific Clinical Need

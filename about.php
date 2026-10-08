@@ -15,7 +15,8 @@ include __DIR__ . '/includes/navbar.php';
             About the Initiative
         </span>
         <h1 class="fw-bold text-dark mb-2">Redefining Healthcare Supply Chains</h1>
-        <p class="text-muted mx-auto" style="max-width: 650px;">
+        <div class="heading-accent-line mx-auto"></div>
+        <p class="text-muted mx-auto page-headline" style="max-width: 650px;">
             MediCycle addresses the critical imbalance between medical surplus in major urban facilities and severe resource deficits in rural and charitable clinics.
         </p>
     </div>

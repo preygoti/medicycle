@@ -169,7 +169,8 @@ include __DIR__ . '/includes/navbar.php';
                             <i class="fas fa-hospital-user fs-2"></i>
                         </div>
                         <h3 class="fw-bold text-dark mb-1">Join MediCycle</h3>
-                        <p class="text-muted small">Connect directly to redistribute surplus healthcare supplies</p>
+                        <div class="heading-accent-line mx-auto" style="width: 45px; height: 3px; margin: 0.4rem auto 0.75rem;"></div>
+                        <p class="text-muted small page-headline">Connect directly to redistribute surplus healthcare supplies</p>
                     </div>
 
                     <div class="alert alert-light border rounded-3 p-3 mb-4 small text-secondary">
