@@ -156,7 +156,7 @@ include __DIR__ . '/includes/navbar.php';
                     <div class="mt-4 pt-3 border-top">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="small fw-bold text-muted"><i class="fas fa-flask text-teal me-1"></i> Quick Demo Logins</span>
-                            <span class="badge bg-light text-secondary border">Harvest Ledger Flow</span>
+                            <span class="badge bg-light text-secondary border">Direct Handover Flow</span>
                         </div>
                         <div class="row g-2">
                             <div class="col-6">

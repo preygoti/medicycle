@@ -16,7 +16,7 @@ include __DIR__ . '/includes/navbar.php';
         </span>
         <h1 class="fw-bold text-dark mb-2">How MediCycle Works</h1>
         <p class="text-muted mx-auto" style="max-width: 650px;">
-            A straightforward 4-step direct redistribution pipeline modeled on Harvest Ledger. Healthcare suppliers directly channel surplus consumables to charitable clinics and NGOs.
+            A straightforward 4-step direct redistribution pipeline. Healthcare suppliers directly channel surplus consumables to charitable clinics and NGOs.
         </p>
     </div>
 </div>

@@ -37,9 +37,6 @@ include __DIR__ . '/includes/navbar.php';
     <div class="container py-lg-4">
         <div class="row align-items-center gy-5">
             <div class="col-lg-7">
-                <span class="badge bg-teal-light text-white px-3 py-2 mb-3 rounded-pill border border-teal text-uppercase" style="background: rgba(204, 251, 241, 0.2); letter-spacing: 0.05em;">
-                    <i class="fas fa-hand-holding-medical me-1"></i> Harvest Ledger Healthcare Edition
-                </span>
                 <h1 class="hero-title mb-3">
                     Turn Medical Surplus Into<br>
                     <span style="color: #5EEAD4;">Community Impact.</span>
