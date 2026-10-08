@@ -1,7 +1,7 @@
 <?php
 /**
  * MediCycle - Helper Functions & Smart Business Logic
- * Harvest Ledger Model: Supplier <-> NGO Direct Redistribution
+ * Direct Healthcare Supplier <-> Recipient NGO/Clinic Redistribution Model
  */
 
 /**

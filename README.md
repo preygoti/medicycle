@@ -1,26 +1,28 @@
 # MediCycle — Smart Medical Supply Redistribution Management System
-### Harvest Ledger Healthcare Edition — Direct Supplier <-> NGO Redistribution Model
+### Direct Healthcare Supplier <-> Recipient NGO/Clinic Redistribution Model
 
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue.svg)](https://www.php.net/)
 [![MySQL](https://img.shields.io/badge/MySQL-MariaDB%2010.4-orange.svg)](https://www.mysql.com/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple.svg)](https://getbootstrap.com/)
 [![License](https://img.shields.io/badge/Academic-OEP%20Project-green.svg)](#)
 
-**MediCycle** is a full-stack Web Technology Open-Ended Project (OEP) engineered on the **Harvest Ledger direct redistribution model**. It connects healthcare suppliers (medical stores, hospitals, distributors) directly with verified recipient NGOs and charitable clinics to prevent usable non-drug healthcare supplies from being incinerated or dumped in landfills.
+**MediCycle** is a full-stack Web Technology Open-Ended Project (OEP) engineered as a decentralized medical supply redistribution platform. It connects healthcare suppliers (medical stores, hospitals, surgical distributors) directly with verified recipient NGOs and charitable clinics to prevent usable non-drug healthcare consumables from being incinerated or dumped in landfills.
 
 ---
 
-## 1. Core Model (Harvest Ledger Comparison)
+## 1. Core Redistribution Model
 
-| Dimension | Harvest Ledger | MediCycle (Healthcare Edition) |
+MediCycle operates on a direct peer-to-peer redistribution architecture between two primary stakeholder roles:
+
+| Dimension | Specification | Description |
 |---|---|---|
-| **Donor / Supplier** | Restaurant / Bakery / Grocery | Medical Store / Hospital / Medical Supplier |
-| **Surplus Listed** | Food Surplus Lots | Non-Drug Medical Supply Surplus |
-| **Recipient** | NGO / Food Bank | NGO / Charitable Community Clinic |
-| **Request Model** | Food Request | Supply Requisition |
-| **Fulfillment** | Direct Pickup / Collection | Direct Handover / Collection Pass |
-| **Verification** | Pickup Code Verification | Handover Code Verification |
-| **Impact Accounting** | Food Waste Diverted (kg) | Medical Waste Diverted (kg) & Funds Saved |
+| **Healthcare Supplier** | Hospitals, Medical Distributors, Surgical Stores | Lists surplus unexpired medical consumables and approves handovers |
+| **Recipient Organization** | Charitable Clinics, Non-Profit Healthcare Centers | Discovers available supplies and requests critical inventory |
+| **Consumable Categories** | Non-Drug Medical Supplies | Factory-sealed gloves, masks, sterile gauze, bandages, PPE kits |
+| **Requisition Flow** | Direct Online Requisition | Requests with desired collection date and quantity |
+| **Fulfillment Protocol** | Direct Physical Collection | Donor and recipient coordinate direct physical pickup |
+| **Security Verification** | Handover PIN Code | Recipient presents code upon physical handover |
+| **Impact Accounting** | Real-Time Metrics Ledger | Solid medical waste averted (kg) and community funds saved (₹) |
 
 ---
 

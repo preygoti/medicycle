@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $pdo->beginTransaction();
 
-                // Insert into requests table (Harvest Ledger direct collection flow)
+                // Insert into requests table (MediCycle direct collection flow)
                 $insReq = $pdo->prepare("INSERT INTO requests 
                     (supply_id, requester_id, requested_quantity, purpose, urgency, preferred_collection_date, message, status, requested_at) 
                     VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', NOW())");

@@ -1,7 +1,7 @@
 <?php
 /**
  * MediCycle - Smart Medical Supply Redistribution Management System
- * Harvest Ledger-style direct redistribution model: Suppliers <-> NGOs/Clinics
+ * Direct Healthcare Supplier <-> Recipient NGO/Clinic Redistribution Model
  */
 require_once __DIR__ . '/config/config.php';
 
@@ -110,7 +110,7 @@ include __DIR__ . '/includes/navbar.php';
             <div class="col-lg-5">
                 <div class="card bg-white text-dark shadow-lg border-0 p-4 rounded-4">
                     <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-                        <h6 class="fw-bold text-teal mb-0"><i class="fas fa-chart-line me-2"></i>Live Redistribution Ledger</h6>
+                        <h6 class="fw-bold text-teal mb-0"><i class="fas fa-chart-line me-2"></i>Live Redistribution Metrics</h6>
                         <span class="badge bg-success bg-opacity-10 text-success"><i class="fas fa-circle me-1 small"></i>Real-Time DB</span>
                     </div>
                     <div class="row g-3 text-center">

@@ -1,7 +1,7 @@
 <?php
 /**
  * MediCycle - Supplier Incoming Requests & Handover Management
- * Direct Supplier <-> NGO Redistribution Flow (Harvest Ledger Model)
+ * Direct Healthcare Supplier <-> Recipient NGO/Clinic Handover Management
  */
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/auth.php';

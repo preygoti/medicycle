@@ -98,9 +98,9 @@ Existing medical donation practices rely predominantly on ad-hoc phone calls, un
 
 ---
 
-# 9. PROPOSED SYSTEM (MEDICYCLE - HARVEST LEDGER MODEL)
+# 9. PROPOSED SYSTEM (MEDICYCLE DIRECT REDISTRIBUTION ARCHITECTURE)
 
-MediCycle adapts the proven direct redistribution architecture of **Harvest Ledger** for medical supply conservation.
+MediCycle implements a decentralized direct redistribution architecture designed specifically for medical supply conservation.
 
 ### Key Innovations:
 * **Direct Supplier-to-NGO Network:** Medical stores and hospitals list surplus consumables directly for charitable clinics and NGOs without administrative bottlenecks.

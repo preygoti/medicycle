@@ -1,7 +1,7 @@
 <?php
 /**
  * MediCycle - NGO My Requests (Direct Collection & Receipt Confirmation)
- * Harvest Ledger Model: Direct Supplier <-> NGO Redistribution
+ * Direct Healthcare Supplier <-> Recipient NGO/Clinic Redistribution Model
  */
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/auth.php';

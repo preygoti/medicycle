@@ -1,12 +1,12 @@
 <?php
 /**
  * MediCycle - Full End-to-End System Integration Test
- * Harvest Ledger Model: Direct Supplier <-> NGO Medical Supply Redistribution
+ * Direct Healthcare Supplier <-> Recipient NGO/Clinic Medical Supply Redistribution
  */
 
 $baseUrl = 'http://127.0.0.1:8000';
 echo "========================================================\n";
-echo "   MEDICYCLE (HARVEST LEDGER MODEL) SYSTEM TEST SUITE   \n";
+echo "   MEDICYCLE DIRECT REDISTRIBUTION SYSTEM TEST SUITE   \n";
 echo "========================================================\n\n";
 
 $testsPassed = 0;
@@ -182,7 +182,7 @@ $reqSubmitRes = $ngoClient->request('/ngo/supply-details.php?id=1', 'POST', [
     'purpose' => 'Rural Health Camp',
     'urgency' => 'High',
     'preferred_collection_date' => date('Y-m-d', strtotime('+3 days')),
-    'message' => 'Harvest Ledger direct collection test'
+    'message' => 'MediCycle direct collection test'
 ]);
 assertTest(strpos($reqSubmitRes['url'], 'ngo/my-requests.php') !== false, "NGO submitted collection request with preferred date");
 
@@ -234,7 +234,7 @@ echo " TEST SUMMARY: {$testsPassed} PASSED, {$testsFailed} FAILED\n";
 echo "========================================================\n";
 
 if ($testsFailed === 0) {
-    echo "\n>>> ALL MEDICYCLE HARVEST LEDGER WORKFLOWS VERIFIED 100% FUNCTIONAL! <<<\n\n";
+    echo "\n>>> ALL MEDICYCLE REDISTRIBUTION WORKFLOWS VERIFIED 100% FUNCTIONAL! <<<\n\n";
     exit(0);
 } else {
     echo "\n>>> SOME TESTS FAILED. INVESTIGATION REQUIRED. <<<\n\n";

@@ -1,4 +1,4 @@
--- MediCycle Database Schema (Harvest Ledger Model: Supplier <-> NGO Direct Redistribution)
+-- MediCycle Database Schema (Supplier <-> NGO Direct Redistribution Model)
 -- Smart Medical Supply Redistribution Management System
 
 DROP DATABASE IF EXISTS medicycle_db;
@@ -224,7 +224,7 @@ INSERT INTO requirements (id, organization_id, supply_name, category_id, require
 (3, 4, 'N95 Respirators & Protective Gowns', 1, 80, 'Boxes (20 pcs)', 'Critical', '2026-10-18', 'Bengaluru', 'Respiratory epidemic preparedness for urban slum outreach dispensary.', 'Active', '2026-09-25 11:20:00'),
 (4, 4, 'Alcohol Prep Pads & Disinfectants', 4, 100, 'Boxes', 'Medium', '2026-11-10', 'Bengaluru', 'Essential for daily routine immunization and diagnostic tests.', 'Active', '2026-09-28 09:30:00');
 
--- INSERT REQUESTS WITH HARVEST-LEDGER HANDOVER STATUSES
+-- INSERT REQUESTS WITH DIRECT HANDOVER STATUSES
 -- Request 1: Completed
 INSERT INTO requests (id, supply_id, requester_id, requested_quantity, purpose, urgency, preferred_collection_date, message, smart_match_score, status, supplier_remarks, handover_code, requested_at, approved_at, ready_at, completed_at) VALUES
 (1, 1, 3, 50, 'Rural Health Camp', 'High', '2026-09-17', 'Requesting 50 boxes of nitrile examination gloves for maternal and child healthcare camps.', 92, 'Completed', 'Approved with priority. Handover successfully completed.', 'HO-7721', '2026-09-15 10:30:00', '2026-09-16 09:00:00', '2026-09-17 10:00:00', '2026-09-18 16:30:00');
