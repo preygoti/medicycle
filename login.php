@@ -162,13 +162,13 @@ include __DIR__ . '/includes/navbar.php';
                             <div class="col-6">
                                 <button type="button" class="btn btn-outline-primary btn-sm w-100 text-truncate text-start p-2" onclick="fillDemo('apollo.supplies@medicycle.org', 'Supplier@123')">
                                     <div class="fw-bold"><i class="fas fa-hospital me-1"></i> Supplier</div>
-                                    <small class="text-muted d-block text-truncate">Apollo Health</small>
+                                    <small class="d-block text-truncate opacity-75">Apollo Health</small>
                                 </button>
                             </div>
                             <div class="col-6">
                                 <button type="button" class="btn btn-outline-success btn-sm w-100 text-truncate text-start p-2" onclick="fillDemo('hope.clinic@medicycle.org', 'Ngo@123')">
                                     <div class="fw-bold"><i class="fas fa-hand-holding-heart me-1"></i> NGO / Clinic</div>
-                                    <small class="text-muted d-block text-truncate">Hope Clinic</small>
+                                    <small class="d-block text-truncate opacity-75">Hope Clinic</small>
                                 </button>
                             </div>
                         </div>

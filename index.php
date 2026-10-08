@@ -33,7 +33,7 @@ include __DIR__ . '/includes/navbar.php';
 ?>
 
 <!-- 1. HERO SECTION -->
-<section class="hero-section text-center text-lg-start py-5">
+<section class="hero-section text-center text-lg-start">
     <div class="container py-lg-4">
         <div class="row align-items-center gy-5">
             <div class="col-lg-7">
@@ -47,7 +47,7 @@ include __DIR__ . '/includes/navbar.php';
                 <p class="hero-subtitle mb-4">
                     MediCycle directly connects hospitals and healthcare suppliers with verified NGOs and charitable clinics. We redirect unexpired, unopened healthcare consumables before they go to waste.
                 </p>
-                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-2">
                     <?php if (is_logged_in()): ?>
                         <?php if ($_SESSION['role'] === 'ngo'): ?>
                             <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="btn btn-light btn-lg fw-semibold text-teal shadow-sm">
@@ -113,6 +113,24 @@ include __DIR__ . '/includes/navbar.php';
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Safety & Protocol Trust Ribbon Buffer -->
+<section class="bg-light border-bottom py-3">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-inline-flex p-2" style="background:#ccfbf1; color:#0f766e;">
+                    <i class="fas fa-shield-halved fs-5"></i>
+                </div>
+                <div>
+                    <strong class="d-block text-dark small">Strict Safety Protocol: Non-Drug Consumables Only</strong>
+                    <span class="text-muted small">We redistribute unopened PPE, examination gloves, sterile bandages, dressing packs, and non-drug diagnostic strips.</span>
+                </div>
+            </div>
+            <a href="<?php echo BASE_URL; ?>/how-it-works.php" class="btn btn-sm btn-outline-secondary">Redistribution Guide</a>
         </div>
     </div>
 </section>

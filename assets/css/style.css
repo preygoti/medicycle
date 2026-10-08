@@ -331,9 +331,10 @@ h1, h2, h3, h4, h5, h6 {
 .hero-section {
     background: linear-gradient(135deg, #0F766E 0%, #115E59 55%, #0F172A 100%);
     color: #FFFFFF;
-    padding: 5rem 0 4.5rem;
+    padding: 4.5rem 0 5.5rem;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .hero-section::before {
@@ -506,6 +507,106 @@ h1, h2, h3, h4, h5, h6 {
 .form-control:focus, .form-select:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+}
+
+/* Ensure select dropdown options always have crisp high-contrast readable text */
+select.form-select, select.form-control {
+    color: #0F172A !important;
+    background-color: #FFFFFF !important;
+}
+
+select.form-select option, select.form-control option {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    padding: 8px 12px;
+}
+
+select.form-select option:checked, select.form-control option:checked {
+    background-color: #0F766E !important;
+    color: #FFFFFF !important;
+    font-weight: 600;
+}
+
+/* Interactive Role Selection Cards */
+.role-select-card {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.25rem 1rem;
+    cursor: pointer;
+    background-color: #FFFFFF;
+    transition: all 0.2s ease-in-out;
+    height: 100%;
+    position: relative;
+    color: var(--dark-slate);
+    text-align: left;
+    display: block;
+    user-select: none;
+}
+
+.role-select-card:hover {
+    border-color: var(--primary-color);
+    background-color: #F8FAFC;
+    transform: translateY(-2px);
+}
+
+.role-select-card.active {
+    border-color: var(--primary-color) !important;
+    background-color: var(--primary-bg) !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.role-select-card .role-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #0F172A !important;
+    margin-bottom: 0.25rem;
+}
+
+.role-select-card.active .role-title {
+    color: #0F766E !important;
+}
+
+.role-select-card .role-desc {
+    font-size: 0.82rem;
+    color: #475569 !important;
+    margin-bottom: 0;
+    line-height: 1.4;
+}
+
+.role-select-card .role-check {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #CBD5E1;
+    background-color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.72rem;
+    color: transparent;
+    transition: all 0.2s ease;
+}
+
+.role-select-card.active .role-check {
+    border-color: var(--primary-color);
+    background-color: var(--primary-color);
+    color: #FFFFFF;
+}
+
+/* High contrast for button active/hover subtexts */
+.btn-outline-primary:hover small,
+.btn-outline-primary:focus small,
+.btn-outline-primary:active small {
+    color: #CCFBF1 !important;
+}
+
+.btn-outline-success:hover small,
+.btn-outline-success:focus small,
+.btn-outline-success:active small {
+    color: #DCFCE7 !important;
 }
 
 /* Footer */

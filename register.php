@@ -198,31 +198,58 @@ include __DIR__ . '/includes/navbar.php';
                         <?php echo csrf_field(); ?>
 
                         <h5 class="fw-bold text-teal border-bottom pb-2 mb-3" style="color:#0F766E;">
-                            <i class="fas fa-user-tag me-2"></i>Account Role & Entity Type
+                            <i class="fas fa-user-tag me-2"></i>Select Account Role & Entity Type
                         </h5>
-                        
+
+                        <!-- Hidden Input for Form Submission -->
+                        <input type="hidden" name="role" id="selected_role" value="<?php echo e($formData['role']); ?>">
+
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
-                                <label for="role" class="form-label small fw-semibold">I represent a: <span class="text-danger">*</span></label>
-                                <select class="form-select" id="role" name="role" required>
-                                    <option value="" <?php echo empty($formData['role']) ? 'selected' : ''; ?>>-- Choose Account Role --</option>
-                                    <option value="supplier" <?php echo $formData['role'] === 'supplier' ? 'selected' : ''; ?>>Healthcare Supplier (Hospital, Store, Clinic, Distributor)</option>
-                                    <option value="ngo" <?php echo $formData['role'] === 'ngo' ? 'selected' : ''; ?>>Recipient Organization (Charitable NGO, Free Clinic, Healthcare Center)</option>
-                                </select>
-                                <div class="invalid-feedback">Please select your account role.</div>
+                                <div class="role-select-card <?php echo $formData['role'] === 'supplier' ? 'active' : ''; ?>" id="card_supplier" onclick="selectRole('supplier')">
+                                    <div class="role-check"><i class="fas fa-check"></i></div>
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div class="rounded-circle p-2 d-inline-flex" style="background:#CCFBF1; color:#0F766E;">
+                                            <i class="fas fa-hospital fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <div class="role-title mb-0">Healthcare Supplier</div>
+                                            <span class="badge bg-light text-secondary border" style="font-size:0.7rem;">Donor / Distributor</span>
+                                        </div>
+                                    </div>
+                                    <p class="role-desc">For Hospitals, Medical Stores, Pharmacies & Equipment Distributors with unexpired surplus medical consumables.</p>
+                                </div>
                             </div>
+
                             <div class="col-md-6">
-                                <label for="org_type" class="form-label small fw-semibold">Entity Type: <span class="text-danger">*</span></label>
-                                <select class="form-select" id="org_type" name="org_type" required>
-                                    <option value="" <?php echo empty($formData['org_type']) ? 'selected' : ''; ?>>-- Choose Organization Type --</option>
-                                    <option value="Hospital" <?php echo $formData['org_type'] === 'Hospital' ? 'selected' : ''; ?>>Hospital / Medical Center</option>
-                                    <option value="Medical Store" <?php echo $formData['org_type'] === 'Medical Store' ? 'selected' : ''; ?>>Medical Store / Pharmacy Supplier</option>
-                                    <option value="Medical Distributor" <?php echo $formData['org_type'] === 'Medical Distributor' ? 'selected' : ''; ?>>Authorized Medical Distributor</option>
-                                    <option value="Charitable NGO" <?php echo $formData['org_type'] === 'Charitable NGO' ? 'selected' : ''; ?>>Charitable Healthcare NGO</option>
-                                    <option value="Community Clinic" <?php echo $formData['org_type'] === 'Community Clinic' ? 'selected' : ''; ?>>Community / Rural Free Clinic</option>
-                                </select>
-                                <div class="invalid-feedback">Please select an entity type.</div>
+                                <div class="role-select-card <?php echo $formData['role'] === 'ngo' ? 'active' : ''; ?>" id="card_ngo" onclick="selectRole('ngo')">
+                                    <div class="role-check"><i class="fas fa-check"></i></div>
+                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                        <div class="rounded-circle p-2 d-inline-flex" style="background:#DCFCE7; color:#16A34A;">
+                                            <i class="fas fa-hand-holding-heart fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <div class="role-title mb-0">NGO / Clinic</div>
+                                            <span class="badge bg-light text-secondary border" style="font-size:0.7rem;">Recipient Clinic</span>
+                                        </div>
+                                    </div>
+                                    <p class="role-desc">For Charitable Clinics, Healthcare NGOs, Free Rural Camps & Trust Dispensaries seeking supplies.</p>
+                                </div>
                             </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="org_type" class="form-label small fw-semibold">Specific Entity Classification: <span class="text-danger">*</span></label>
+                            <select class="form-select" id="org_type" name="org_type" required>
+                                <option value="">-- Choose Entity Type --</option>
+                                <option value="Hospital" <?php echo $formData['org_type'] === 'Hospital' ? 'selected' : ''; ?>>Hospital / Medical Center</option>
+                                <option value="Medical Store" <?php echo $formData['org_type'] === 'Medical Store' ? 'selected' : ''; ?>>Medical Store / Pharmacy Supplier</option>
+                                <option value="Medical Distributor" <?php echo $formData['org_type'] === 'Medical Distributor' ? 'selected' : ''; ?>>Authorized Medical Distributor</option>
+                                <option value="Charitable NGO" <?php echo $formData['org_type'] === 'Charitable NGO' ? 'selected' : ''; ?>>Charitable Healthcare NGO</option>
+                                <option value="Community Clinic" <?php echo $formData['org_type'] === 'Community Clinic' ? 'selected' : ''; ?>>Community / Rural Free Clinic</option>
+                                <option value="Dispensary" <?php echo $formData['org_type'] === 'Dispensary' ? 'selected' : ''; ?>>Charitable Dispensary</option>
+                            </select>
+                            <div class="invalid-feedback">Please select an entity classification.</div>
                         </div>
 
                         <h5 class="fw-bold text-teal border-bottom pb-2 mb-3" style="color:#0F766E;">
@@ -333,6 +360,36 @@ include __DIR__ . '/includes/navbar.php';
 </div>
 
 <script>
+function selectRole(role) {
+    document.getElementById('selected_role').value = role;
+    const cardSupplier = document.getElementById('card_supplier');
+    const cardNgo = document.getElementById('card_ngo');
+    const orgSelect = document.getElementById('org_type');
+    
+    if (role === 'supplier') {
+        cardSupplier.classList.add('active');
+        cardNgo.classList.remove('active');
+        updateEntityTypes(['Hospital', 'Medical Store', 'Medical Distributor', 'Pharmacy Supplier', 'Clinical Laboratory']);
+    } else if (role === 'ngo') {
+        cardNgo.classList.add('active');
+        cardSupplier.classList.remove('active');
+        updateEntityTypes(['Charitable NGO', 'Community Clinic', 'Dispensary', 'Rural Mobile Camp', 'Public Health Center']);
+    }
+}
+
+function updateEntityTypes(options) {
+    const orgSelect = document.getElementById('org_type');
+    const currentVal = orgSelect.value;
+    orgSelect.innerHTML = '<option value="">-- Choose Entity Type --</option>';
+    options.forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt;
+        el.textContent = opt;
+        if (opt === currentVal) el.selected = true;
+        orgSelect.appendChild(el);
+    });
+}
+
 function togglePassword(inputId, btn) {
     const input = document.getElementById(inputId);
     const icon = btn.querySelector('i');
