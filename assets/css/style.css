@@ -42,11 +42,12 @@
     box-sizing: border-box;
 }
 
-html, body {
-    height: 100%;
+html {
+    min-height: 100%;
 }
 
 body {
+    min-height: 100vh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     background-color: #F8FAFC;
     color: var(--dark-slate);
@@ -54,6 +55,11 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+}
+
+/* Crucial: Prevent flex container from collapsing or shrinking sections */
+section, header, footer, main, .app-container {
+    flex-shrink: 0;
 }
 
 /* Typography Helpers */
@@ -334,6 +340,8 @@ h1, h2, h3, h4, h5, h6 {
     padding: 4.5rem 0 5.5rem;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
+    min-height: auto;
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
