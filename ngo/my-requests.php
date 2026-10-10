@@ -10,59 +10,17 @@ require_role('ngo');
 
 $userId = $_SESSION['user_id'];
 
-// Handle CONFIRM RECEIPT / COLLECTION
+// Direct receipt confirmation disabled: Handovers MUST be verified through secure Handshake PIN or QR scanning by supplier/courier
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'confirm_receipt') {
-    if (!verify_csrf_token()) {
-        set_flash('danger', 'Security token mismatch. Please try again.');
-    } else {
-        $requestId = (int)($_POST['request_id'] ?? 0);
-        try {
-            // Verify request ownership and that it is in an active handover status
-            $reqStmt = $pdo->prepare("SELECT r.*, s.supplier_id, s.supply_name, s.unit, o.organization_name as supplier_org 
-                                      FROM requests r 
-                                      JOIN medical_supplies s ON r.supply_id = s.id 
-                                      LEFT JOIN organizations o ON s.supplier_id = o.user_id 
-                                      WHERE r.id = ? AND r.requester_id = ? AND r.status != 'Completed' LIMIT 1");
-            $reqStmt->execute([$requestId, $userId]);
-            $request = $reqStmt->fetch();
-
-            if ($request) {
-                $pdo->beginTransaction();
-
-                // 1. Mark request as Completed
-                $updReq = $pdo->prepare("UPDATE requests SET status = 'Completed', completed_at = NOW() WHERE id = ?");
-                $updReq->execute([$requestId]);
-
-                // 2. Log into impact metrics table
-                record_impact($pdo, $requestId, (int)$request['requested_quantity']);
-
-                // 3. Notify supplying hospital
-                create_notification(
-                    $pdo,
-                    $request['supplier_id'],
-                    'Collection Confirmed by Clinic',
-                    "{$_SESSION['org_name']} has confirmed receipt & physical collection of {$request['requested_quantity']} {$request['unit']} of {$request['supply_name']}. Impact recorded!",
-                    'supplier/history.php'
-                );
-
-                $pdo->commit();
-                set_flash('success', "Collection confirmed for {$request['supply_name']}! Thank you for verifying receipt. Ecological and community impact metrics recorded.");
-            } else {
-                set_flash('danger', 'Request not found or already marked completed.');
-            }
-        } catch (PDOException $e) {
-            if ($pdo->inTransaction()) $pdo->rollBack();
-            error_log("Confirm receipt error: " . $e->getMessage());
-            set_flash('danger', 'Error updating handover receipt: ' . $e->getMessage());
-        }
-        header('Location: ' . BASE_URL . '/ngo/my-requests.php');
-        exit;
-    }
+    set_flash('info', 'Secure Handover Protocol: For medical supply chain accountability, handovers must be authenticated by the supplier or courier verifying your 6-Digit Handshake PIN or QR Code.');
+    header('Location: ' . BASE_URL . '/ngo/my-requests.php');
+    exit;
 }
 
 // Fetch all requests for this NGO
 $stmt = $pdo->prepare("SELECT r.*, s.supply_name, s.unit, s.location as supply_location, 
-                              o.organization_name as supplier_name, o.address as supplier_address, o.city as supplier_city, o.phone as supplier_phone
+                              u_supp.phone as supplier_phone,
+                              o.organization_name as supplier_name, o.address as supplier_address, o.city as supplier_city
                        FROM requests r 
                        JOIN medical_supplies s ON r.supply_id = s.id 
                        JOIN users u_supp ON s.supplier_id = u_supp.id 
@@ -121,15 +79,15 @@ include __DIR__ . '/../includes/navbar.php';
                                             <span class="fw-semibold text-dark d-block"><?php echo e($r['supplier_name']); ?></span>
                                             <span class="text-muted small"><i class="fas fa-map-marker-alt me-1 text-danger"></i><?php echo e($r['supplier_city'] ?? $r['supply_location']); ?></span>
                                         </td>
-                                        <td class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e($r['unit']); ?></td>
+                                        <td class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></td>
                                         <td>
                                             <div class="small text-muted mb-1">
                                                 <i class="far fa-calendar-alt me-1"></i><?php echo format_date($r['preferred_collection_date'] ?? $r['requested_at']); ?>
                                             </div>
                                             <?php if (!empty($r['handover_code'])): ?>
-                                                <span class="badge bg-dark font-monospace" title="Present this code at pickup">
-                                                    <i class="fas fa-key text-warning me-1"></i><?php echo e($r['handover_code']); ?>
-                                                </span>
+                                                <button type="button" class="btn btn-xs btn-dark py-1 px-2 font-monospace shadow-2xs" data-bs-toggle="modal" data-bs-target="#qrModal<?php echo $r['id']; ?>" title="Click to view QR & 6-Digit Pass">
+                                                    <i class="fas fa-qrcode text-warning me-1"></i><?php echo e($r['handover_code']); ?>
+                                                </button>
                                             <?php else: ?>
                                                 <span class="badge bg-light text-muted border">Code on Approval</span>
                                             <?php endif; ?>
@@ -147,25 +105,61 @@ include __DIR__ . '/../includes/navbar.php';
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-end">
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-outline-secondary" title="View Details">
+                                            <div class="d-flex justify-content-end align-items-center gap-1">
+                                                <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-secondary" title="View Details">
                                                     <i class="fas fa-eye me-1"></i> Details
                                                 </a>
-                                                <?php if (in_array($r['status'], ['Accepted', 'Ready for Handover', 'Collected', 'Received'])): ?>
-                                                    <?php if ($r['status'] !== 'Completed'): ?>
-                                                        <form action="<?php echo BASE_URL; ?>/ngo/my-requests.php" method="POST" class="d-inline" onsubmit="return confirm('Confirm receipt of these supplies at your facility?');">
-                                                            <?php echo csrf_field(); ?>
-                                                            <input type="hidden" name="action" value="confirm_receipt">
-                                                            <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                            <button type="submit" class="btn btn-success" title="Confirm Handover Received">
-                                                                <i class="fas fa-check-double me-1"></i> Confirm Received
-                                                            </button>
-                                                        </form>
-                                                    <?php endif; ?>
+                                                <?php if (!empty($r['handover_code']) && in_array($r['status'], ['Approved', 'Accepted', 'Ready for Handover'])): ?>
+                                                    <button type="button" class="btn btn-sm btn-teal text-white shadow-2xs fw-semibold" style="background:#0f766e;" data-bs-toggle="modal" data-bs-target="#qrModal<?php echo $r['id']; ?>" title="Show Pickup Handshake Pass & QR">
+                                                        <i class="fas fa-qrcode me-1"></i> Show Pass
+                                                    </button>
+                                                <?php elseif ($r['status'] === 'Completed'): ?>
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="fas fa-check-double me-1"></i>Received</span>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
+                                    <?php if (!empty($r['handover_code'])): ?>
+                                        <div class="modal fade" id="qrModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                                    <div class="modal-header border-bottom py-3">
+                                                        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                                                                <i class="fas fa-qrcode"></i>
+                                                            </span>
+                                                            Pickup Verification Pass
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body p-4 text-center">
+                                                        <?php echo render_handshake_pass_html($r['handover_code'], $r['id'], 'Donor: ' . ($r['supplier_name'] ?? 'Medical Facility')); ?>
+                                                        <div class="alert alert-light border small text-muted text-start mt-3 mb-0">
+                                                            <div class="fw-semibold text-dark mb-1"><i class="fas fa-shield-halved text-teal me-1"></i> Handshake Verification Rule:</div>
+                                                            Show this QR code or 6-digit PIN to the supplier or courier during collection. Handover will be marked Completed only when the other party verifies your code.
+                                                        </div>
+                                                        <div class="p-3 bg-light rounded-3 text-start small mt-3">
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <span class="text-muted">Item:</span>
+                                                                <span class="fw-bold text-dark"><?php echo e($r['supply_name']); ?></span>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between mb-1">
+                                                                <span class="text-muted">Quantity:</span>
+                                                                <span class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></span>
+                                                            </div>
+                                                            <div class="d-flex justify-content-between">
+                                                                <span class="text-muted">Donor Location:</span>
+                                                                <span class="fw-semibold text-dark"><?php echo e($r['supplier_city'] ?? $r['supply_location']); ?></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer border-top py-2">
+                                                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>

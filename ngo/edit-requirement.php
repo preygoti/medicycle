@@ -161,8 +161,19 @@ include __DIR__ . '/../includes/navbar.php';
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-semibold">Required By *</label>
-                            <input type="date" class="form-control" name="required_by" value="<?php echo e($formData['required_by']); ?>" required>
+                            <label class="form-label small fw-semibold d-flex justify-content-between align-items-center">
+                                <span>Required By *</span>
+                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-teal fw-semibold" onclick="document.getElementById('edit_required_by').showPicker && document.getElementById('edit_required_by').showPicker();">
+                                    <i class="fas fa-calendar-day me-1"></i>Pick
+                                </button>
+                            </label>
+                            <input type="date" class="form-control" id="edit_required_by" name="required_by" value="<?php echo e($formData['required_by']); ?>" required>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <span class="badge bg-light text-dark border cursor-pointer" role="button" onclick="setEditDays(3)">+3d</span>
+                                <span class="badge bg-light text-dark border cursor-pointer" role="button" onclick="setEditDays(7)">+1w</span>
+                                <span class="badge bg-light text-dark border cursor-pointer" role="button" onclick="setEditDays(14)">+2w</span>
+                                <span class="badge bg-light text-dark border cursor-pointer" role="button" onclick="setEditDays(30)">+1m</span>
+                            </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-semibold">Delivery City *</label>
@@ -188,5 +199,20 @@ include __DIR__ . '/../includes/navbar.php';
 
     </div>
 </div>
+
+<script>
+function setEditDays(days) {
+    const d = new Date();
+    d.setDate(d.getDate() + days);
+    const yr = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    const input = document.getElementById('edit_required_by');
+    if (input) {
+        input.value = `${yr}-${mo}-${da}`;
+        input.dispatchEvent(new Event('change'));
+    }
+}
+</script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>

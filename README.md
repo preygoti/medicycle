@@ -10,19 +10,16 @@
 
 ---
 
-## 1. Core Redistribution Model
+## 1. Core Redistribution Architecture (4 Distinct Roles)
 
-MediCycle operates on a direct peer-to-peer redistribution architecture between two primary stakeholder roles:
+MediCycle operates on a multi-tier redistribution ecosystem across 4 distinct user roles:
 
-| Dimension | Specification | Description |
+| Role | Target Persona | Key Capabilities in MediCycle |
 |---|---|---|
-| **Healthcare Supplier** | Hospitals, Medical Distributors, Surgical Stores | Lists surplus unexpired medical consumables and approves handovers |
-| **Recipient Organization** | Charitable Clinics, Non-Profit Healthcare Centers | Discovers available supplies and requests critical inventory |
-| **Consumable Categories** | Non-Drug Medical Supplies | Factory-sealed gloves, masks, sterile gauze, bandages, PPE kits |
-| **Requisition Flow** | Direct Online Requisition | Requests with desired collection date and quantity |
-| **Fulfillment Protocol** | Direct Physical Collection | Donor and recipient coordinate direct physical pickup |
-| **Security Verification** | Handover PIN Code | Recipient presents code upon physical handover |
-| **Impact Accounting** | Real-Time Metrics Ledger | Solid medical waste averted (kg) and community funds saved (₹) |
+| **Admin** | System Administrator / Regulatory Authority | Verify organizations, moderate supply listings, manage user directory, audit logistics consignments, system settings & macro reports |
+| **Healthcare Supplier** | Hospitals, Medical Distributors, Surgical Stores | Post surplus unexpired consumables, manage batches, approve requisitions, monitor transfers, view donor impact stats |
+| **NGO / Clinic** | Charitable Clinics, Non-Profit Healthcare Centers | Search available consumables, smart match recommendation scores, post clinical requirements, request batches, confirm receipt |
+| **Delivery Partner** | Logistics Volunteers, Fleet Couriers | View assigned consignments, accept pickup runs, update transit milestones (Pickup $\to$ In Transit $\to$ Delivered), track delivery logs |
 
 ---
 
@@ -53,17 +50,15 @@ MediCycle operates on a direct peer-to-peer redistribution architecture between 
 
 ## 4. Key Features & OEP Requirements Satisfied
 
-1. **Two Core Operational Roles:**
-   * **Supplier:** Lists surplus inventory, tracks lots, reviews requests, issues Handover Codes, marks packages ready, and completes collections.
-   * **NGO / Clinic:** Searches and filters surplus batches, receives algorithmic smart match scores, posts community requirements, requests supplies, and confirms physical receipt.
+1. **Four Active Operational Roles:** Complete dedicated dashboards and workflows for Admin, Supplier, NGO/Clinic, and Delivery Partner.
 2. **Complete CRUD Operations:**
-   * **INSERT:** Add surplus supplies, submit collection requests, post clinical needs, register organizations.
-   * **READ:** Filterable catalog, inventory dashboard, transaction history, real-time metrics.
-   * **UPDATE:** Edit supplies, modify posted requirements, approve requests, issue Handover Codes, verify completions.
-   * **DELETE:** Delete listed supplies, withdraw requirements, clean up inventory lots with confirmation.
-3. **Advanced Search & Multi-criteria Filtering:** Keyword, category, city/location, and priority filters.
+   * **INSERT:** Add surplus supplies, submit collection requests, post clinical needs, register organizations, create categories.
+   * **READ:** Filterable catalog, inventory dashboard, transaction history, audit trails, real-time metrics.
+   * **UPDATE:** Edit supplies, modify posted requirements, approve requests, update delivery milestones, toggle verifications.
+   * **DELETE:** Delete listed supplies, withdraw requirements, remove categories with dependency checks.
+3. **Advanced Search & Multi-criteria Filtering:** Keyword, category, city/location, and priority filters across supplies, organizations, and users.
 4. **Smart Matchmaking Engine (Algorithmic AI Module):** Computes a 0–100 match percentage between clinic needs and available lots based on category alignment, geographic distance, and urgency.
-5. **Direct Handover Flow:** Eliminates admin bottlenecks and courier dependencies. Generates unique Handover Verification Codes for verified physical collections.
+5. **End-to-End Delivery & Fulfillment Pipeline:** Auto-generates delivery dispatch records upon supplier approval, allowing couriers/volunteers to accept, update pickup, transit, and delivery states.
 6. **Redistribution Impact Metrics:** Real-time calculation of landfill packaging waste diverted (kg) and community funds saved (₹).
 
 ---
@@ -71,55 +66,77 @@ MediCycle operates on a direct peer-to-peer redistribution architecture between 
 ## 5. End-to-End Workflow
 
 ```
-Supplier Registers & Logs In
+Supplier Registers
        │
        ▼
-Supplier Lists Surplus Consumables (INSERT into medical_supplies)
+Admin Verifies Organization
        │
        ▼
-NGO Discovers Supply & Submits Requisition (INSERT into requests with Preferred Date)
+Supplier Lists Eligible Medical Consumables (INSERT into medical_supplies)
        │
        ▼
-Supplier Accepts Request (UPDATE requests, decrements inventory, generates Handover Code)
+Admin Verifies / Approves Listing (Status -> Available)
        │
        ▼
-Supplier Marks "Ready for Handover" (Packages prepared for collection)
+NGO Searches Supplies & Submits Requisition (INSERT into requests)
        │
        ▼
-NGO Arrives & Presents Handover Code (Direct physical collection)
+Supplier Reviews & Approves Request (UPDATE requests -> Approved)
        │
        ▼
-NGO / Supplier Confirms Receipt (UPDATE requests to Completed)
+Delivery Consignment Auto-Assigned (INSERT into deliveries)
        │
        ▼
-Transaction Completed & Impact Metrics Recorded (INSERT/UPDATE impact_metrics)
+Delivery Partner Accepts & Updates Milestones (Assigned -> Picked Up -> In Transit -> Delivered)
+       │
+       ▼
+NGO / Clinic Confirms Physical Receipt (UPDATE requests -> Completed)
+       │
+       ▼
+Impact Statistics Automatically Recorded (INSERT/UPDATE impact_metrics)
 ```
 
 ---
 
-## 6. Demo Accounts (College Evaluation)
+## 6. College OEP Team Members (Group of 5)
 
-| Role | Demo Email | Password | Organization |
-|---|---|---|---|
-| **Supplier** | `apollo.supplies@medicycle.org` | `Supplier@123` | Apollo Health Supplies (Ahmedabad) |
-| **Supplier** | `metro.pharma@medicycle.org` | `Supplier@123` | Metro Healthcare Distribution |
-| **NGO / Clinic** | `hope.clinic@medicycle.org` | `Ngo@123` | Hope Community Health Clinic (Ahmedabad) |
-| **NGO / Clinic** | `care.foundation@medicycle.org` | `Ngo@123` | Care & Cure Rural Mission |
-
-*Quick-fill demo buttons are provided directly on the Login page for instant one-click evaluator login.*
+| Member | Role in Project | Module Responsibilities |
+|---|---|---|
+| **Student 1 (Lead)** | System Architect & Backend Lead | Database Schema design, Core Auth (`auth.php`, `session.php`), PDO DB Engine, Deployment |
+| **Student 2** | Admin Portal & Compliance | Admin Dashboard, Organization Verification, User Moderation, Audit & Analytics |
+| **Student 3** | Healthcare Supplier Portal | Supply Inventory CRUD, Batch Management, Request Processing, Transfers Tracking |
+| **Student 4** | NGO / Clinic Portal | Catalog Search & Filtering, Clinical Requirements CRUD, Request Workflow, Receipt Confirmation |
+| **Student 5** | Logistics & Smart Algorithm | Delivery Partner Portal, Consignment Tracking, Smart Matchmaking Engine (`smart_matching.php`) |
 
 ---
 
-## 7. Running the Project Locally
+## 7. Demo Accounts (College Evaluation)
+
+| Role | Demo Email | Password | Organization / Notes |
+|---|---|---|---|
+| **Administrator** | `admin@medicycle.org` | `Admin@123` | System Administrator Portal |
+| **Supplier** | `apollo.supplies@medicycle.org` | `Supplier@123` | Apollo Health Supplies (Ahmedabad) |
+| **NGO / Clinic** | `hope.clinic@medicycle.org` | `Ngo@123` | Hope Community Health Clinic (Ahmedabad) |
+| **Delivery Partner** | `delivery@medicycle.org` | `Delivery@123` | MediCycle Fast Logistics Partner |
+
+*Quick-fill demo buttons are provided directly on the Login page for instant one-click evaluator login across all 4 roles.*
+
+---
+
+## 8. Running the Project Locally
 
 ```bash
 # 1. Start Apache & MySQL in XAMPP
 # 2. Database medicycle_db is located at database/medicycle_db.sql
-# 3. Access the application in browser:
+# 3. Access the web installer (if setting up fresh):
+http://127.0.0.1:8000/setup.php
+
+# 4. Access the application in browser:
 http://127.0.0.1:8000/
 # or via XAMPP web root:
 http://localhost/medicycle/
 
-# 4. Run Automated End-to-End Test Suite:
-php tests/test_workflow.php
+# 5. Run Full 30-Point Integration Test Suite:
+php tests/test_full_system.php
 ```
+

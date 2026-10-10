@@ -185,6 +185,13 @@ include __DIR__ . '/includes/navbar.php';
 
                     <?php echo render_flash_messages(); ?>
 
+                    <?php if (is_logged_in()): ?>
+                        <div class="alert alert-info py-2 px-3 small d-flex justify-content-between align-items-center mb-4 rounded-3 border-0" style="background:#ccfbf1; color:#0f766e;">
+                            <span><i class="fas fa-info-circle me-1"></i> Active: <strong><?php echo e($_SESSION['user_name'] ?? ''); ?></strong>. Registering below creates a new organization account.</span>
+                            <a href="<?php echo get_role_dashboard(); ?>" class="btn btn-sm btn-teal py-1 px-2 text-white">Go to Dashboard</a>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if (!empty($errors)): ?>
                         <div class="alert alert-danger shadow-sm rounded-3 py-2 px-3 small mb-4">
                             <ul class="mb-0 ps-3">
@@ -209,32 +216,32 @@ include __DIR__ . '/includes/navbar.php';
                             <div class="col-md-6">
                                 <div class="role-select-card <?php echo $formData['role'] === 'supplier' ? 'active' : ''; ?>" id="card_supplier" onclick="selectRole('supplier')">
                                     <div class="role-check"><i class="fas fa-check"></i></div>
-                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
                                         <div class="rounded-circle p-2 d-inline-flex" style="background:#CCFBF1; color:#0F766E;">
-                                            <i class="fas fa-hospital fs-4"></i>
+                                            <i class="fas fa-hospital fs-5"></i>
                                         </div>
                                         <div>
-                                            <div class="role-title mb-0">Healthcare Supplier</div>
-                                            <span class="badge bg-light text-secondary border" style="font-size:0.7rem;">Donor / Distributor</span>
+                                            <div class="role-title mb-0 small fw-bold">Healthcare Supplier</div>
+                                            <span class="badge bg-light text-secondary border" style="font-size:0.65rem;">Hospitals & Medical Stores</span>
                                         </div>
                                     </div>
-                                    <p class="role-desc">For Hospitals, Medical Stores, Pharmacies & Equipment Distributors with unexpired surplus medical consumables.</p>
+                                    <p class="role-desc small mb-0">Hospitals, medical distributors & pharmacy stores with surplus unexpired supplies.</p>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="role-select-card <?php echo $formData['role'] === 'ngo' ? 'active' : ''; ?>" id="card_ngo" onclick="selectRole('ngo')">
                                     <div class="role-check"><i class="fas fa-check"></i></div>
-                                    <div class="d-flex align-items-center gap-3 mb-2">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
                                         <div class="rounded-circle p-2 d-inline-flex" style="background:#DCFCE7; color:#16A34A;">
-                                            <i class="fas fa-hand-holding-heart fs-4"></i>
+                                            <i class="fas fa-hand-holding-heart fs-5"></i>
                                         </div>
                                         <div>
-                                            <div class="role-title mb-0">NGO / Clinic</div>
-                                            <span class="badge bg-light text-secondary border" style="font-size:0.7rem;">Recipient Clinic</span>
+                                            <div class="role-title mb-0 small fw-bold">NGO / Clinic</div>
+                                            <span class="badge bg-light text-secondary border" style="font-size:0.65rem;">Charitable Clinics & Centers</span>
                                         </div>
                                     </div>
-                                    <p class="role-desc">For Charitable Clinics, Healthcare NGOs, Free Rural Camps & Trust Dispensaries seeking supplies.</p>
+                                    <p class="role-desc small mb-0">Charitable clinics, rural health centers & community dispensaries seeking supplies.</p>
                                 </div>
                             </div>
                         </div>

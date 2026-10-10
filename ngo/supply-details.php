@@ -153,7 +153,7 @@ include __DIR__ . '/../includes/navbar.php';
                             </div>
                             <div class="col-sm-6">
                                 <label class="text-muted small d-block">Available Quantity</label>
-                                <span class="fw-bold fs-5 text-teal"><?php echo number_format($supply['quantity']) . ' ' . e($supply['unit']); ?></span>
+                                <span class="fw-bold fs-5 text-teal"><?php echo number_format($supply['quantity']) . ' ' . e(format_unit($supply['unit'])); ?></span>
                             </div>
                             <div class="col-sm-6">
                                 <label class="text-muted small d-block">Expiration Date</label>
@@ -208,9 +208,9 @@ include __DIR__ . '/../includes/navbar.php';
                         <?php echo csrf_field(); ?>
 
                         <div class="mb-3">
-                            <label for="requested_quantity" class="form-label small fw-semibold">Quantity Required * (Max: <?php echo $supply['quantity']; ?> <?php echo e($supply['unit']); ?>)</label>
+                            <label for="requested_quantity" class="form-label small fw-semibold">Quantity Required * (Max: <?php echo number_format($supply['quantity']); ?> <?php echo e(format_unit($supply['unit'])); ?>)</label>
                             <input type="number" class="form-control" id="requested_quantity" name="requested_quantity" value="<?php echo e($requestedQty); ?>" min="1" max="<?php echo $supply['quantity']; ?>" placeholder="e.g. 50" required>
-                            <div class="invalid-feedback">Enter a quantity between 1 and <?php echo $supply['quantity']; ?>.</div>
+                            <div class="invalid-feedback">Enter a quantity between 1 and <?php echo number_format($supply['quantity']); ?>.</div>
                         </div>
 
                         <div class="mb-3">

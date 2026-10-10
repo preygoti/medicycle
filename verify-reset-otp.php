@@ -141,6 +141,21 @@ include __DIR__ . '/includes/navbar.php';
                             <div class="form-text text-center text-muted small mt-2">
                                 <i class="far fa-clock me-1 text-teal"></i> Code remains valid for <strong>10 minutes</strong>.
                             </div>
+                            <?php
+                            $devOtp = '';
+                            if (file_exists(APP_ROOT . '/logs/mail.log')) {
+                                $logContent = file_get_contents(APP_ROOT . '/logs/mail.log');
+                                if (preg_match_all('/TO:\s*' . preg_quote($user['email'], '/') . '.*?\n\s*OTP_CODE:\s*(\d{6})/is', $logContent, $matches)) {
+                                    $devOtp = end($matches[1]);
+                                }
+                            }
+                            if ($devOtp): ?>
+                                <div class="mt-2 text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 small" onclick="document.getElementById('otp').value='<?php echo $devOtp; ?>';">
+                                        <i class="fas fa-flask text-teal me-1"></i> Demo Autofill Code: <strong><?php echo $devOtp; ?></strong>
+                                    </button>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100 py-2">

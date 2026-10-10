@@ -23,7 +23,7 @@ $stmt = $pdo->prepare("SELECT r.*, s.supply_name, s.unit,
 $stmt->execute([$userId]);
 $history = $stmt->fetchAll();
 
-$pageTitle = 'Redistribution History';
+$pageTitle = 'Transfer History - MediCycle';
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/navbar.php';
 ?>
@@ -35,8 +35,8 @@ include __DIR__ . '/../includes/navbar.php';
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h3 class="fw-bold text-dark mb-1">Completed Redistribution History</h3>
-                <p class="text-muted small mb-0">Record of confirmed medical supply donations and their verified clinical impact</p>
+                <h3 class="fw-bold text-dark mb-1">Transfer History</h3>
+                <p class="text-muted small mb-0">Record of confirmed medical supply transfers and their verified clinical impact</p>
             </div>
         </div>
 

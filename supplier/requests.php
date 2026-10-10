@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Verify that this request belongs to one of this supplier's supplies
             $reqStmt = $pdo->prepare("SELECT r.*, s.supplier_id, s.supply_name, s.quantity, s.unit, s.location, 
                                              u.id as requester_id, u.name as requester_name,
-                                             o.organization_name as requester_org, o.address as ngo_addr, o.city as ngo_city, o.phone as ngo_phone
+                                             o.organization_name as requester_org, o.address as ngo_addr, o.city as ngo_city, u.phone as ngo_phone
                                       FROM requests r 
                                       JOIN medical_supplies s ON r.supply_id = s.id 
                                       JOIN users u ON r.requester_id = u.id 
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
 
                     $pdo->commit();
-                    set_flash('success', "Request #{$requestId} accepted! Handover Code <strong>{$handoverCode}</strong> issued for direct collection.");
+                    set_flash('success', "Request accepted successfully! Requisition is approved and awaiting physical verification in Verify Handover.");
 
                 } elseif ($action === 'mark_ready') {
                     if (!in_array($request['status'], ['Accepted', 'Pending'])) {
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
 
                     $pdo->commit();
-                    set_flash('success', "Request #{$requestId} is now marked Ready for Handover.");
+                    set_flash('success', "Supplies are now marked Ready for Handover.");
 
                 } elseif ($action === 'complete_handover') {
                     if (!in_array($request['status'], ['Accepted', 'Ready for Handover', 'Collected', 'Received'])) {
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     );
 
                     $pdo->commit();
-                    set_flash('info', "Request #{$requestId} declined.");
+                    set_flash('info', "Requisition request declined.");
                 }
             }
         } catch (Exception $e) {
@@ -202,13 +202,13 @@ include __DIR__ . '/../includes/navbar.php';
                 <h3 class="fw-bold text-dark mb-1">Incoming Requests & Direct Handovers</h3>
                 <p class="text-muted small mb-0">Manage clinic requests, issue Handover Codes, and verify direct collections</p>
             </div>
-            <!-- Status filter buttons -->
-            <div class="btn-group btn-group-sm">
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php" class="btn btn-outline-secondary <?php echo empty($statusFilter) ? 'active' : ''; ?>">All</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Pending" class="btn btn-outline-warning <?php echo $statusFilter === 'Pending' ? 'active' : ''; ?>">Pending</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Accepted" class="btn btn-outline-info <?php echo $statusFilter === 'Accepted' ? 'active' : ''; ?>">Accepted</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Ready for Handover" class="btn btn-outline-primary <?php echo $statusFilter === 'Ready for Handover' ? 'active' : ''; ?>">Ready</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Completed" class="btn btn-outline-success <?php echo $statusFilter === 'Completed' ? 'active' : ''; ?>">Completed</a>
+            <!-- Status filter buttons with space between them -->
+            <div class="d-flex flex-wrap gap-2">
+                <a href="<?php echo BASE_URL; ?>/supplier/requests.php" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo empty($statusFilter) ? 'btn-secondary text-white fw-semibold' : 'btn-outline-secondary bg-white'; ?>">All</a>
+                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Pending" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Pending' ? 'btn-warning text-dark fw-bold' : 'btn-outline-warning text-dark bg-white'; ?>">Pending</a>
+                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Accepted" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Accepted' ? 'btn-info text-white fw-bold' : 'btn-outline-info bg-white'; ?>">Accepted</a>
+                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Ready for Handover" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Ready for Handover' ? 'btn-primary text-white fw-bold' : 'btn-outline-primary bg-white'; ?>">Ready</a>
+                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Completed" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Completed' ? 'btn-success text-white fw-bold' : 'btn-outline-success bg-white'; ?>">Completed</a>
             </div>
         </div>
 
@@ -218,7 +218,6 @@ include __DIR__ . '/../includes/navbar.php';
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Request ID</th>
                                 <th>Supply Item</th>
                                 <th>Recipient Organization</th>
                                 <th>Requested Qty</th>
@@ -231,16 +230,6 @@ include __DIR__ . '/../includes/navbar.php';
                             <?php if (!empty($requests)): ?>
                                 <?php foreach ($requests as $r): ?>
                                     <tr id="req-<?php echo $r['id']; ?>">
-                                        <td>
-                                            <span class="badge bg-light text-dark border">#REQ-<?php echo str_pad($r['id'], 4, '0', STR_PAD_LEFT); ?></span>
-                                            <?php if (!empty($r['handover_code'])): ?>
-                                                <div class="mt-1">
-                                                    <span class="badge bg-dark font-monospace" title="Handover Verification Code">
-                                                        <i class="fas fa-key me-1 text-warning"></i><?php echo e($r['handover_code']); ?>
-                                                    </span>
-                                                </div>
-                                            <?php endif; ?>
-                                        </td>
                                         <td>
                                             <span class="fw-bold text-dark d-block"><?php echo e($r['supply_name']); ?></span>
                                             <span class="text-muted small">In Stock: <?php echo $r['available_qty'] . ' ' . e($r['unit']); ?></span>
@@ -271,97 +260,68 @@ include __DIR__ . '/../includes/navbar.php';
                                                 </div>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end">
+                                        <td class="text-end pe-3 text-nowrap">
                                             <?php if ($r['status'] === 'Pending'): ?>
-                                                <button type="button" class="btn btn-sm btn-success px-2 py-1" data-bs-toggle="modal" data-bs-target="#acceptModal<?php echo $r['id']; ?>">
-                                                    <i class="fas fa-check me-1"></i> Accept
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-outline-danger px-2 py-1" data-bs-toggle="modal" data-bs-target="#rejectModal<?php echo $r['id']; ?>">
-                                                    <i class="fas fa-times me-1"></i> Reject
-                                                </button>
-                                            <?php elseif ($r['status'] === 'Accepted'): ?>
-                                                <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST" class="d-inline">
-                                                    <?php echo csrf_field(); ?>
-                                                    <input type="hidden" name="action" value="mark_ready">
-                                                    <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-primary px-2 py-1">
-                                                        <i class="fas fa-box-check me-1"></i> Mark Ready
+                                                <div class="d-inline-flex align-items-center gap-2 justify-content-end">
+                                                    <button type="button" class="btn btn-sm btn-success rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#acceptModal<?php echo $r['id']; ?>">
+                                                        <i class="fas fa-check"></i> Accept
                                                     </button>
-                                                </form>
-                                                <button type="button" class="btn btn-sm btn-outline-success px-2 py-1" data-bs-toggle="modal" data-bs-target="#completeModal<?php echo $r['id']; ?>">
-                                                    <i class="fas fa-check-double me-1"></i> Complete Handover
-                                                </button>
-                                            <?php elseif ($r['status'] === 'Ready for Handover' || $r['status'] === 'Collected' || $r['status'] === 'Received'): ?>
-                                                <button type="button" class="btn btn-sm btn-success px-2 py-1" data-bs-toggle="modal" data-bs-target="#completeModal<?php echo $r['id']; ?>">
-                                                    <i class="fas fa-handshake me-1"></i> Confirm Handover
-                                                </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#rejectModal<?php echo $r['id']; ?>">
+                                                        <i class="fas fa-times"></i> Reject
+                                                    </button>
+                                                </div>
+                                            <?php elseif (in_array($r['status'], ['Accepted', 'Ready for Handover', 'In Transit', 'Collected'])): ?>
+                                                <span class="badge rounded-pill bg-light text-secondary border px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                    <i class="fas fa-handshake text-teal"></i> Verify at Handover
+                                                </span>
                                             <?php else: ?>
-                                                <span class="text-muted small">No action needed</span>
+                                                <?php if ($r['status'] === 'Completed'): ?>
+                                                    <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                        <i class="fas fa-circle-check"></i> Fulfilled
+                                                    </span>
+                                                <?php elseif ($r['status'] === 'Rejected'): ?>
+                                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                        <i class="fas fa-circle-xmark"></i> Declined
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge rounded-pill bg-light text-secondary border px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                        <i class="fas fa-check-circle text-muted"></i> No Action Needed
+                                                    </span>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
 
                                     <!-- Accept Modal -->
                                     <div class="modal fade" id="acceptModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg rounded-4">
                                                 <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
                                                     <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="accept">
                                                     <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title fw-bold">Accept Request #REQ-<?php echo str_pad($r['id'], 4, '0', STR_PAD_LEFT); ?></h5>
+                                                    <div class="modal-header border-bottom py-3">
+                                                        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                                                                <i class="fas fa-check"></i>
+                                                            </span>
+                                                            Accept Requisition Request
+                                                        </h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
-                                                    <div class="modal-body">
-                                                        <p class="small text-muted mb-3">
-                                                            Accepting this request will allocate <strong><?php echo $r['requested_quantity'] . ' ' . e($r['unit']); ?></strong> of <strong><?php echo e($r['supply_name']); ?></strong> to <strong><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></strong> and generate a secure Handover Code.
+                                                    <div class="modal-body p-4">
+                                                        <p class="text-secondary small mb-3">
+                                                            Accepting this request will allocate <strong><?php echo $r['requested_quantity'] . ' ' . e($r['unit']); ?></strong> of <strong><?php echo e($r['supply_name']); ?></strong> to <strong><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></strong>. The recipient clinic will receive their secure verification code for pickup.
                                                         </p>
-                                                        <div class="mb-3">
+                                                        <div class="mb-2">
                                                             <label class="form-label small fw-semibold">Pickup / Handover Instructions</label>
                                                             <textarea name="remarks" class="form-control" rows="3" placeholder="e.g. Ready for collection Mon-Fri 10am-4pm at Main Pharmacy Counter."></textarea>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="fas fa-check-circle me-1"></i> Confirm & Generate Handover Code
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Complete Handover Modal -->
-                                    <div class="modal fade" id="completeModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
-                                                    <?php echo csrf_field(); ?>
-                                                    <input type="hidden" name="action" value="complete_handover">
-                                                    <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                    <div class="modal-header bg-success text-white">
-                                                        <h5 class="modal-title fw-bold"><i class="fas fa-handshake me-2"></i>Verify & Complete Handover</h5>
-                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="alert alert-light border mb-3">
-                                                            <div class="small text-muted">Beneficiary NGO:</div>
-                                                            <div class="fw-bold"><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></div>
-                                                            <div class="small text-muted mt-2">Expected Handover Code:</div>
-                                                            <div class="fs-5 fw-bold font-monospace text-primary"><?php echo e($r['handover_code'] ?? 'None'); ?></div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label class="form-label small fw-semibold">Enter / Confirm Handover Code (Optional verification)</label>
-                                                            <input type="text" name="handover_code" class="form-control font-monospace" placeholder="<?php echo e($r['handover_code'] ?? 'HAND-XXXXXX'); ?>" value="<?php echo e($r['handover_code'] ?? ''); ?>">
-                                                            <div class="form-text small">Entering the code confirms physical collection by the NGO representative.</div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-success">
-                                                            <i class="fas fa-check-double me-1"></i> Confirm Handover & Update Impact
+                                                    <div class="modal-footer border-top py-3">
+                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-xs">
+                                                            <i class="fas fa-check-circle me-1"></i> Confirm & Accept Request
                                                         </button>
                                                     </div>
                                                 </form>
@@ -371,25 +331,30 @@ include __DIR__ . '/../includes/navbar.php';
 
                                     <!-- Reject Modal -->
                                     <div class="modal fade" id="rejectModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content border-0 shadow-lg rounded-4">
                                                 <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
                                                     <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="reject">
                                                     <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title fw-bold text-danger">Decline Request #REQ-<?php echo str_pad($r['id'], 4, '0', STR_PAD_LEFT); ?></h5>
+                                                    <div class="modal-header border-bottom py-3">
+                                                        <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#fee2e2; color:#ef4444;">
+                                                                <i class="fas fa-times"></i>
+                                                            </span>
+                                                            Decline Requisition Request
+                                                        </h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
+                                                    <div class="modal-body p-4">
+                                                        <div class="mb-2">
                                                             <label class="form-label small fw-semibold">Reason for Declining *</label>
                                                             <textarea name="remarks" class="form-control" rows="3" placeholder="Stock reserved, clinic capacity mismatch, or other reason..." required></textarea>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-danger">Decline Request</button>
+                                                    <div class="modal-footer border-top py-3">
+                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-xs">Decline Request</button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -399,7 +364,7 @@ include __DIR__ . '/../includes/navbar.php';
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">
+                                    <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="fas fa-inbox fs-3 text-secondary d-block mb-2"></i>
                                         No requisition requests found matching your filter.
                                     </td>

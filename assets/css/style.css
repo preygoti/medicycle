@@ -45,6 +45,9 @@
 html {
     min-height: 100%;
     scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 body {
@@ -55,7 +58,9 @@ body {
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: auto;
 }
 
 /* Crucial: Prevent flex container from collapsing or shrinking sections */
@@ -86,10 +91,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Global Navbar */
 .navbar-medicycle {
-    background: #FFFFFF;
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
-    padding: 0.75rem 0;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    padding: 0.65rem 0;
     position: sticky;
     top: 0;
     z-index: 1030;
@@ -103,6 +110,10 @@ h1, h2, h3, h4, h5, h6 {
     gap: 0.5rem;
     font-size: 1.35rem;
     letter-spacing: -0.03em;
+    transition: transform 0.15s ease;
+}
+.navbar-brand:hover {
+    transform: scale(1.02);
 }
 
 .navbar-brand i {
@@ -123,35 +134,106 @@ h1, h2, h3, h4, h5, h6 {
     vertical-align: middle;
 }
 
+/* Modern Notification Bell Button & Precision Aligned Badge */
+.notif-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    margin: 0 0.15rem !important;
+    color: #475569 !important;
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
+    transition: all 0.2s ease-in-out;
+}
+.notif-icon-btn:hover {
+    background-color: #F1F5F9 !important;
+    color: var(--primary-color) !important;
+    border-color: #CBD5E1 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
+}
+.notif-pulse-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    border-radius: 10px;
+    border: 2px solid #FFFFFF;
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.45);
+    pointer-events: none;
+    letter-spacing: -0.02em;
+}
+
+/* Premium Header User Avatar Capsule */
+.user-profile-capsule {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 0.3rem 0.65rem 0.3rem 0.35rem !important;
+    transition: all 0.2s ease;
+}
+.user-profile-capsule:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+.user-avatar-circle {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0F766E 0%, #0D9488 100%);
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(15, 118, 110, 0.25);
+}
+
 .navbar-nav .nav-link {
     font-weight: 500;
     font-size: 0.94rem;
     color: #475569;
-    padding: 0.55rem 0.95rem;
-    border-radius: 6px;
+    padding: 0.55rem 1.05rem;
+    margin: 0 0.25rem;
+    border-radius: 8px;
     position: relative;
     transition: all 0.2s ease-in-out;
 }
 
 .navbar-nav .nav-link:hover {
     color: var(--primary-color) !important;
-    background-color: rgba(15, 118, 110, 0.05);
+    background-color: rgba(15, 118, 110, 0.06);
 }
 
 .navbar-nav .nav-link.active {
     color: var(--primary-color) !important;
     font-weight: 700;
-    background-color: rgba(15, 118, 110, 0.06);
+    background-color: rgba(15, 118, 110, 0.08);
 }
 
 /* Prominent indicator line below the active page heading */
 .navbar-nav .nav-link.active::after {
     content: '';
     position: absolute;
-    bottom: 2px;
-    left: 12px;
-    right: 12px;
-    height: 3.5px;
+    bottom: 3px;
+    left: 14px;
+    right: 14px;
+    height: 3px;
     background: linear-gradient(90deg, #0F766E, #14B8A6);
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(15, 118, 110, 0.35);
@@ -226,11 +308,57 @@ h1, h2, h3, h4, h5, h6 {
     color: #FFFFFF;
 }
 
-.btn-success:hover {
+.btn-success:hover, .btn-success:focus, .btn-success:active {
     background-color: #15803D;
     border-color: #15803D;
     color: #FFFFFF;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+}
+
+/* Quick Demo Selector Buttons (Unified Identical Theme & Clean Click States) */
+.btn-demo-pill {
+    background-color: #0F766E !important;
+    border: 1px solid #0F766E !important;
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+    transition: all 0.18s ease-in-out;
+}
+.btn-demo-pill:hover {
+    background-color: #115E59 !important;
+    border-color: #115E59 !important;
+    color: #FFFFFF !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25) !important;
+}
+.btn-demo-pill:active, .btn-demo-pill:focus {
+    background-color: #134E4A !important;
+    border-color: #134E4A !important;
+    color: #FFFFFF !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.25) !important;
+}
+
+.btn-teal {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #FFFFFF !important;
+}
+.btn-teal:hover, .btn-teal:focus {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+}
+.btn-outline-teal {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    background-color: transparent !important;
+}
+.btn-outline-teal:hover, .btn-outline-teal:focus {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
 }
 
 /* Cards & Surfaces */
@@ -306,11 +434,12 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.2rem;
 }
 
-/* Application Layout with Sidebar */
+/* Application Layout with Fixed Desktop Sidebar */
 .app-container {
     display: flex;
     flex: 1 1 auto;
     min-height: calc(100vh - 65px);
+    position: relative;
 }
 
 .app-sidebar {
@@ -321,6 +450,14 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     flex-direction: column;
     border-right: 1px solid #1E293B;
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    max-height: calc(100vh - 65px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    z-index: 1000;
 }
 
 .app-sidebar .sidebar-heading {
@@ -373,11 +510,47 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app-content {
-    flex-grow: 1;
+    flex: 1 1 auto;
     padding: 2rem;
-    overflow-y: auto;
     background-color: #F8FAFC;
     min-width: 0;
+    overflow-x: hidden;
+}
+
+/* Light, Subtle Placeholder Text (Clear Difference from Filled Values) */
+::placeholder {
+    color: #94A3B8 !important;
+    opacity: 0.65 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+}
+
+::-webkit-input-placeholder {
+    color: #94A3B8 !important;
+    opacity: 0.65 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+}
+
+::-moz-placeholder {
+    color: #94A3B8 !important;
+    opacity: 0.65 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+}
+
+:-ms-input-placeholder {
+    color: #94A3B8 !important;
+    opacity: 0.65 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+}
+
+.form-control::placeholder {
+    color: #94A3B8 !important;
+    opacity: 0.65 !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
 }
 
 /* Hero Section */
@@ -564,6 +737,71 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
 }
 
+/* =========================================================================
+   Unified Input Groups & Password Fields Fixes
+   Fixes half light/green borders and browser native icon collision
+   ========================================================================= */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.input-group {
+    border-radius: 8px;
+    transition: all 0.15s ease-in-out;
+}
+
+.input-group > .input-group-text {
+    background-color: #F8FAFC;
+    border: 1px solid var(--border-color);
+    color: #64748B;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.input-group > .form-control {
+    border: 1px solid var(--border-color);
+    background-image: none !important;
+    transition: border-color 0.15s ease-in-out;
+}
+
+.input-group > .btn {
+    border: 1px solid var(--border-color);
+    background-color: #FFFFFF;
+    color: #64748B;
+    transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+}
+
+.input-group > .btn:hover {
+    background-color: #F8FAFC;
+    color: var(--primary-color);
+}
+
+/* Unified focus outline across the entire input-group */
+.input-group:focus-within {
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12) !important;
+    border-radius: 8px;
+}
+
+.input-group:focus-within > .input-group-text,
+.input-group:focus-within > .form-control,
+.input-group:focus-within > .btn {
+    border-color: var(--primary-color) !important;
+}
+
+/* Prevent Bootstrap from applying mismatched partial borders inside input-groups */
+.was-validated .input-group > .form-control:valid {
+    border-color: var(--border-color) !important;
+    background-image: none !important;
+}
+
+.was-validated .input-group:focus-within > .form-control:valid,
+.was-validated .input-group:focus-within > .input-group-text,
+.was-validated .input-group:focus-within > .btn {
+    border-color: var(--primary-color) !important;
+}
+
 /* Ensure select dropdown options always have crisp high-contrast readable text */
 select.form-select, select.form-control {
     color: #0F172A !important;
@@ -724,3 +962,884 @@ footer.medicycle-footer .footer-title {
         font-size: 1.45rem;
     }
 }
+
+/* Mode Tab Pill Buttons (Add Medical Supply) */
+.btn-mode-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #334155 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.btn-mode-tab:hover {
+    background-color: #f8fafc !important;
+    border-color: #0f766e !important;
+    color: #0f766e !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(15, 118, 110, 0.12);
+}
+
+.btn-mode-tab:hover i {
+    color: #0f766e !important;
+}
+
+.btn-mode-tab.active {
+    background-color: #0f766e !important;
+    border-color: #0f766e !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25);
+}
+
+.btn-mode-tab.active i {
+    color: #ffffff !important;
+}
+
+/* Live Barcode Scanner Viewfinder & Laser */
+.barcode-scanner-box {
+    position: relative;
+    width: 100%;
+    min-height: 260px;
+    background: #0f172a;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.barcode-scanner-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    max-height: 320px;
+}
+
+.barcode-laser {
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #ef4444;
+    box-shadow: 0 0 12px #ef4444, 0 0 4px #f87171;
+    animation: scanLaser 2s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: 5;
+}
+
+@keyframes scanLaser {
+    0% { top: 15%; opacity: 0.9; }
+    50% { opacity: 1; }
+    100% { top: 85%; opacity: 0.9; }
+}
+
+.barcode-target-guide {
+    position: absolute;
+    width: 75%;
+    height: 120px;
+    border: 2px dashed rgba(255, 255, 255, 0.65);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 4;
+}
+
+/* Touch & Trackpad Swipe Back Indicator */
+.swipe-back-pill {
+    position: fixed;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%) translateX(0px) scale(0.8);
+    width: 44px;
+    height: 44px;
+    background: rgba(15, 118, 110, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+/* =========================================================================
+   GLOBAL MODAL BACKDROP BLUR & FROSTED GLASS
+   ========================================================================= */
+.modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.45) !important;
+    backdrop-filter: blur(12px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+}
+
+.modal-backdrop.show {
+    opacity: 1 !important;
+}
+
+.modal.show {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-content {
+    border-radius: 18px !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35) !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    overflow: hidden;
+}
+
+/* =========================================================================
+   MODERN DROPDOWN LIST DESIGN
+   ========================================================================= */
+.form-select {
+    border-radius: 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.6rem 2.5rem 0.6rem 1rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%230f766e' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.85rem center !important;
+    background-size: 13px 9px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s ease !important;
+}
+
+.form-select:hover {
+    border-color: #94a3b8 !important;
+}
+
+.form-select:focus {
+    border-color: #0f766e !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18) !important;
+    outline: none !important;
+}
+
+/* Fix Bootstrap Validation Icon Overlapping Native Date Picker Icons */
+input[type="date"].form-control.is-invalid,
+.was-validated input[type="date"].form-control:invalid,
+input[type="date"].form-control.is-valid,
+.was-validated input[type="date"].form-control:valid {
+    background-image: none !important;
+    padding-right: 0.75rem !important;
+}
+
+/* Styled calendar picker indicator for date inputs */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(36%) sepia(85%) saturate(452%) hue-rotate(128deg) brightness(92%) contrast(92%);
+    border-radius: 4px;
+    padding: 2px;
+    transition: transform 0.15s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    transform: scale(1.15);
+}
+
+.dropdown-menu {
+    border-radius: 14px !important;
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 8px 10px -6px rgba(15, 23, 42, 0.08) !important;
+    padding: 0.5rem !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+}
+
+.dropdown-item {
+    border-radius: 8px !important;
+    padding: 0.55rem 0.9rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    transition: all 0.15s ease !important;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: #f0fdfa !important;
+    color: #0f766e !important;
+    transform: translateX(2px);
+}
+
+/* =========================================================================
+   MODERN CALENDAR / DATE PICKER STYLING
+   ========================================================================= */
+input[type="date"].form-control {
+    border-radius: 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 0.6rem 0.9rem !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    transition: all 0.2s ease !important;
+}
+
+input[type="date"].form-control::-webkit-calendar-picker-indicator {
+    cursor: pointer !important;
+    filter: invert(36%) sepia(85%) saturate(542%) hue-rotate(130deg) brightness(92%) contrast(93%);
+    opacity: 0.85;
+    padding: 4px;
+    border-radius: 6px;
+    background-color: #f0fdfa;
+    transition: all 0.15s ease;
+}
+
+input[type="date"].form-control::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    background-color: #ccfbf1;
+}
+
+input[type="date"].form-control:focus {
+    border-color: #0f766e !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18) !important;
+    outline: none !important;
+}
+
+/* =========================================================================
+   MODERN HANDSHAKE PASS & VERIFICATION TERMINAL STYLING
+   ========================================================================= */
+.handshake-pass-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.handshake-pass-card:hover {
+    box-shadow: 0 25px 45px -12px rgba(15, 118, 110, 0.15);
+}
+
+.handshake-pass-header {
+    background: linear-gradient(135deg, #042f2e 0%, #0f766e 70%, #14b8a6 100%);
+    color: #ffffff;
+    padding: 1.25rem 1.75rem;
+    position: relative;
+}
+
+.handshake-pass-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 14px 14px;
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.handshake-pass-perforation {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 0 1.25rem;
+    margin: 0.75rem 0;
+}
+
+.handshake-pass-notch-left,
+.handshake-pass-notch-right {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-color: var(--body-bg, #f8fafc);
+    border-radius: 50%;
+    z-index: 2;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+}
+
+.handshake-pass-notch-left {
+    left: -12px;
+    border-right: 1px solid #e2e8f0;
+}
+
+.handshake-pass-notch-right {
+    right: -12px;
+    border-left: 1px solid #e2e8f0;
+}
+
+.handshake-pass-dashed-line {
+    width: 100%;
+    height: 1px;
+    border-top: 2px dashed #cbd5e1;
+}
+
+/* OTP Digits Grid */
+.handshake-digits-row {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 0.75rem 0;
+}
+
+.handshake-digit-tile {
+    width: 44px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f766e;
+    background: #f0fdfa;
+    border: 2px solid #5eead4;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(15, 118, 110, 0.08);
+    transition: all 0.2s ease;
+}
+
+.handshake-digit-tile:hover {
+    transform: translateY(-2px);
+    border-color: #0f766e;
+    box-shadow: 0 6px 12px rgba(15, 118, 110, 0.18);
+}
+
+/* Universal QR & Barcode Camera Scanner Viewfinder */
+.scanner-viewport-hud {
+    position: relative;
+    width: 100%;
+    min-height: 255px;
+    height: 255px;
+    background: #090d16;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1.5px solid #1e293b;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.75), 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* Ensure html5-qrcode's injected video fills container centered without lateral shifts */
+#qr-reader {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 250px !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    background: transparent !important;
+    z-index: 2;
+}
+
+#qr-reader__scan_region {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 250px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    background: transparent !important;
+}
+
+#qr-reader video {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 250px !important;
+    max-height: 260px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border-radius: 12px !important;
+    display: block !important;
+    margin: 0 auto !important;
+}
+
+#qr-reader img {
+    display: none !important;
+}
+
+#qr-reader__dashboard,
+#qr-reader__header_message,
+#qr-reader__status_span,
+#qr-reader__camera_selection {
+    display: none !important;
+}
+
+/* Viewfinder Target Reticle Frame Overlay */
+.hud-target-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 170px;
+    height: 170px;
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 6;
+}
+
+.hud-corner {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border: 3px solid #2dd4bf;
+}
+
+.hud-corner.top-left { top: 0; left: 0; border-right: none; border-bottom: none; border-top-left-radius: 8px; }
+.hud-corner.top-right { top: 0; right: 0; border-left: none; border-bottom: none; border-top-right-radius: 8px; }
+.hud-corner.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; border-bottom-left-radius: 8px; }
+.hud-corner.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; border-bottom-right-radius: 8px; }
+
+/* Animated Laser Scanner Sweep */
+.laser-scan-bar {
+    position: absolute;
+    left: 4px;
+    right: 4px;
+    height: 2.5px;
+    background: linear-gradient(90deg, transparent 0%, #2dd4bf 50%, transparent 100%);
+    box-shadow: 0 0 12px 2px rgba(45, 212, 191, 0.9), 0 0 24px 4px rgba(45, 212, 191, 0.4);
+    animation: laserSweep 2s ease-in-out infinite alternate;
+    z-index: 7;
+    pointer-events: none;
+}
+
+@keyframes laserSweep {
+    0% { top: 4px; opacity: 0.85; }
+    50% { opacity: 1; }
+    100% { top: 162px; opacity: 0.85; }
+}
+
+/* Scanner Inactive State Overlay */
+.scanner-placeholder-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 8;
+    background: radial-gradient(circle at center, #111827 0%, #090d16 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    text-align: center;
+    color: #ffffff;
+}
+
+/* Balanced OTP PIN Input Boxes in Verification Terminal */
+.otp-pin-input {
+    width: 44px !important;
+    height: 48px !important;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    color: #0f766e !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    transition: all 0.15s ease !important;
+    padding: 0 !important;
+}
+
+.otp-pin-input:focus {
+    border-color: #0f766e !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15) !important;
+    background-color: #f0fdfa !important;
+    transform: translateY(-1px);
+    outline: none !important;
+}
+
+.otp-pin-input.is-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+    color: #b91c1c !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+    animation: shakeInput 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shakeInput {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+    40%, 60% { transform: translate3d(3px, 0, 0); }
+}
+
+/* Compact Verification Terminal Elements */
+.verify-action-btn {
+    padding: 0.5rem 1.25rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+}
+
+/* Real-Time Floating Notification Toast */
+.live-toast-alert {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 99999;
+    max-width: 360px;
+    background: #ffffff;
+    border: 1px solid #ccfbf1;
+    border-left: 4px solid #0f766e;
+    border-radius: 10px;
+    box-shadow: 0 12px 20px -3px rgba(15, 23, 42, 0.12), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+    padding: 0.85rem 1rem;
+    animation: slideInToast 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: all 0.25s ease;
+}
+
+@keyframes slideInToast {
+    from {
+        opacity: 0;
+        transform: translateY(-15px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* =========================================================================
+   COMPREHENSIVE RESPONSIVE SYSTEM FOR ALL DEVICES & MODAL POP-UPS
+   ========================================================================= */
+
+/* 1. Universal Modal Pop-Up Perfection on All Devices */
+.modal {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.modal-dialog {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: calc(100% - 3rem) !important;
+    margin: 1.5rem auto !important;
+    max-width: 540px;
+    width: calc(100% - 2rem);
+}
+
+.modal-dialog.modal-lg {
+    max-width: 820px !important;
+}
+
+.modal-dialog.modal-xl {
+    max-width: 1140px !important;
+}
+
+.modal-dialog.modal-sm {
+    max-width: 380px !important;
+}
+
+.modal-content {
+    border-radius: 18px !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35) !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    overflow: hidden;
+    max-height: calc(100vh - 3rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    flex-shrink: 0;
+    padding: 1rem 1.25rem !important;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 1.25rem !important;
+    overscroll-behavior: contain;
+}
+
+.modal-footer {
+    flex-shrink: 0;
+    padding: 0.75rem 1.25rem !important;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Mobile Pop-Up / Modal Adaptations (Screen width <= 576px) */
+@media (max-width: 575.98px) {
+    .modal-dialog {
+        margin: 0.75rem auto !important;
+        width: calc(100% - 1.25rem) !important;
+        max-width: calc(100% - 1.25rem) !important;
+    }
+    
+    .modal-dialog-centered {
+        min-height: calc(100% - 1.5rem) !important;
+    }
+    
+    .modal-content {
+        border-radius: 14px !important;
+        max-height: calc(100vh - 1.5rem) !important;
+    }
+    
+    .modal-header {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .modal-title {
+        font-size: 1.05rem !important;
+    }
+    
+    .modal-body {
+        padding: 1rem 0.85rem !important;
+    }
+    
+    .modal-footer {
+        padding: 0.65rem 1rem !important;
+    }
+}
+
+/* 2. Responsive PIN Inputs & Handshake Digit Tiles */
+@media (max-width: 480px) {
+    .handshake-digits-row {
+        gap: 0.35rem !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+    }
+    .handshake-digit-tile {
+        width: 38px !important;
+        height: 46px !important;
+        font-size: 1.25rem !important;
+        border-radius: 8px !important;
+    }
+    .otp-pin-input {
+        width: 40px !important;
+        height: 44px !important;
+        font-size: 1.15rem !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .handshake-digits-row {
+        gap: 0.2rem !important;
+    }
+    .handshake-digit-tile {
+        width: 33px !important;
+        height: 40px !important;
+        font-size: 1.05rem !important;
+        border-radius: 6px !important;
+        border-width: 1px !important;
+    }
+    .otp-pin-input {
+        width: 34px !important;
+        height: 42px !important;
+        font-size: 1.05rem !important;
+        border-radius: 6px !important;
+    }
+}
+
+/* 3. Mobile & Tablet App Navigation (Width <= 991.98px) */
+@media (max-width: 991.98px) {
+    .app-container {
+        flex-direction: column !important;
+    }
+    .app-sidebar {
+        width: 100% !important;
+        position: static !important;
+        height: auto !important;
+        max-height: none !important;
+        border-right: none !important;
+        border-bottom: 1px solid #1E293B !important;
+        padding-bottom: 0.35rem !important;
+        background-color: var(--sidebar-bg) !important;
+    }
+    .app-sidebar .sidebar-heading {
+        display: none !important;
+    }
+    .app-sidebar .nav {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0.5rem 0.75rem !important;
+        gap: 0.35rem !important;
+        scrollbar-width: none;
+    }
+    .app-sidebar .nav::-webkit-scrollbar {
+        display: none;
+    }
+    .app-sidebar .nav-link {
+        white-space: nowrap !important;
+        margin: 0 !important;
+        padding: 0.45rem 0.85rem !important;
+        font-size: 0.82rem !important;
+        border-radius: 20px !important;
+        border-left: none !important;
+        border-bottom: none !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    .app-sidebar .nav-link.active {
+        background-color: #0F766E !important;
+        color: #FFFFFF !important;
+        border-left: none !important;
+    }
+    .app-content {
+        padding: 1rem !important;
+    }
+}
+
+/* 4. Smooth Touch Scrolling on All Tables */
+.table-responsive {
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 12px;
+}
+
+/* 5. Clean Mobile Card & Container Spacing */
+@media (max-width: 575.98px) {
+    .container-fluid {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+    .card {
+        border-radius: 14px !important;
+    }
+    .card-body {
+        padding: 1rem !important;
+    }
+    .scanner-viewport-hud {
+        height: 245px !important;
+        min-height: 245px !important;
+    }
+}
+
+/* =========================================================================
+   SIDEBAR ACTION BUTTONS (Sign Out & Delete Account)
+   ========================================================================= */
+.sidebar-footer {
+    padding: 1rem 1.15rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.15) !important;
+    background: transparent;
+}
+
+.btn-sidebar-signout,
+.btn-sidebar-delete {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+    padding: 0.52rem 0.85rem !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    border-radius: 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    border: 1px solid transparent !important;
+}
+
+/* Sidebar Action Buttons: Sign Out & Delete Account (Exact Same Consistent Styling) */
+.btn-sidebar-signout,
+.btn-sidebar-delete {
+    color: #fca5a5 !important;
+    background-color: rgba(239, 68, 68, 0.08) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+.btn-sidebar-signout i,
+.btn-sidebar-delete i {
+    color: #f87171 !important;
+    font-size: 0.88rem !important;
+    transition: transform 0.2s ease, color 0.2s ease !important;
+}
+
+.btn-sidebar-signout:hover,
+.btn-sidebar-signout:focus,
+.btn-sidebar-delete:hover,
+.btn-sidebar-delete:focus {
+    color: #ffffff !important;
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
+    transform: translateY(-1px);
+}
+
+.btn-sidebar-signout:hover i,
+.btn-sidebar-signout:focus i,
+.btn-sidebar-delete:hover i,
+.btn-sidebar-delete:focus i {
+    color: #ffffff !important;
+    transform: scale(1.08);
+}
+
+.btn-sidebar-signout:active,
+.btn-sidebar-delete:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* Mobile Sidebar Footer Adaptation */
+@media (max-width: 768px) {
+    .sidebar-footer {
+        padding: 0.5rem 0.75rem !important;
+        display: flex !important;
+        gap: 0.5rem !important;
+    }
+    .sidebar-footer .btn-sidebar-signout,
+    .sidebar-footer .btn-sidebar-delete {
+        margin-bottom: 0 !important;
+        flex: 1 1 50% !important;
+        padding: 0.42rem 0.5rem !important;
+        font-size: 0.78rem !important;
+    }
+}
+
+/* Real-Time Live Sync Toast & Pill */
+#live-sync-pill {
+    position: fixed;
+    bottom: 22px;
+    right: 25px;
+    z-index: 99998;
+    background: #0f766e;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(15, 118, 110, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+#live-toast-container {
+    position: fixed;
+    top: 85px;
+    right: 25px;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+
+
+

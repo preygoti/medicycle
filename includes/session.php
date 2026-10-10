@@ -71,6 +71,29 @@ function current_user() {
     if (!is_logged_in()) {
         return null;
     }
+    global $pdo;
+    if (isset($pdo) && !empty($_SESSION['user_id'])) {
+        try {
+            $chk = $pdo->prepare("SELECT u.id, u.name, u.email, u.role, u.status,
+                                         o.id AS org_id, o.organization_name, o.verification_status
+                                  FROM users u
+                                  LEFT JOIN organizations o ON u.id = o.user_id
+                                  WHERE u.id = ? LIMIT 1");
+            $chk->execute([$_SESSION['user_id']]);
+            $u = $chk->fetch(PDO::FETCH_ASSOC);
+            if (!$u || $u['status'] === 'suspended' || $u['status'] === 'inactive') {
+                unset($_SESSION['user_id'], $_SESSION['user_name'], $_SESSION['user_email'], $_SESSION['role'], $_SESSION['org_id'], $_SESSION['org_name'], $_SESSION['verification_status']);
+                return null;
+            }
+            // Dynamically synchronize live profile name entered by user
+            $_SESSION['user_name'] = $u['name'];
+            $_SESSION['user_email'] = $u['email'];
+            $_SESSION['role'] = $u['role'];
+            $_SESSION['org_id'] = $u['org_id'];
+            $_SESSION['org_name'] = $u['organization_name'] ?: $u['name'];
+            $_SESSION['verification_status'] = $u['verification_status'] ?? 'verified';
+        } catch (Exception $e) {}
+    }
     return [
         'id' => $_SESSION['user_id'],
         'name' => $_SESSION['user_name'] ?? 'User',
@@ -78,7 +101,7 @@ function current_user() {
         'role' => $_SESSION['role'],
         'org_id' => $_SESSION['org_id'] ?? null,
         'org_name' => $_SESSION['org_name'] ?? null,
-        'verification_status' => $_SESSION['verification_status'] ?? 'pending',
+        'verification_status' => $_SESSION['verification_status'] ?? 'verified',
     ];
 }
 

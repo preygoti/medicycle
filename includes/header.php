@@ -27,5 +27,8 @@ $pageTitle = isset($pageTitle) ? $pageTitle . ' | ' . APP_NAME : APP_NAME . ' - 
     
     <!-- MediCycle Custom Theme CSS with Auto Cache Busting -->
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css?v=<?php echo file_exists(__DIR__ . '/../assets/css/style.css') ? filemtime(__DIR__ . '/../assets/css/style.css') : time(); ?>">
+    <script>
+        window.BASE_URL = '<?php echo BASE_URL; ?>';
+    </script>
 </head>
 <body>

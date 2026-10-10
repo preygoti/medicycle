@@ -60,7 +60,7 @@ try {
                            FROM medical_supplies s 
                            JOIN categories c ON s.category_id = c.id 
                            WHERE s.supplier_id = ? 
-                           ORDER BY s.created_at DESC LIMIT 4");
+                           ORDER BY s.created_at DESC LIMIT 5");
     $stmt->execute([$userId]);
     $recentSupplies = $stmt->fetchAll();
 
@@ -88,9 +88,9 @@ include __DIR__ . '/../includes/navbar.php';
                 <div class="heading-accent-line start" style="width: 45px; height: 3px; margin: 0.35rem 0 0.5rem;"></div>
                 <p class="text-muted small mb-0 page-headline">Overview for <?php echo e($_SESSION['org_name']); ?></p>
             </div>
-            <div class="d-flex gap-2">
-                <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-primary">
-                    <i class="fas fa-plus-circle me-1"></i> Add Medical Supply
+            <div class="d-flex flex-wrap gap-2">
+                <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-teal text-white shadow-xs" style="background:#0f766e;">
+                    <i class="fas fa-plus-circle me-1"></i> Add Medical Item
                 </a>
                 <a href="<?php echo BASE_URL; ?>/supplier/requests.php" class="btn btn-outline-secondary position-relative">
                     <i class="fas fa-inbox me-1"></i> Requests
@@ -165,91 +165,80 @@ include __DIR__ . '/../includes/navbar.php';
             </div>
         </div>
 
-        <div class="row g-4 mb-4">
-            <!-- Incoming Requests Table -->
-            <div class="col-lg-7">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                        <h6 class="fw-bold text-dark mb-0"><i class="fas fa-inbox text-teal me-2" style="color:#0f766e;"></i>Incoming Supply Requests</h6>
-                        <a href="<?php echo BASE_URL; ?>/supplier/requests.php" class="small text-decoration-none">View All</a>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Supply Item</th>
-                                        <th>Requester Org</th>
-                                        <th>Qty</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (!empty($recentRequests)): ?>
-                                        <?php foreach ($recentRequests as $req): ?>
-                                            <tr>
-                                                <td>
-                                                    <span class="fw-semibold text-dark"><?php echo e($req['supply_name']); ?></span>
-                                                    <div class="text-muted small"><?php echo format_date($req['requested_at']); ?></div>
-                                                </td>
-                                                <td>
-                                                    <span class="d-block small fw-medium"><?php echo e($req['organization_name'] ?? $req['requester_name']); ?></span>
-                                                    <span class="text-muted small"><i class="fas fa-map-marker-alt me-1"></i><?php echo e($req['city'] ?? 'N/A'); ?></span>
-                                                </td>
-                                                <td class="fw-bold"><?php echo $req['requested_quantity'] . ' ' . e($req['unit']); ?></td>
-                                                <td><?php echo status_badge($req['status']); ?></td>
-                                                <td>
-                                                    <a href="<?php echo BASE_URL; ?>/supplier/requests.php#req-<?php echo $req['id']; ?>" class="btn btn-sm btn-outline-primary py-0 px-2">
-                                                        Review
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    <?php else: ?>
-                                        <tr>
-                                            <td colspan="5" class="text-center py-4 text-muted small">
-                                                No incoming requests at the moment.
-                                            </td>
-                                        </tr>
-                                    <?php endif; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+        <!-- Recent Supplies Listing (Full Width) -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white py-3">
+                <h6 class="fw-bold text-dark mb-0"><i class="fas fa-boxes-stacked text-teal me-2" style="color:#0f766e;"></i>Recent Supplies</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-sm btn-teal text-white rounded-pill px-3" style="background:#0f766e;">
+                        <i class="fas fa-plus-circle me-1"></i> Add Item
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>/supplier/inventory.php" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                        View All Inventory
+                    </a>
                 </div>
             </div>
-
-            <!-- Recent Added Supplies -->
-            <div class="col-lg-5">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                        <h6 class="fw-bold text-dark mb-0"><i class="fas fa-boxes-stacked text-teal me-2" style="color:#0f766e;"></i>Recent Supplies</h6>
-                        <a href="<?php echo BASE_URL; ?>/supplier/inventory.php" class="small text-decoration-none">Inventory</a>
-                    </div>
-                    <div class="card-body p-3">
-                        <?php if (!empty($recentSupplies)): ?>
-                            <div class="list-group list-group-flush">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Supply Item</th>
+                                <th>Category</th>
+                                <th>Available Stock</th>
+                                <th>Batch Number</th>
+                                <th>Expiry Date</th>
+                                <th>Status</th>
+                                <th class="text-end pe-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($recentSupplies)): ?>
                                 <?php foreach ($recentSupplies as $supply): ?>
-                                    <div class="list-group-item px-0 py-2 border-bottom">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="fw-semibold small text-dark"><?php echo e($supply['supply_name']); ?></span>
-                                            <?php echo status_badge($supply['status']); ?>
-                                        </div>
-                                        <div class="d-flex justify-content-between small text-muted">
-                                            <span><?php echo $supply['quantity'] . ' ' . e($supply['unit']); ?></span>
-                                            <span>Expires: <?php echo format_date($supply['expiry_date']); ?></span>
-                                        </div>
-                                    </div>
+                                    <tr>
+                                        <td>
+                                            <a href="<?php echo BASE_URL; ?>/supplier/view-supply.php?id=<?php echo $supply['id']; ?>" class="fw-semibold text-dark text-decoration-none d-block">
+                                                <?php echo e($supply['supply_name']); ?>
+                                            </a>
+                                            <small class="text-muted">Added: <?php echo format_date($supply['created_at']); ?></small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border"><?php echo e($supply['category_name'] ?? 'General Medical'); ?></span>
+                                        </td>
+                                        <td class="fw-bold text-dark">
+                                            <?php echo number_format($supply['quantity']) . ' ' . e(format_unit($supply['unit'])); ?>
+                                        </td>
+                                        <td>
+                                            <span class="font-monospace small text-muted"><?php echo e($supply['batch_number'] ?? 'N/A'); ?></span>
+                                        </td>
+                                        <td>
+                                            <span class="small <?php echo (strtotime($supply['expiry_date']) < strtotime('+60 days')) ? 'text-warning fw-semibold' : 'text-muted'; ?>">
+                                                <i class="fas fa-calendar-day me-1"></i><?php echo format_date($supply['expiry_date']); ?>
+                                            </span>
+                                        </td>
+                                        <td><?php echo status_badge($supply['status']); ?></td>
+                                        <td class="text-end pe-3">
+                                            <div class="d-inline-flex align-items-center gap-2 justify-content-end">
+                                                <a href="<?php echo BASE_URL; ?>/supplier/view-supply.php?id=<?php echo $supply['id']; ?>" class="btn btn-sm btn-outline-secondary rounded-2 py-1 px-2 shadow-xs" style="font-size:0.78rem;" title="View Details">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="<?php echo BASE_URL; ?>/supplier/edit-supply.php?id=<?php echo $supply['id']; ?>" class="btn btn-sm btn-outline-teal rounded-2 py-1 px-2 shadow-xs" style="border-color:#0f766e; color:#0f766e; font-size:0.78rem;" title="Edit Item">
+                                                    <i class="fas fa-pen"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="text-center py-4 text-muted small">
-                                You haven't added any supplies yet.<br>
-                                <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-sm btn-primary mt-2">Add Your First Supply</a>
-                            </div>
-                        <?php endif; ?>
-                    </div>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="8" class="text-center py-4 text-muted small">
+                                        You haven't added any supplies yet.<br>
+                                        <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-sm btn-teal text-white mt-2" style="background:#0f766e;">Add Your First Supply</a>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

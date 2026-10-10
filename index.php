@@ -13,18 +13,8 @@ try {
     $statUnits = $pdo->query("SELECT COALESCE(SUM(quantity), 0) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
     $statWaste = $pdo->query("SELECT COALESCE(SUM(estimated_waste_avoided), 0) FROM impact_metrics")->fetchColumn();
 
-    // Fetch featured available medical supplies
-    $featuredStmt = $pdo->query("SELECT s.*, c.category_name, o.organization_name, o.city 
-                                  FROM medical_supplies s 
-                                  JOIN categories c ON s.category_id = c.id 
-                                  JOIN organizations o ON s.supplier_id = o.user_id 
-                                  WHERE s.status = 'Available' AND s.expiry_date > CURDATE()
-                                  ORDER BY s.priority_score DESC, s.created_at DESC 
-                                  LIMIT 4");
-    $featuredSupplies = $featuredStmt->fetchAll();
 } catch (PDOException $e) {
     $statSupplies = 0; $statOrgs = 0; $statTransfers = 0; $statUnits = 0; $statWaste = 0;
-    $featuredSupplies = [];
 }
 
 // Handle contact inquiry submission from unified #contact section
@@ -72,39 +62,24 @@ include __DIR__ . '/includes/navbar.php';
     <div class="container py-lg-4">
         <div class="row align-items-center gy-5">
             <div class="col-lg-7">
+                <div class="badge bg-light text-teal px-3 py-2 rounded-pill fw-semibold mb-3 border" style="background:#ccfbf1; color:#0f766e;">
+                    <i class="fas fa-hand-holding-medical me-1"></i> Smart Medical Supply Redistribution System
+                </div>
                 <h1 class="hero-title mb-3">
-                    Turn Medical Surplus Into<br>
-                    <span style="color: #5EEAD4;">Community Impact.</span>
+                    Reduce Medical Waste.<br>
+                    <span style="color: #5EEAD4;">Redirect Medical Need.</span>
                 </h1>
                 <div class="heading-accent-line start hero"></div>
                 <p class="hero-subtitle mb-4">
-                    MediCycle directly connects hospitals and healthcare suppliers with verified NGOs and charitable clinics. We redirect unexpired, unopened healthcare consumables before they go to waste.
+                    MediCycle is an enterprise healthcare redistribution platform connecting verified healthcare suppliers, hospitals, and pharmacies with verified NGOs and charitable clinics to redistribute eligible unused medical consumables through smart priority matching and volunteer logistics.
                 </p>
                 <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-2">
-                    <?php if (is_logged_in()): ?>
-                        <?php if ($_SESSION['role'] === 'ngo'): ?>
-                            <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="btn btn-light btn-lg fw-semibold text-teal shadow-sm">
-                                <i class="fas fa-search me-1"></i> Browse Supplies
-                            </a>
-                            <a href="<?php echo BASE_URL; ?>/ngo/post-requirement.php" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-bullhorn me-1"></i> Post Clinical Need
-                            </a>
-                        <?php else: ?>
-                            <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-light btn-lg fw-semibold text-teal shadow-sm">
-                                <i class="fas fa-plus-circle me-1"></i> List Surplus Consumables
-                            </a>
-                            <a href="<?php echo BASE_URL; ?>/supplier/dashboard.php" class="btn btn-outline-light btn-lg">
-                                <i class="fas fa-chart-pie me-1"></i> Supplier Dashboard
-                            </a>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <a href="<?php echo BASE_URL; ?>/login.php" class="btn btn-light btn-lg fw-semibold text-teal shadow-sm">
-                            <i class="fas fa-sign-in-alt me-1"></i> Sign In to Portal
-                        </a>
-                        <a href="<?php echo BASE_URL; ?>/register.php" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-user-plus me-1"></i> Register Organization
-                        </a>
-                    <?php endif; ?>
+                    <a href="<?php echo BASE_URL; ?>/how-it-works.php" class="btn btn-light btn-lg fw-semibold text-teal shadow-sm">
+                        <i class="fas fa-circle-info me-1"></i> How It Works
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>/about.php" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-hand-holding-medical me-1"></i> About Platform
+                    </a>
                 </div>
             </div>
             <div class="col-lg-5">
@@ -207,56 +182,6 @@ include __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
         </div>
-
-        <!-- Academic OEP System Architecture Card -->
-        <div class="card border-0 shadow-sm bg-light p-4 p-md-5 rounded-4">
-            <div class="text-center mb-4">
-                <span class="badge bg-secondary text-uppercase px-3 py-1">Academic Context</span>
-                <h4 class="fw-bold text-dark mt-2">Open Ended Project (OEP) System Design</h4>
-                <div class="heading-accent-line mx-auto" style="width: 40px; height: 3px; margin: 0.4rem auto 0.8rem;"></div>
-                <p class="text-muted small mx-auto" style="max-width: 600px;">
-                    Engineered in compliance with Web Technology OEP curriculum guidelines, demonstrating modern native PHP, MySQL relational architecture, responsive Bootstrap styling, and client-server validation.
-                </p>
-            </div>
-
-            <div class="row g-3 text-center">
-                <div class="col-md">
-                    <div class="card p-3 border bg-white h-100 shadow-sm">
-                        <div class="fw-bold text-teal mb-1">Member 1</div>
-                        <div class="small fw-semibold text-dark">Auth & Sessions</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Password hashing, session locks, role redirection, and CSRF protection</div>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card p-3 border bg-white h-100 shadow-sm">
-                        <div class="fw-bold text-primary mb-1">Member 2</div>
-                        <div class="small fw-semibold text-dark">UI/UX & Design</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Bootstrap 5 theme, responsive dashboards, interactive components & Chart.js</div>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card p-3 border bg-white h-100 shadow-sm">
-                        <div class="fw-bold text-success mb-1">Member 3</div>
-                        <div class="small fw-semibold text-dark">Database & CRUD</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Normalized MySQL schema, transactions, search queries & relational foreign keys</div>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card p-3 border bg-white h-100 shadow-sm">
-                        <div class="fw-bold text-warning mb-1">Member 4</div>
-                        <div class="small fw-semibold text-dark">Handover Pipeline</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Supply requests, supplier approvals, handover codes & receipt confirmations</div>
-                    </div>
-                </div>
-                <div class="col-md">
-                    <div class="card p-3 border bg-white h-100 shadow-sm">
-                        <div class="fw-bold text-danger mb-1">Member 5</div>
-                        <div class="small fw-semibold text-dark">Smart AI & Reports</div>
-                        <div class="text-muted small" style="font-size:0.75rem;">Recommendation scoring, priority algorithm, demand analytics & validation</div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
 
@@ -322,11 +247,6 @@ include __DIR__ . '/includes/navbar.php';
                 <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2">For Healthcare Suppliers</span>
                 <h2 class="fw-bold text-dark mb-3">Have Eligible Medical Surplus?</h2>
                 <p class="text-muted">Turn surplus stock into life-saving aid for under-resourced clinics rather than writing off unusable goods to medical waste incinerators.</p>
-                <div class="mt-4">
-                    <a href="<?php echo BASE_URL; ?>/register.php" class="btn btn-primary">
-                        <i class="fas fa-hospital me-1"></i> Join as Healthcare Supplier
-                    </a>
-                </div>
             </div>
             <div class="col-lg-7">
                 <div class="row g-3">
@@ -391,11 +311,6 @@ include __DIR__ . '/includes/navbar.php';
                 <span class="badge bg-green text-green px-3 py-2 rounded-pill fw-semibold mb-2">For NGOs & Clinics</span>
                 <h2 class="fw-bold text-dark mb-3">Looking for Medical Supplies?</h2>
                 <p class="text-muted">Access factory-sealed personal protective equipment, sterile wound care, dressings, and non-drug kits donated by verified suppliers.</p>
-                <div class="mt-4">
-                    <a href="<?php echo BASE_URL; ?>/register.php" class="btn btn-success">
-                        <i class="fas fa-hand-holding-heart me-1"></i> Register as NGO / Clinic
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -493,86 +408,7 @@ include __DIR__ . '/includes/navbar.php';
     </div>
 </section>
 
-<!-- 5. LIVE SURPLUS INVENTORY HIGHLIGHT -->
-<section id="supplies" class="py-5 bg-teal-subtle">
-    <div class="container py-3">
-        <div class="d-flex justify-content-between align-items-end mb-4">
-            <div>
-                <span class="text-teal fw-bold text-uppercase small">Surplus Medical Inventory</span>
-                <h2 class="fw-bold text-dark mb-1">Available Medical Supplies</h2>
-                <div class="heading-accent-line start" style="width: 50px; height: 3px; margin: 0.35rem 0 0.6rem;"></div>
-                <p class="text-muted mb-0 small page-headline">Eligible surplus lots ready for immediate request and direct collection</p>
-            </div>
-            <div>
-                <?php if (is_logged_in() && $_SESSION['role'] === 'ngo'): ?>
-                    <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="btn btn-outline-primary btn-sm">
-                        Browse Full Catalog <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
-                <?php else: ?>
-                    <a href="<?php echo BASE_URL; ?>/login.php" class="btn btn-outline-primary btn-sm">
-                        Sign In to Request <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </div>
 
-        <div class="row g-4">
-            <?php if (!empty($featuredSupplies)): ?>
-                <?php foreach ($featuredSupplies as $supply): ?>
-                    <div class="col-md-6 col-lg-3">
-                        <div class="card h-100 card-hover border-0 shadow-sm">
-                            <div class="card-body p-4 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-light text-secondary border"><?php echo e($supply['category_name']); ?></span>
-                                    <?php echo priority_badge($supply['priority_level']); ?>
-                                </div>
-                                <h5 class="fw-bold text-dark mt-2 mb-2 line-clamp-2"><?php echo e($supply['supply_name']); ?></h5>
-                                <p class="text-muted small flex-grow-1 mb-3" style="font-size: 0.83rem;">
-                                    <?php echo e(substr($supply['description'] ?? 'Surplus unexpired medical consumable lot in original factory seal.', 0, 85)) . '...'; ?>
-                                </p>
-                                
-                                <div class="bg-light p-2 rounded-2 mb-3 small">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="text-muted">Available:</span>
-                                        <span class="fw-bold text-teal"><?php echo $supply['quantity'] . ' ' . e($supply['unit']); ?></span>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="text-muted">Expiry Date:</span>
-                                        <span class="fw-semibold text-dark"><?php echo format_date($supply['expiry_date']); ?></span>
-                                    </div>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">City:</span>
-                                        <span class="fw-medium text-dark"><i class="fas fa-map-marker-alt text-danger me-1"></i><?php echo e($supply['city']); ?></span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-auto">
-                                    <?php if (is_logged_in() && $_SESSION['role'] === 'ngo'): ?>
-                                        <a href="<?php echo BASE_URL; ?>/ngo/supply-details.php?id=<?php echo $supply['id']; ?>" class="btn btn-primary btn-sm w-100">
-                                            <i class="fas fa-hand-holding-heart me-1"></i> Request Supply
-                                        </a>
-                                    <?php elseif (is_logged_in() && $_SESSION['role'] === 'supplier'): ?>
-                                        <a href="<?php echo BASE_URL; ?>/supplier/inventory.php" class="btn btn-outline-secondary btn-sm w-100">
-                                            <i class="fas fa-eye me-1"></i> View Inventory
-                                        </a>
-                                    <?php else: ?>
-                                        <a href="<?php echo BASE_URL; ?>/login.php" class="btn btn-outline-secondary btn-sm w-100">
-                                            <i class="fas fa-lock me-1"></i> Sign In to Request
-                                        </a>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="col-12 text-center py-5 text-muted">
-                    <p>No active supplies available at the moment.</p>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</section>
 
 <!-- 6. CONTACT & HELP DESK SECTION -->
 <section id="contact" class="py-5 bg-white border-top">
@@ -586,80 +422,21 @@ include __DIR__ . '/includes/navbar.php';
             <p class="text-muted page-headline">Have questions about healthcare supplier onboarding, NGO verification, or logistics partnerships? We are here to help.</p>
         </div>
 
-        <div class="row g-5">
-            <!-- Contact Inquiry Form -->
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm p-4 p-md-5 h-100">
-                    <h4 class="fw-bold text-dark mb-4">
-                        <i class="fas fa-paper-plane text-teal me-2" style="color:#0f766e;"></i>Send Us an Inquiry
-                    </h4>
-
-                    <?php if ($contactSuccess): ?>
-                        <div class="alert alert-success shadow-sm mb-4">
-                            <i class="fas fa-check-circle me-2"></i>
-                            Thank you! Your inquiry has been received by the MediCycle coordination desk. We will respond promptly.
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($contactErrors)): ?>
-                        <div class="alert alert-danger shadow-sm mb-4">
-                            <ul class="mb-0 ps-3 small">
-                                <?php foreach ($contactErrors as $err): ?>
-                                    <li><?php echo e($err); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
-
-                    <form action="<?php echo BASE_URL; ?>/index.php#contact" method="POST" class="needs-validation" novalidate>
-                        <?php echo csrf_field(); ?>
-                        <input type="hidden" name="contact_submit" value="1">
-
-                        <div class="mb-3">
-                            <label for="c_name" class="form-label small fw-semibold">Your Name *</label>
-                            <input type="text" class="form-control" id="c_name" name="name" value="<?php echo e($cName); ?>" placeholder="Full Name" required>
-                            <div class="invalid-feedback">Name is required.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="c_email" class="form-label small fw-semibold">Email Address *</label>
-                            <input type="email" class="form-control" id="c_email" name="email" value="<?php echo e($cEmail); ?>" placeholder="email@organization.org" required>
-                            <div class="invalid-feedback">Valid email required.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="c_subject" class="form-label small fw-semibold">Inquiry Subject *</label>
-                            <input type="text" class="form-control" id="c_subject" name="subject" value="<?php echo e($cSubject); ?>" placeholder="e.g. Hospital Onboarding Verification" required>
-                            <div class="invalid-feedback">Subject is required.</div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="c_message" class="form-label small fw-semibold">Detailed Message *</label>
-                            <textarea class="form-control" id="c_message" name="message" rows="4" placeholder="How can the MediCycle network assist your organization?" required minlength="10"><?php echo e($cMessage); ?></textarea>
-                            <div class="invalid-feedback">Message must be at least 10 characters.</div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 py-2">
-                            <i class="fas fa-paper-plane me-1"></i> Send Inquiry
-                        </button>
-                    </form>
-                </div>
-            </div>
-
+        <div class="row g-4 justify-content-center">
             <!-- FAQs & Coordination Info -->
-            <div class="col-lg-6">
+            <div class="col-lg-8">
                 <!-- Contact info cards -->
                 <div class="row g-3 mb-4">
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 bg-light h-100">
-                            <div class="text-teal mb-1"><i class="fas fa-hospital me-1"></i> <strong>Supplier Desk</strong></div>
+                        <div class="p-3 border rounded-3 bg-light h-100 text-center">
+                            <div class="text-teal mb-1"><i class="fas fa-hospital me-1"></i> <strong>Healthcare Supplier Desk</strong></div>
                             <small class="text-muted d-block">suppliers@medicycle.org</small>
                             <small class="text-muted">+91 79 2630 1100</small>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 bg-light h-100">
-                            <div class="text-success mb-1"><i class="fas fa-hand-holding-heart me-1"></i> <strong>NGO Liaison</strong></div>
+                        <div class="p-3 border rounded-3 bg-light h-100 text-center">
+                            <div class="text-success mb-1"><i class="fas fa-hand-holding-heart me-1"></i> <strong>NGO & Clinic Liaison</strong></div>
                             <small class="text-muted d-block">ngos@medicycle.org</small>
                             <small class="text-muted">+91 79 2630 1101</small>
                         </div>
@@ -667,7 +444,7 @@ include __DIR__ . '/includes/navbar.php';
                 </div>
 
                 <div class="mb-4">
-                    <h5 class="fw-bold text-dark mb-3"><i class="fas fa-question-circle text-teal me-2"></i>Frequently Asked Questions</h5>
+                    <h5 class="fw-bold text-dark mb-3 text-center"><i class="fas fa-question-circle text-teal me-2"></i>Frequently Asked Questions</h5>
                     <div class="accordion shadow-sm" id="faqAccordion">
                         <div class="accordion-item border-0 border-bottom">
                             <h2 class="accordion-header" id="faq1">
@@ -735,12 +512,9 @@ include __DIR__ . '/includes/navbar.php';
             <p class="text-muted mb-4">
                 Whether you are a healthcare supplier with surplus inventory or an NGO clinic in need of medical consumables, MediCycle provides the direct, verified bridge.
             </p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="<?php echo BASE_URL; ?>/register.php" class="btn btn-primary btn-lg">
-                    <i class="fas fa-user-plus me-1"></i> Register Your Organization
-                </a>
-                <a href="<?php echo BASE_URL; ?>/login.php" class="btn btn-outline-secondary btn-lg">
-                    <i class="fas fa-sign-in-alt me-1"></i> Sign In
+            <div class="d-flex justify-content-center">
+                <a href="<?php echo BASE_URL; ?>/register.php" class="btn btn-primary btn-lg px-4 py-2 shadow-sm rounded-pill">
+                    <i class="fas fa-arrow-right me-1"></i> Get Started with MediCycle
                 </a>
             </div>
         </div>

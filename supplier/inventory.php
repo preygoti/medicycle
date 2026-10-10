@@ -50,7 +50,7 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY category_name ASC")
 $sql = "SELECT s.*, c.category_name 
         FROM medical_supplies s 
         JOIN categories c ON s.category_id = c.id 
-        WHERE s.supplier_id = ?";
+        WHERE s.supplier_id = ? AND s.listing_type = 'surplus'";
 $params = [$userId];
 
 if (!empty($search)) {
@@ -69,6 +69,9 @@ if ($categoryFilter > 0) {
 if (!empty($statusFilter)) {
     $sql .= " AND s.status = ?";
     $params[] = $statusFilter;
+} else {
+    // Remove completed/transferred lots and depleted stock from active Medical Supply
+    $sql .= " AND s.status != 'Transferred' AND s.quantity > 0";
 }
 
 $sql .= " ORDER BY s.created_at DESC";
@@ -82,7 +85,7 @@ try {
     $supplies = [];
 }
 
-$pageTitle = 'My Inventory';
+$pageTitle = 'Medical Supply';
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/navbar.php';
 ?>
@@ -94,12 +97,12 @@ include __DIR__ . '/../includes/navbar.php';
 
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
             <div>
-                <h3 class="fw-bold text-dark mb-1">Medical Supply Inventory</h3>
+                <h3 class="fw-bold text-dark mb-1">Medical Supply</h3>
                 <div class="heading-accent-line start" style="width: 45px; height: 3px; margin: 0.35rem 0 0.5rem;"></div>
                 <p class="text-muted small mb-0 page-headline">Manage, search, edit, and monitor your listed lots</p>
             </div>
-            <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-primary">
-                <i class="fas fa-plus-circle me-1"></i> Add New Consumable
+            <a href="<?php echo BASE_URL; ?>/supplier/add-supply.php" class="btn btn-teal text-white shadow-xs" style="background:#0f766e;">
+                <i class="fas fa-plus-circle me-1"></i> Add Medical Item
             </a>
         </div>
 
@@ -198,20 +201,20 @@ include __DIR__ . '/../includes/navbar.php';
                                             <span class="d-block text-muted small" style="font-size:0.72rem;">Score: <?php echo $s['priority_score']; ?>/100</span>
                                         </td>
                                         <td><?php echo status_badge($s['status']); ?></td>
-                                        <td class="text-end">
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="<?php echo BASE_URL; ?>/supplier/view-supply.php?id=<?php echo $s['id']; ?>" class="btn btn-outline-secondary" title="View Details">
+                                        <td class="text-end pe-3">
+                                            <div class="d-inline-flex align-items-center gap-2 justify-content-end">
+                                                <a href="<?php echo BASE_URL; ?>/supplier/view-supply.php?id=<?php echo $s['id']; ?>" class="btn btn-sm btn-outline-secondary rounded-2 px-2 py-1 shadow-xs" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="<?php echo BASE_URL; ?>/supplier/edit-supply.php?id=<?php echo $s['id']; ?>" class="btn btn-outline-primary" title="Edit Supply">
+                                                <a href="<?php echo BASE_URL; ?>/supplier/edit-supply.php?id=<?php echo $s['id']; ?>" class="btn btn-sm btn-outline-teal rounded-2 px-2 py-1 shadow-xs" style="border-color:#0f766e; color:#0f766e;" title="Edit Supply">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
                                                 <!-- DELETE Form with confirmation -->
-                                                <form action="<?php echo BASE_URL; ?>/supplier/inventory.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this supply listing? This action cannot be undone.');">
+                                                <form action="<?php echo BASE_URL; ?>/supplier/inventory.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Are you sure you want to delete this supply listing? This action cannot be undone.');">
                                                     <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="supply_id" value="<?php echo $s['id']; ?>">
-                                                    <button type="submit" class="btn btn-outline-danger" title="Delete Supply">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 shadow-xs" title="Delete Supply">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>

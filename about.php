@@ -72,56 +72,6 @@ include __DIR__ . '/includes/navbar.php';
             </div>
         </div>
     </div>
-
-    <!-- OEP Team Architecture Card -->
-    <div class="card border-0 shadow-sm bg-light p-4 p-md-5 rounded-4 mt-4">
-        <div class="text-center mb-4">
-            <span class="badge bg-secondary text-uppercase px-3 py-1">Academic Context</span>
-            <h4 class="fw-bold text-dark mt-2">Open Ended Project (OEP) System Design</h4>
-            <div class="heading-accent-line mx-auto" style="width: 40px; height: 3px; margin: 0.4rem auto 0.8rem;"></div>
-            <p class="text-muted small mx-auto" style="max-width: 600px;">
-                Engineered in compliance with Web Technology OEP curriculum guidelines, demonstrating modern native PHP, MySQL relational architecture, responsive Bootstrap styling, and client-server validation.
-            </p>
-        </div>
-
-        <div class="row g-3 text-center">
-            <div class="col-md">
-                <div class="card p-3 border h-100">
-                    <div class="fw-bold text-teal mb-1">Member 1</div>
-                    <div class="small fw-semibold text-dark">Auth & Sessions</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Password hashing, session locks, role redirection, and CSRF protection</div>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="card p-3 border h-100">
-                    <div class="fw-bold text-primary mb-1">Member 2</div>
-                    <div class="small fw-semibold text-dark">UI/UX & Design</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Bootstrap 5 theme, responsive dashboards, interactive components & Chart.js</div>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="card p-3 border h-100">
-                    <div class="fw-bold text-success mb-1">Member 3</div>
-                    <div class="small fw-semibold text-dark">Database & CRUD</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Normalized MySQL schema, transactions, search queries & relational foreign keys</div>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="card p-3 border h-100">
-                    <div class="fw-bold text-warning mb-1">Member 4</div>
-                    <div class="small fw-semibold text-dark">Handover Pipeline</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Supply requests, supplier approvals, handover codes & receipt confirmations</div>
-                </div>
-            </div>
-            <div class="col-md">
-                <div class="card p-3 border h-100">
-                    <div class="fw-bold text-danger mb-1">Member 5</div>
-                    <div class="small fw-semibold text-dark">Smart AI & Reports</div>
-                    <div class="text-muted small" style="font-size:0.75rem;">Recommendation scoring, priority algorithm, demand analytics & validation</div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

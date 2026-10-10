@@ -30,7 +30,7 @@ $sql = "SELECT s.*, c.category_name, o.organization_name as supplier_name, o.cit
         FROM medical_supplies s 
         JOIN categories c ON s.category_id = c.id 
         JOIN organizations o ON s.supplier_id = o.user_id 
-        WHERE s.status = 'Available' AND s.expiry_date > CURDATE()";
+        WHERE s.status = 'Available' AND s.expiry_date > CURDATE() AND s.listing_type = 'surplus'";
 $params = [];
 
 if (!empty($search)) {
@@ -153,11 +153,11 @@ include __DIR__ . '/../includes/navbar.php';
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 border-0 shadow-sm card-hover d-flex flex-column <?php echo $isSmartMatch ? 'border-start border-4 border-success' : ''; ?>">
                             <div class="card-body p-4 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-light text-secondary border"><?php echo e($s['category_name']); ?></span>
-                                    <div>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-1 mb-2">
+                                    <span class="badge bg-light text-secondary border text-truncate" style="max-width: 58%; font-size: 0.72rem;" title="<?php echo e($s['category_name']); ?>"><?php echo e($s['category_name']); ?></span>
+                                    <span class="flex-shrink-0" style="font-size: 0.72rem;">
                                         <?php echo priority_badge($s['priority_level']); ?>
-                                    </div>
+                                    </span>
                                 </div>
 
                                 <h5 class="fw-bold text-dark mt-1 mb-2">
@@ -189,9 +189,17 @@ include __DIR__ . '/../includes/navbar.php';
                                         <span class="text-muted">Condition:</span>
                                         <span class="badge bg-white text-dark border"><?php echo e($s['condition_status']); ?></span>
                                     </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Given By:</span>
+                                        <span class="fw-bold text-dark text-truncate" style="max-width: 170px;" title="<?php echo e($s['supplier_name']); ?>">
+                                            <i class="fas fa-hospital text-teal me-1"></i><?php echo e($s['supplier_name']); ?>
+                                        </span>
+                                    </div>
                                     <div class="d-flex justify-content-between">
-                                        <span class="text-muted">Hospital Hub:</span>
-                                        <span class="text-dark"><i class="fas fa-map-marker-alt text-danger me-1"></i><?php echo e($s['supplier_city']); ?></span>
+                                        <span class="text-muted">Location:</span>
+                                        <span class="text-dark fw-medium">
+                                            <i class="fas fa-map-marker-alt text-danger me-1"></i><?php echo e($s['location'] ?: $s['supplier_city']); ?>
+                                        </span>
                                     </div>
                                 </div>
 
