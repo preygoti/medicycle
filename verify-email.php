@@ -128,21 +128,24 @@ include __DIR__ . '/includes/navbar.php';
                         <?php echo csrf_field(); ?>
 
                         <div class="mb-4 text-center">
-                            <label for="otp" class="form-label small fw-semibold text-secondary mb-2">Enter 6-Digit Code</label>
-                            <input type="text" 
-                                   class="form-control form-control-lg text-center font-monospace fw-bold tracking-wide" 
-                                   id="otp" 
-                                   name="otp" 
-                                   maxlength="6" 
-                                   pattern="\d{6}" 
-                                   inputmode="numeric" 
-                                   autocomplete="one-time-code"
-                                   placeholder="••••••" 
-                                   style="font-size: 2rem; letter-spacing: 0.5rem; height: 60px;" 
-                                   required 
-                                   autofocus>
+                            <label class="form-label small fw-semibold text-secondary mb-2">Enter 6-Digit Verification PIN</label>
+                            
+                            <!-- 6 Separate Digit PIN Boxes -->
+                            <div class="d-flex justify-content-center gap-2 mb-3">
+                                <?php for ($i = 0; $i < 6; $i++): ?>
+                                    <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                                           id="pin<?php echo $i + 1; ?>"
+                                           class="form-control text-center fw-bold otp-pin-input shadow-xs" 
+                                           style="width: 52px; height: 58px; font-size: 1.5rem; border-radius: 10px;"
+                                           data-index="<?php echo $i; ?>" autocomplete="off"
+                                           <?php echo ($i === 0) ? 'autofocus' : ''; ?>>
+                                <?php endfor; ?>
+                            </div>
+
+                            <input type="hidden" name="otp" id="hidden_otp" value="">
+
                             <div class="form-text small text-muted mt-2">
-                                <i class="far fa-clock me-1"></i> Code expires in <strong>10 minutes</strong>.
+                                <i class="far fa-clock me-1 text-teal"></i> Code remains valid for <strong>10 minutes</strong>.
                             </div>
                             <?php
                             $devOtp = '';
@@ -154,14 +157,14 @@ include __DIR__ . '/includes/navbar.php';
                             }
                             if ($devOtp): ?>
                                 <div class="mt-2">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 small" onclick="document.getElementById('otp').value='<?php echo $devOtp; ?>';">
-                                        <i class="fas fa-flask text-teal me-1"></i> Demo Autofill Code: <strong><?php echo $devOtp; ?></strong>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2 small" onclick="fillOtp('<?php echo $devOtp; ?>');">
+                                        <i class="fas fa-key text-teal me-1"></i> Quick Fill PIN: <strong><?php echo $devOtp; ?></strong>
                                     </button>
                                 </div>
                             <?php endif; ?>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                        <button type="submit" id="btn-verify-otp" class="btn btn-teal text-white w-100 py-2 fw-semibold shadow-sm" style="background:#0f766e;">
                             <i class="fas fa-check-circle me-1"></i> Verify & Activate Account
                         </button>
                     </form>
@@ -173,15 +176,84 @@ include __DIR__ . '/includes/navbar.php';
                         </a>
                     </div>
 
-                    <div class="text-center mt-3">
-                        <a href="<?php echo BASE_URL; ?>/login.php" class="small text-muted text-decoration-none">
-                            <i class="fas fa-arrow-left me-1"></i> Return to Sign In
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<script>
+function fillOtp(code) {
+    const pinInputs = document.querySelectorAll('.otp-pin-input');
+    const hiddenOtp = document.getElementById('hidden_otp');
+    if (!pinInputs.length) return;
+    const digits = code.toString().replace(/\D/g, '').slice(0, 6);
+    for (let i = 0; i < 6; i++) {
+        if (pinInputs[i]) pinInputs[i].value = digits[i] || '';
+    }
+    if (hiddenOtp) hiddenOtp.value = digits;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const pinInputs = document.querySelectorAll('.otp-pin-input');
+    const hiddenOtp = document.getElementById('hidden_otp');
+
+    function syncOtp() {
+        let full = '';
+        pinInputs.forEach(inp => { full += inp.value; });
+        if (hiddenOtp) hiddenOtp.value = full;
+    }
+
+    pinInputs.forEach((input, index) => {
+        input.addEventListener('focus', function() { this.select(); });
+        input.addEventListener('click', function() { this.select(); });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                if (this.value !== '') {
+                    this.value = '';
+                    syncOtp();
+                } else if (index > 0) {
+                    pinInputs[index - 1].value = '';
+                    pinInputs[index - 1].focus();
+                    syncOtp();
+                }
+                return;
+            }
+            if (e.key === 'ArrowLeft' && index > 0) {
+                e.preventDefault();
+                pinInputs[index - 1].focus();
+                return;
+            }
+            if (e.key === 'ArrowRight' && index < pinInputs.length - 1) {
+                e.preventDefault();
+                pinInputs[index + 1].focus();
+                return;
+            }
+            if (/^[0-9]$/.test(e.key)) {
+                e.preventDefault();
+                this.value = e.key;
+                syncOtp();
+                if (index < pinInputs.length - 1) {
+                    pinInputs[index + 1].focus();
+                }
+            }
+        });
+
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+            syncOtp();
+            if (this.value.length === 1 && index < pinInputs.length - 1) {
+                pinInputs[index + 1].focus();
+            }
+        });
+
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '').slice(0, 6);
+            if (pasteData) {
+                fillOtp(pasteData);
+                const nextIdx = Math.min(pasteData.length, pinInputs.length - 1);
+                pinInputs[nextIdx].focus();
+            }
+        });
+    });
+});
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
