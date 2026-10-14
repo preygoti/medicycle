@@ -148,7 +148,7 @@ function send_medicycle_mail(string $toEmail, string $toName, string $subject, s
     $smtpUser = defined('SMTP_USERNAME') ? SMTP_USERNAME : '';
     $smtpPass = defined('SMTP_PASSWORD') ? SMTP_PASSWORD : '';
     $fromEmail = defined('SMTP_FROM_EMAIL') ? SMTP_FROM_EMAIL : 'no-reply@medicycle.org';
-    $fromName = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'MediCycle Platform';
+    $fromName = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'Medi Cycle';
 
     $isSmtpConfigured = !empty($smtpUser) && !empty($smtpPass);
 

@@ -77,7 +77,7 @@ define('SMTP_ENCRYPTION', getenv('SMTP_ENCRYPTION') ?: 'tls');
 define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: '');
 define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: '');
 define('SMTP_FROM_EMAIL', getenv('SMTP_FROM_EMAIL') ?: 'no-reply@medicycle.org');
-define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'MediCycle Platform');
+define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Medi Cycle');
 
 // Require database connection
 require_once __DIR__ . '/database.php';
