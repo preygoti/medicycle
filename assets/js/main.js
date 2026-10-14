@@ -672,6 +672,75 @@ document.addEventListener('DOMContentLoaded', function () {
         pollStatus();
         setInterval(pollStatus, POLL_INTERVAL);
     })();
+
+    // --------------------------------------------------------------------------
+    // 6. Modern Scroll-Driven Reveal Animations ("Text Coming From Somewhere")
+    // --------------------------------------------------------------------------
+    (function initScrollReveals() {
+        // Auto-tag landing sections, cards, headlines, and steps
+        const autoSelectors = [
+            '.hero-section h1',
+            '.hero-section p.hero-subtitle',
+            '.hero-section .card',
+            '.section-header',
+            '.stat-card',
+            '.feature-card',
+            '.step-card',
+            '.testimonial-card',
+            '.impact-card',
+            '.category-pill',
+            '.landing-showcase-card',
+            'section h2',
+            'section .card'
+        ];
+
+        autoSelectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+                if (!el.classList.contains('reveal-on-scroll') && 
+                    !el.classList.contains('reveal-fade-left') && 
+                    !el.classList.contains('reveal-fade-right') && 
+                    !el.classList.contains('reveal-zoom-in') &&
+                    !el.closest('.modal')) { // Skip modals
+                    el.classList.add('reveal-on-scroll');
+                }
+            });
+        });
+
+        const revealElements = document.querySelectorAll(
+            '.reveal-on-scroll, .reveal-fade-left, .reveal-fade-right, .reveal-zoom-in'
+        );
+
+        if (!revealElements.length) return;
+
+        if ('IntersectionObserver' in window) {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -40px 0px',
+                threshold: 0.10
+            };
+
+            const revealObserver = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            revealElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                // If already visible at top of page, reveal immediately
+                if (rect.top < window.innerHeight * 0.90) {
+                    el.classList.add('is-revealed');
+                } else {
+                    revealObserver.observe(el);
+                }
+            });
+        } else {
+            revealElements.forEach(el => el.classList.add('is-revealed'));
+        }
+    })();
 });
 
 

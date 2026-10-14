@@ -62,6 +62,20 @@ if (isset($_GET['action']) && $_GET['action'] === 'resend') {
     exit;
 }
 
+// Calculate remaining cooldown seconds from database
+$cdStmt = $pdo->prepare("SELECT TIMESTAMPDIFF(SECOND, created_at, NOW()) AS elapsed FROM email_otps 
+                         WHERE email = ? AND otp_type = 'registration' AND is_used = 0 
+                         ORDER BY created_at DESC LIMIT 1");
+$cdStmt->execute([$user['email']]);
+$lastOtp = $cdStmt->fetch();
+$remainingCooldown = 0;
+if ($lastOtp && isset($lastOtp['elapsed'])) {
+    $elapsed = (int)$lastOtp['elapsed'];
+    if ($elapsed >= 0 && $elapsed < 45) {
+        $remainingCooldown = 45 - $elapsed;
+    }
+}
+
 // Handle OTP SUBMISSION
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token()) {
@@ -187,9 +201,22 @@ include __DIR__ . '/includes/navbar.php';
 
                     <div class="text-center mt-4 pt-3 border-top">
                         <p class="text-muted small mb-2">Didn't receive the email code?</p>
-                        <a href="<?php echo BASE_URL; ?>/verify-email.php?email=<?php echo urlencode($user['email']); ?>&action=resend" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-rotate-right me-1"></i> Resend Verification Code
-                        </a>
+                        
+                        <!-- Live Backwards Countdown Component -->
+                        <div id="resend-wrapper" class="d-inline-flex flex-column align-items-center">
+                            <button type="button" id="btn-resend-countdown" class="btn btn-sm btn-light border text-muted px-3 py-2 rounded-pill shadow-xs" 
+                                    style="<?php echo ($remainingCooldown > 0) ? 'display: inline-flex;' : 'display: none;'; ?> align-items: center; cursor: not-allowed;" disabled>
+                                <i class="fas fa-hourglass-half fa-spin text-teal me-2"></i>
+                                <span>Resend new code in <strong id="cooldown-seconds" class="text-dark font-monospace fs-6"><?php echo $remainingCooldown; ?></strong>s</span>
+                            </button>
+
+                            <a href="<?php echo BASE_URL; ?>/verify-email.php?email=<?php echo urlencode($user['email']); ?>&action=resend" 
+                               id="btn-resend-active" 
+                               class="btn btn-sm btn-outline-teal px-4 py-2 rounded-pill shadow-xs fw-semibold" 
+                               style="<?php echo ($remainingCooldown > 0) ? 'display: none;' : 'display: inline-flex;'; ?> align-items: center; text-decoration: none;">
+                                <i class="fas fa-rotate-right me-1"></i> Resend Verification Code Now
+                            </a>
+                        </div>
                     </div>
 
 <script>
@@ -207,11 +234,70 @@ function fillOtp(code) {
 document.addEventListener('DOMContentLoaded', function() {
     const pinInputs = document.querySelectorAll('.otp-pin-input');
     const hiddenOtp = document.getElementById('hidden_otp');
+    const verifyForm = document.querySelector('form.needs-validation');
+    const btnVerify = document.getElementById('btn-verify-otp');
+    const btnResendCountdown = document.getElementById('btn-resend-countdown');
+    const btnResendActive = document.getElementById('btn-resend-active');
+    const cooldownSecondsEl = document.getElementById('cooldown-seconds');
 
+    // 1. Live Countdown Timer
+    let remainingCooldown = <?php echo (int)$remainingCooldown; ?>;
+
+    function updateCooldown() {
+        if (remainingCooldown > 0) {
+            if (btnResendCountdown) {
+                btnResendCountdown.style.display = 'inline-flex';
+                if (cooldownSecondsEl) cooldownSecondsEl.textContent = remainingCooldown;
+            }
+            if (btnResendActive) btnResendActive.style.display = 'none';
+            remainingCooldown--;
+            setTimeout(updateCooldown, 1000);
+        } else {
+            if (btnResendCountdown) btnResendCountdown.style.display = 'none';
+            if (btnResendActive) {
+                btnResendActive.style.display = 'inline-flex';
+                btnResendActive.style.animation = 'pulseGlow 1.5s infinite';
+            }
+        }
+    }
+
+    if (remainingCooldown > 0) {
+        updateCooldown();
+    }
+
+    // 2. Resend Click Feedback
+    if (btnResendActive) {
+        btnResendActive.addEventListener('click', function(e) {
+            this.classList.add('disabled');
+            this.style.pointerEvents = 'none';
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Dispatching New Code...';
+        });
+    }
+
+    // 3. Form Submit Feedback
+    if (verifyForm) {
+        verifyForm.addEventListener('submit', function(e) {
+            if (hiddenOtp && hiddenOtp.value.length === 6) {
+                if (btnVerify && !btnVerify.disabled) {
+                    btnVerify.disabled = true;
+                    btnVerify.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Verifying Code...';
+                }
+            }
+        });
+    }
+
+    // 4. PIN Input auto-flow
     function syncOtp() {
         let full = '';
         pinInputs.forEach(inp => { full += inp.value; });
         if (hiddenOtp) hiddenOtp.value = full;
+        if (full.length === 6 && verifyForm) {
+            // Optional auto submit or visual hint
+            if (btnVerify) {
+                btnVerify.classList.remove('btn-teal');
+                btnVerify.classList.add('btn-success');
+            }
+        }
     }
 
     pinInputs.forEach((input, index) => {

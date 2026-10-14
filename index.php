@@ -61,7 +61,7 @@ include __DIR__ . '/includes/navbar.php';
 <section id="home" class="hero-section text-center text-lg-start">
     <div class="container py-lg-4">
         <div class="row align-items-center gy-5">
-            <div class="col-lg-7">
+            <div class="col-lg-7 reveal-fade-left">
                 <div class="badge bg-light text-teal px-3 py-2 rounded-pill fw-semibold mb-3 border" style="background:#ccfbf1; color:#0f766e;">
                     <i class="fas fa-hand-holding-medical me-1"></i> Smart Medical Supply Redistribution System
                 </div>
@@ -82,7 +82,7 @@ include __DIR__ . '/includes/navbar.php';
                     </a>
                 </div>
             </div>
-            <div class="col-lg-5">
+            <div class="col-lg-5 reveal-fade-right">
                 <div class="card bg-white text-dark shadow-lg border-0 p-4 rounded-4">
                     <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
                         <h6 class="fw-bold text-teal mb-0"><i class="fas fa-chart-line me-2"></i>Live Redistribution Metrics</h6>
@@ -146,14 +146,14 @@ include __DIR__ . '/includes/navbar.php';
 <!-- 2. ABOUT & PROBLEM SECTION -->
 <section id="about" class="py-5 bg-white">
     <div class="container py-3">
-        <div class="text-center mx-auto mb-5" style="max-width: 720px;">
+        <div class="text-center mx-auto mb-5 reveal-on-scroll" style="max-width: 720px;">
             <span class="text-teal fw-bold text-uppercase small letter-spacing-1">Why MediCycle Exists</span>
             <h2 class="fw-bold text-dark mt-1">Healthcare Surplus Shouldn't Become Waste</h2>
             <div class="heading-accent-line mx-auto"></div>
             <p class="text-muted page-headline">Every day, valuable unopened clinical consumables expire on hospital shelves while charitable community clinics face critical supply shortages.</p>
         </div>
 
-        <div class="row g-4 mb-5">
+        <div class="row g-4 mb-5 reveal-stagger">
             <div class="col-md-4">
                 <div class="card h-100 border-0 shadow-sm p-4 text-center">
                     <div class="stat-icon red mx-auto mb-3" style="width: 56px; height: 56px; border-radius: 14px;">
@@ -188,14 +188,14 @@ include __DIR__ . '/includes/navbar.php';
 <!-- 3. HOW IT WORKS: 4-STEP DIRECT WORKFLOW -->
 <section id="how-it-works" class="py-5 bg-teal-subtle">
     <div class="container py-3">
-        <div class="text-center mx-auto mb-5" style="max-width: 700px;">
+        <div class="text-center mx-auto mb-5 reveal-on-scroll" style="max-width: 700px;">
             <span class="text-teal fw-bold text-uppercase small letter-spacing-1">Direct Redistribution Model</span>
             <h2 class="fw-bold text-dark mt-1">How MediCycle Works</h2>
             <div class="heading-accent-line mx-auto"></div>
             <p class="text-muted page-headline">A streamlined, 4-step direct peer workflow connecting verified healthcare providers with NGOs.</p>
         </div>
 
-        <div class="row g-4">
+        <div class="row g-4 reveal-stagger">
             <div class="col-md-6 col-lg-3">
                 <div class="card h-100 border-0 shadow-sm text-center p-4">
                     <div class="stat-icon teal mx-auto mb-3" style="width: 52px; height: 52px; border-radius: 12px;">
@@ -243,12 +243,12 @@ include __DIR__ . '/includes/navbar.php';
 <section class="py-5 bg-white">
     <div class="container py-3">
         <div class="row g-5 align-items-center mb-5 pb-4 border-bottom">
-            <div class="col-lg-5">
+            <div class="col-lg-5 reveal-fade-left">
                 <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2">For Healthcare Suppliers</span>
                 <h2 class="fw-bold text-dark mb-3">Have Eligible Medical Surplus?</h2>
                 <p class="text-muted">Turn surplus stock into life-saving aid for under-resourced clinics rather than writing off unusable goods to medical waste incinerators.</p>
             </div>
-            <div class="col-lg-7">
+            <div class="col-lg-7 reveal-fade-right">
                 <div class="row g-3">
                     <div class="col-sm-6">
                         <div class="p-3 border rounded-3 h-100 bg-light">
@@ -279,7 +279,7 @@ include __DIR__ . '/includes/navbar.php';
         </div>
 
         <div class="row g-5 align-items-center">
-            <div class="col-lg-7 order-2 order-lg-1">
+            <div class="col-lg-7 order-2 order-lg-1 reveal-fade-left">
                 <div class="row g-3">
                     <div class="col-sm-6">
                         <div class="p-3 border rounded-3 h-100 bg-light">
@@ -307,7 +307,7 @@ include __DIR__ . '/includes/navbar.php';
                     </div>
                 </div>
             </div>
-            <div class="col-lg-5 order-1 order-lg-2">
+            <div class="col-lg-5 order-1 order-lg-2 reveal-fade-right">
                 <span class="badge bg-green text-green px-3 py-2 rounded-pill fw-semibold mb-2">For NGOs & Clinics</span>
                 <h2 class="fw-bold text-dark mb-3">Looking for Medical Supplies?</h2>
                 <p class="text-muted">Access factory-sealed personal protective equipment, sterile wound care, dressings, and non-drug kits donated by verified suppliers.</p>
@@ -320,7 +320,7 @@ include __DIR__ . '/includes/navbar.php';
 <section class="py-5 bg-teal-subtle">
     <div class="container py-3">
         <div class="row align-items-center gy-4">
-            <div class="col-lg-6">
+            <div class="col-lg-6 reveal-fade-left">
                 <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2">Algorithmic Resource Allocation</span>
                 <h2 class="fw-bold text-dark mb-3">Intelligent Urgency & Proximity Matching</h2>
                 <p class="text-muted">MediCycle incorporates a multi-factor recommendation engine that connects surplus batches with recipient needs using clinical urgency, geographical proximity, and shelf-life scoring.</p>

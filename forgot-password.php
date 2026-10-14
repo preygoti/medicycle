@@ -37,6 +37,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: ' . BASE_URL . '/verify-reset-otp.php?email=' . urlencode($user['email']));
                     exit;
                 } else {
+                    // If active code exists with cooldown, redirect to verify screen where live countdown ticks
+                    if (stripos($otpResult['error'] ?? '', 'wait') !== false) {
+                        $_SESSION['reset_email'] = $user['email'];
+                        set_flash('info', $otpResult['error']);
+                        header('Location: ' . BASE_URL . '/verify-reset-otp.php?email=' . urlencode($user['email']));
+                        exit;
+                    }
                     $errors[] = $otpResult['error'] ?? 'Could not dispatch verification email. Please try again shortly.';
                 }
             }
@@ -85,10 +92,24 @@ include __DIR__ . '/includes/navbar.php';
                             </div>
                             <div class="form-text small text-muted">We will send a 10-minute one-time password (OTP) to this address.</div>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 py-2 mt-2">
+                        <button type="submit" id="btn-forgot-submit" class="btn btn-primary w-100 py-2 mt-2">
                             <i class="fas fa-paper-plane me-1"></i> Send Verification Code
                         </button>
                     </form>
+
+                    <script>
+                    document.querySelector('form')?.addEventListener('submit', function(e) {
+                        const emailInput = document.getElementById('email');
+                        if (emailInput && emailInput.value.trim() !== '') {
+                            const btn = document.getElementById('btn-forgot-submit');
+                            if (btn && !btn.disabled) {
+                                btn.disabled = true;
+                                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Sending Verification Code...';
+                                this.submit();
+                            }
+                        }
+                    });
+                    </script>
 
                     <div class="text-center mt-4 pt-2 border-top">
                         <a href="<?php echo BASE_URL; ?>/login.php" class="small text-decoration-none fw-semibold">
