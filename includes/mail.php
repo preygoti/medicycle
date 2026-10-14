@@ -21,16 +21,16 @@ function generate_six_digit_otp(): string {
 function create_email_otp(PDO $pdo, string $email, string $otpType, ?int $userId = null): array {
     $email = strtolower(trim($email));
 
-    // Cooldown check: Prevent excessive OTP requests within 45 seconds
-    $recentStmt = $pdo->prepare("SELECT created_at FROM email_otps 
+    // Cooldown check: Prevent excessive OTP requests within 45 seconds (using DB timestamps)
+    $recentStmt = $pdo->prepare("SELECT TIMESTAMPDIFF(SECOND, created_at, NOW()) AS elapsed_seconds FROM email_otps 
                                   WHERE email = ? AND otp_type = ? AND is_used = 0 
                                   ORDER BY created_at DESC LIMIT 1");
     $recentStmt->execute([$email, $otpType]);
     $recent = $recentStmt->fetch();
 
-    if ($recent) {
-        $secondsSinceLast = time() - strtotime($recent['created_at']);
-        if ($secondsSinceLast < 45) {
+    if ($recent && isset($recent['elapsed_seconds'])) {
+        $secondsSinceLast = (int)$recent['elapsed_seconds'];
+        if ($secondsSinceLast >= 0 && $secondsSinceLast < 45) {
             $waitSeconds = 45 - $secondsSinceLast;
             return [
                 'success' => false,
@@ -48,17 +48,16 @@ function create_email_otp(PDO $pdo, string $email, string $otpType, ?int $userId
     // Generate new 6-digit OTP
     $plainOtp = generate_six_digit_otp();
     $otpHash = password_hash($plainOtp, PASSWORD_BCRYPT);
-    $expiresAt = date('Y-m-d H:i:s', time() + (10 * 60)); // 10 minutes
 
     $insStmt = $pdo->prepare("INSERT INTO email_otps 
         (user_id, email, otp_hash, otp_type, expires_at, attempts, is_used, created_at) 
-        VALUES (?, ?, ?, ?, ?, 0, 0, NOW())");
-    $insStmt->execute([$userId, $email, $otpHash, $otpType, $expiresAt]);
+        VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), 0, 0, NOW())");
+    $insStmt->execute([$userId, $email, $otpHash, $otpType]);
 
     return [
         'success' => true,
         'otp' => $plainOtp,
-        'expires_at' => $expiresAt,
+        'expires_at' => date('Y-m-d H:i:s', time() + 600),
         'error' => null
     ];
 }
@@ -74,7 +73,7 @@ function verify_email_otp(PDO $pdo, string $email, string $enteredOtp, string $o
         return ['valid' => false, 'message' => 'Please enter a valid 6-digit numeric verification code.'];
     }
 
-    $stmt = $pdo->prepare("SELECT * FROM email_otps 
+    $stmt = $pdo->prepare("SELECT *, (expires_at < NOW()) AS is_expired FROM email_otps 
                            WHERE email = ? AND otp_type = ? AND is_used = 0 
                            ORDER BY created_at DESC LIMIT 1");
     $stmt->execute([$email, $otpType]);
@@ -85,7 +84,7 @@ function verify_email_otp(PDO $pdo, string $email, string $enteredOtp, string $o
     }
 
     // Check expiration (10 minutes)
-    if (strtotime($otpRecord['expires_at']) < time()) {
+    if (!empty($otpRecord['is_expired'])) {
         $expireStmt = $pdo->prepare("UPDATE email_otps SET is_used = 1 WHERE id = ?");
         $expireStmt->execute([$otpRecord['id']]);
         return ['valid' => false, 'message' => 'Your verification code has expired (valid for 10 minutes). Please request a new code.'];

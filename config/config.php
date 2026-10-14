@@ -3,6 +3,9 @@
  * MediCycle - Global Application Configuration
  */
 
+// Set application timezone
+date_default_timezone_set('Asia/Kolkata');
+
 // Define application root directory
 if (!defined('APP_ROOT')) {
     define('APP_ROOT', dirname(__DIR__));
