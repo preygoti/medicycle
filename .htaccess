@@ -1,6 +1,5 @@
 # MediCycle Apache Configuration
-Options -Indexes
-Options +FollowSymLinks
+# Note: Options directive is disabled on free hosting to avoid 500 errors
 
 # Set default charset
 AddDefaultCharset UTF-8
