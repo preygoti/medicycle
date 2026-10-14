@@ -236,22 +236,20 @@ function render_handshake_pass_html($code, $requestId = null, $title = 'Handover
     $qrUrl = get_handshake_qr_url($code, $requestId);
     $digits = str_split(str_pad(preg_replace('/[^0-9]/', '', (string)$code), 6, '0'));
     
-    $html = '<div class="handshake-pass-card mb-4">';
-    $html .= '  <div class="handshake-pass-header d-flex flex-wrap justify-content-between align-items-center gap-2">';
-    $html .= '    <div>';
-    $html .= '      <div class="d-flex align-items-center gap-2 mb-1">';
-    $html .= '        <span class="badge bg-white text-teal fw-bold px-2 py-1" style="color:#0f766e;"><i class="fas fa-shield-alt me-1"></i> SECURE COLLECTION PASS</span>';
-    $html .= '        <span class="small text-white opacity-75"><i class="fas fa-check-circle me-1"></i>VERIFIED CLAIM</span>';
-    $html .= '      </div>';
-    $html .= '      <h5 class="fw-bold mb-0 text-white">' . e($title) . '</h5>';
+    $html = '<div class="handshake-pass-card mb-3 text-start">';
+    $html .= '  <div class="handshake-pass-header text-start">';
+    $html .= '    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 position-relative" style="z-index:2;">';
+    $html .= '      <span class="badge bg-white fw-bold px-2.5 py-1 d-inline-flex align-items-center gap-1" style="color:#0f766e; font-size:0.7rem; letter-spacing:0.03em;"><i class="fas fa-shield-alt"></i> SECURE COLLECTION PASS</span>';
+    $html .= '      <span class="badge px-2.5 py-1 d-inline-flex align-items-center gap-1" style="background:rgba(255,255,255,0.18); color:#ffffff; border:1px solid rgba(255,255,255,0.32); font-size:0.7rem;"><i class="fas fa-check-circle"></i> VERIFIED CLAIM</span>';
     $html .= '    </div>';
-    $html .= '    <div class="text-end">';
-    $html .= '      <span class="badge px-2 py-1" style="background:rgba(255,255,255,0.18); color:#ffffff; border:1px solid rgba(255,255,255,0.3);"><i class="fas fa-lock me-1"></i> Confidential Handshake</span>';
+    $html .= '    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 position-relative" style="z-index:2;">';
+    $html .= '      <h5 class="fw-bold mb-0 text-white text-start" style="font-size:1.08rem;">' . e($title) . '</h5>';
+    $html .= '      <span class="small text-white opacity-85 d-inline-flex align-items-center gap-1" style="font-size:0.74rem;"><i class="fas fa-lock"></i> Confidential Handshake</span>';
     $html .= '    </div>';
     $html .= '  </div>';
 
     $html .= '  <div class="p-3 p-md-4 bg-white">';
-    $html .= '    <div class="row g-3 g-md-4 align-items-center">';
+    $html .= '    <div class="row g-3 align-items-center">';
     $html .= '      <div class="col-12 col-sm-4 text-center border-bottom border-sm-bottom-0 border-sm-end pb-3 pb-sm-0">';
     $html .= '        <div class="p-2 rounded-3 bg-light border d-inline-block shadow-2xs">';
     $html .= '          <img src="' . e($qrUrl) . '" alt="Handshake QR" class="img-fluid rounded" style="width:115px; height:115px; max-width:100%;">';
@@ -259,17 +257,17 @@ function render_handshake_pass_html($code, $requestId = null, $title = 'Handover
     $html .= '        <div class="text-muted text-uppercase fw-bold mt-2" style="font-size:0.68rem; letter-spacing:0.06em;"><i class="fas fa-qrcode me-1 text-teal"></i>Scan at Handover</div>';
     $html .= '      </div>';
     
-    $html .= '      <div class="col-12 col-sm-8 text-center text-sm-start">';
-    $html .= '        <div class="small text-muted text-uppercase fw-bold mb-1" style="letter-spacing:0.05em;">Your 6-Digit Handshake PIN</div>';
-    $html .= '        <div class="handshake-digits-row justify-content-center justify-content-sm-start my-2">';
+    $html .= '      <div class="col-12 col-sm-8 text-center">';
+    $html .= '        <div class="small text-muted text-uppercase fw-bold mb-2" style="letter-spacing:0.06em; font-size:0.74rem;">Your 6-Digit Handshake PIN</div>';
+    $html .= '        <div class="handshake-digits-row justify-content-center my-2">';
     foreach ($digits as $d) {
         $html .= '      <div class="handshake-digit-tile">' . e($d) . '</div>';
     }
     $html .= '        </div>';
-    $html .= '        <p class="text-muted small mb-3" style="font-size:0.82rem;">Present this QR code or 6-digit PIN to the supplying donor upon physical collection. The donor will scan or enter it to verify and release supplies.</p>';
-    $html .= '        <div class="d-flex flex-wrap justify-content-center justify-content-sm-start gap-2">';
-    $html .= '          <button type="button" class="btn btn-sm btn-outline-teal rounded-pill px-3" onclick="navigator.clipboard.writeText(\'' . e($code) . '\'); alert(\'Handshake PIN ' . e($code) . ' copied to clipboard!\');"><i class="fas fa-copy me-1"></i> Copy PIN</button>';
-    $html .= '          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="window.print();"><i class="fas fa-print me-1"></i> Print Pass</button>';
+    $html .= '        <p class="text-muted small mb-3 mx-auto" style="font-size:0.79rem; max-width: 310px; line-height:1.4;">Present this QR code or 6-digit PIN to the supplying donor upon physical collection to verify and release supplies.</p>';
+    $html .= '        <div class="d-flex flex-wrap justify-content-center gap-2">';
+    $html .= '          <button type="button" class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold" style="font-size:0.76rem;" onclick="navigator.clipboard.writeText(\'' . e($code) . '\'); this.innerHTML=\'<i class=\\\'fas fa-check me-1\\\'></i> Copied!\'; setTimeout(() => { this.innerHTML=\'<i class=\\\'fas fa-copy me-1\\\'></i> Copy PIN\'; }, 1800);"><i class="fas fa-copy me-1"></i> Copy PIN</button>';
+    $html .= '          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold" style="font-size:0.76rem;" onclick="window.print();"><i class="fas fa-print me-1"></i> Print Pass</button>';
     $html .= '        </div>';
     $html .= '      </div>';
     $html .= '    </div>';

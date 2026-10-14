@@ -1,8 +1,8 @@
 <?php
 /**
  * MediCycle - Real-Time Status & Event Poller API
- * Lightweight JSON endpoint queried via JS to detect status transitions (Pending -> Approved, etc.)
- * Returns unread notifications, pending count, and the latest request state fingerprint.
+ * Lightweight JSON endpoint queried via JS to detect any state transitions across
+ * Supplies, Requests, Handovers, Requirements, Deliveries, and Notifications.
  */
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/auth.php';
@@ -10,17 +10,41 @@ require_once __DIR__ . '/../includes/auth.php';
 header('Content-Type: application/json');
 header('Cache-Control: no-cache, no-store, must-revalidate');
 
-if (!is_logged_in()) {
-    echo json_encode(['logged_in' => false]);
-    exit;
+$isLoggedIn = is_logged_in();
+$currentUser = $isLoggedIn ? current_user() : null;
+$userId = $currentUser ? (int)$currentUser['id'] : 0;
+$role = $currentUser['role'] ?? 'guest';
+
+// Release PHP session lock immediately so concurrent requests/tabs never block
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
 }
 
-$currentUser = current_user();
-$userId = (int)$currentUser['id'];
-$role = $currentUser['role'];
-
 try {
-    // 1. Unread notifications & recent notifications
+    // 1. Global Operational State Digest (keeps Supplier, NGO, Courier & Admin 100% synchronized)
+    $suppliesDigest = $pdo->query("SELECT id, status, listing_type, quantity, expiry_date FROM medical_supplies ORDER BY id DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+    $requestsDigest = $pdo->query("SELECT id, supply_id, requester_id, requested_quantity, status, handover_code, supplier_remarks, requested_at, approved_at, completed_at FROM requests ORDER BY id DESC LIMIT 100")->fetchAll(PDO::FETCH_ASSOC);
+    $reqsDigest     = $pdo->query("SELECT id, organization_id, required_quantity, urgency, status FROM requirements ORDER BY id DESC LIMIT 60")->fetchAll(PDO::FETCH_ASSOC);
+    $delivDigest    = $pdo->query("SELECT id, request_id, pickup_status, delivery_status, delivered_at FROM deliveries ORDER BY id DESC LIMIT 60")->fetchAll(PDO::FETCH_ASSOC);
+
+    $globalFingerprint = md5(json_encode([
+        's' => $suppliesDigest,
+        'r' => $requestsDigest,
+        'q' => $reqsDigest,
+        'd' => $delivDigest
+    ]));
+
+    if (!$isLoggedIn) {
+        echo json_encode([
+            'logged_in' => false,
+            'fingerprint' => $globalFingerprint,
+            'global_fingerprint' => $globalFingerprint,
+            'timestamp' => time()
+        ]);
+        exit;
+    }
+
+    // 2. User-specific Unread Notifications & Recent Alerts
     $countStmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
     $countStmt->execute([$userId]);
     $unreadCount = (int)$countStmt->fetchColumn();
@@ -33,79 +57,31 @@ try {
     $recentNotifs = $nStmt->fetchAll(PDO::FETCH_ASSOC);
     $latestNotifId = !empty($recentNotifs) ? (int)$recentNotifs[0]['id'] : 0;
 
-    // 2. Gather role-specific operational state data
-    $requests = [];
-    $extraData = [];
+    // 3. Pending count for badge display
     $pendingCount = 0;
-
-    if ($role === 'ngo') {
-        // Track requests made by this NGO
-        $rStmt = $pdo->prepare("SELECT id, status, handover_code, approved_at, completed_at, updated_at 
-                               FROM requests 
-                               WHERE requester_id = ? 
-                               ORDER BY id DESC LIMIT 30");
-        $rStmt->execute([$userId]);
-        $requests = $rStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Track requirement changes
-        $reqStmt = $pdo->prepare("SELECT COUNT(*), MAX(id) FROM requirements WHERE organization_id = (SELECT id FROM organizations WHERE user_id = ? LIMIT 1)");
-        $reqStmt->execute([$userId]);
-        $extraData['requirements'] = $reqStmt->fetch(PDO::FETCH_NUM);
-
-        // Count pending
-        foreach ($requests as $r) {
-            if ($r['status'] === 'Pending') $pendingCount++;
+    foreach ($requestsDigest as $r) {
+        if ($r['status'] === 'Pending') {
+            if ($role === 'ngo' && (int)$r['requester_id'] === $userId) {
+                $pendingCount++;
+            } elseif ($role === 'supplier' || $role === 'admin') {
+                $pendingCount++;
+            }
         }
-
-    } elseif ($role === 'supplier') {
-        // Track requests on this supplier's medical supplies
-        $rStmt = $pdo->prepare("SELECT r.id, r.status, r.approved_at, r.completed_at, r.updated_at 
-                               FROM requests r 
-                               JOIN medical_supplies ms ON r.supply_id = ms.id 
-                               WHERE ms.supplier_id = ? 
-                               ORDER BY r.id DESC LIMIT 30");
-        $rStmt->execute([$userId]);
-        $requests = $rStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Track medical supplies inventory changes
-        $sStmt = $pdo->prepare("SELECT COUNT(*), MAX(updated_at), SUM(quantity) FROM medical_supplies WHERE supplier_id = ?");
-        $sStmt->execute([$userId]);
-        $extraData['supplies'] = $sStmt->fetch(PDO::FETCH_NUM);
-
-        // Count pending
-        foreach ($requests as $r) {
-            if ($r['status'] === 'Pending') $pendingCount++;
-        }
-
-    } elseif ($role === 'admin') {
-        $rStmt = $pdo->query("SELECT id, status, updated_at FROM requests ORDER BY id DESC LIMIT 30");
-        $requests = $rStmt->fetchAll(PDO::FETCH_ASSOC);
-        $extraData['users'] = $pdo->query("SELECT COUNT(*) FROM users")->fetch(PDO::FETCH_NUM);
-
-    } else { // delivery partner
-        $rStmt = $pdo->prepare("SELECT r.id, r.status, d.delivery_status, d.pickup_status, d.updated_at 
-                               FROM requests r 
-                               JOIN deliveries d ON r.id = d.request_id 
-                               WHERE d.delivery_partner_id = ? 
-                               ORDER BY r.id DESC LIMIT 30");
-        $rStmt->execute([$userId]);
-        $requests = $rStmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // 3. Compute unique state fingerprint
-    $fingerprintData = [
-        'req' => $requests,
-        'extra' => $extraData,
+    // 4. Combined State Fingerprint (triggers instant UI update on any supply/request/handover/notification change)
+    $stateHash = md5(json_encode([
+        'global' => $globalFingerprint,
         'notif_unread' => $unreadCount,
         'notif_max' => $latestNotifId
-    ];
-    $stateHash = md5(json_encode($fingerprintData));
+    ]));
 
     echo json_encode([
         'logged_in' => true,
         'user_id' => $userId,
         'role' => $role,
         'fingerprint' => $stateHash,
+        'global_fingerprint' => $globalFingerprint,
         'unread_count' => $unreadCount,
         'latest_notif_id' => $latestNotifId,
         'recent_notifications' => $recentNotifs,
@@ -116,7 +92,8 @@ try {
 } catch (Exception $e) {
     error_log("poll_status error: " . $e->getMessage());
     echo json_encode([
-        'logged_in' => true,
+        'logged_in' => $isLoggedIn,
         'error' => $e->getMessage()
     ]);
 }
+

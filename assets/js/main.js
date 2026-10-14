@@ -336,18 +336,72 @@ document.addEventListener('DOMContentLoaded', function () {
         }, { passive: true });
     })();
 
-    // 7. Real-Time Auto-Refresh Poller Engine (Fast Status Sync without Manual F5)
+    // 7. Real-Time Auto-Refresh Poller Engine (Instant Cross-Side Synchronization without Manual Refresh)
     (function initRealtimePoller() {
         if (!document.querySelector('.app-container') && !document.querySelector('.dashboard-card')) {
             return;
         }
 
         let lastFingerprint = null;
+        let lastGlobalFingerprint = null;
         let lastNotifIds = new Set();
         let isInitialLoad = true;
         let pendingRefresh = false;
         let isRefreshing = false;
-        const POLL_INTERVAL = 2500; // 2.5 seconds for instant reactive updates
+        let lastKeystrokeTime = 0;
+        const POLL_INTERVAL = 1200; // 1.2 seconds for near-instant synchronization
+
+        // Track actual typing activity so focused inputs in background windows never block live updates
+        document.addEventListener('keydown', function (e) {
+            if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+                lastKeystrokeTime = Date.now();
+            }
+        }, true);
+
+        document.addEventListener('input', function (e) {
+            if (e.target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+                lastKeystrokeTime = Date.now();
+            }
+        }, true);
+
+        // Cross-tab / Cross-window instant BroadcastChannel + localStorage event bridge
+        let syncChannel = null;
+        try {
+            if ('BroadcastChannel' in window) {
+                syncChannel = new BroadcastChannel('medicycle_live_sync');
+                syncChannel.onmessage = function (ev) {
+                    if (ev.data && ev.data.type === 'STATE_UPDATED') {
+                        pollStatus(true);
+                    }
+                };
+            }
+        } catch (e) {}
+
+        window.addEventListener('storage', function (ev) {
+            if (ev.key === 'medicycle_sync_ping') {
+                pollStatus(true);
+            }
+        });
+
+        function broadcastStateChange() {
+            try {
+                if (syncChannel) {
+                    syncChannel.postMessage({ type: 'STATE_UPDATED', ts: Date.now() });
+                }
+                localStorage.setItem('medicycle_sync_ping', String(Date.now()));
+            } catch (e) {}
+        }
+
+        // If this page load just displayed a flash alert (meaning an action was just submitted), ping all other tabs immediately
+        if (document.querySelector('.alert-dismissible')) {
+            setTimeout(broadcastStateChange, 80);
+        }
+
+        // Also ping when any form is submitted
+        document.addEventListener('submit', function () {
+            setTimeout(broadcastStateChange, 250);
+            setTimeout(broadcastStateChange, 800);
+        }, true);
 
         // Web Audio chime for live incoming updates
         function playSoftChime() {
@@ -378,7 +432,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 pill.style.cssText = 'position:fixed; bottom:22px; right:25px; z-index:99998; background:#0f766e; color:#ffffff; font-size:0.75rem; font-weight:600; padding:6px 14px; border-radius:50px; box-shadow:0 4px 15px rgba(15,118,110,0.3); display:flex; align-items:center; gap:6px; opacity:0; transition:all 0.3s ease; pointer-events:none;';
                 document.body.appendChild(pill);
             }
-            pill.innerHTML = '<i class="fas fa-arrows-rotate fa-spin" style="font-size:0.7rem;"></i> ' + (text || 'Live Updated');
+            pill.innerHTML = '<i class="fas fa-arrows-rotate fa-spin" style="font-size:0.7rem;"></i> ' + (text || 'Live Synchronized');
             pill.style.opacity = '1';
             pill.style.transform = 'translateY(0)';
             setTimeout(function() {
@@ -430,8 +484,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }, 6500);
         }
 
-        // Live update navbar notification badge and dropdown
-        function updateNavbarNotifications(unreadCount, recentNotifs) {
+        // Live update navbar notification badge
+        function updateNavbarNotifications(unreadCount) {
             const bellBtn = document.getElementById('notifDropdown');
             if (!bellBtn) return;
 
@@ -457,21 +511,32 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Seamless background DOM content refresh
-        async function refreshPageContent(reason) {
+        async function refreshPageContent() {
             if (isRefreshing) return;
 
-            const hasOpenModal = !!document.querySelector('.modal.show');
-            const isUserTyping = !!(document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName));
+            // Check if user is actively typing within the last 3 seconds
+            const isActivelyTyping = (Date.now() - lastKeystrokeTime < 3000) &&
+                                     document.hasFocus() &&
+                                     document.activeElement &&
+                                     ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
+                                     !document.activeElement.classList.contains('otp-pin-input');
 
-            if (hasOpenModal || isUserTyping) {
+            // Check if a form modal (like Accept/Reject/Add/Barcode) is open
+            const openModal = document.querySelector('.modal.show');
+            const isFormModalOpen = !!(openModal && openModal.querySelector('form'));
+
+            if (isActivelyTyping || isFormModalOpen) {
                 pendingRefresh = true;
+                setTimeout(function() {
+                    if (pendingRefresh) refreshPageContent();
+                }, 1500);
                 return;
             }
 
             isRefreshing = true;
             try {
-                const baseUrl = window.location.href;
-                const res = await fetch(baseUrl, {
+                const fetchUrl = window.location.href;
+                const res = await fetch(fetchUrl, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     cache: 'no-store'
                 });
@@ -489,15 +554,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 const newContent = newDoc.querySelector('.app-content');
 
                 if (currentContent && newContent) {
+                    // If a read-only pass modal was open (e.g. qrModal / tablePassModal), close it cleanly before swapping DOM
+                    if (openModal && !isFormModalOpen) {
+                        try {
+                            const bsModal = bootstrap.Modal.getInstance(openModal);
+                            if (bsModal) bsModal.hide();
+                        } catch (e) {}
+                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.removeProperty('overflow');
+                        document.body.style.removeProperty('padding-right');
+                    }
+
                     const scrollY = window.scrollY;
                     currentContent.innerHTML = newContent.innerHTML;
+
+                    // Also sync sidebar if present
+                    const currentSidebar = document.querySelector('.app-sidebar');
+                    const newSidebar = newDoc.querySelector('.app-sidebar');
+                    if (currentSidebar && newSidebar) {
+                        currentSidebar.innerHTML = newSidebar.innerHTML;
+                    }
+
+                    // Also sync navbar notification dropdown items if present
+                    const currentNotifBtn = document.getElementById('notifDropdown');
+                    const newNotifBtn = newDoc.getElementById('notifDropdown');
+                    if (currentNotifBtn && newNotifBtn && currentNotifBtn.parentElement && newNotifBtn.parentElement) {
+                        const isDropdownOpen = currentNotifBtn.classList.contains('show');
+                        if (!isDropdownOpen) {
+                            currentNotifBtn.parentElement.innerHTML = newNotifBtn.parentElement.innerHTML;
+                        }
+                    }
+
                     window.scrollTo(0, scrollY);
 
                     // Re-bind Bootstrap tooltips
                     const tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
                     tooltips.map(function (el) { return new bootstrap.Tooltip(el); });
 
-                    showSyncPill('Updated Live');
+                    // Re-bind verification terminal PIN inputs & QR scanner if on verify-handover page
+                    if (typeof window.initVerifyHandoverTerminal === 'function') {
+                        window.initVerifyHandoverTerminal();
+                    }
+
+                    showSyncPill('Live Synchronized');
                 } else {
                     window.location.reload();
                 }
@@ -509,75 +609,70 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Listen for modal close and input blur to execute pending refreshes
+        // Listen for modal close to execute any pending refresh immediately
         document.addEventListener('hidden.bs.modal', function () {
             if (pendingRefresh) {
-                setTimeout(function() { refreshPageContent('Modal closed'); }, 200);
+                setTimeout(function() { refreshPageContent(); }, 150);
             }
         });
-
-        document.addEventListener('blur', function (e) {
-            if (pendingRefresh && e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
-                setTimeout(function () {
-                    const stillTyping = document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
-                    const modalOpen = !!document.querySelector('.modal.show');
-                    if (!stillTyping && !modalOpen) {
-                        refreshPageContent('Finished typing');
-                    }
-                }, 350);
-            }
-        }, true);
 
         // Core Polling Loop
         async function pollStatus() {
             try {
                 const apiBase = window.BASE_URL ? window.BASE_URL.replace(/\/$/, '') : '';
-                const res = await fetch(apiBase + '/api/poll_status.php', {
+                const res = await fetch(apiBase + '/api/poll_status.php?_t=' + Date.now(), {
                     headers: { 'Accept': 'application/json' },
                     cache: 'no-store'
                 });
 
                 if (!res.ok) return;
                 const data = await res.json();
-                if (!data || !data.logged_in) return;
+                if (!data) return;
 
                 // 1. Process notifications & update bell
-                updateNavbarNotifications(data.unread_count || 0, data.recent_notifications || []);
+                if (data.logged_in) {
+                    updateNavbarNotifications(data.unread_count || 0);
 
-                if (data.recent_notifications && data.recent_notifications.length > 0) {
-                    data.recent_notifications.forEach(function (n) {
-                        if (!lastNotifIds.has(n.id)) {
-                            lastNotifIds.add(n.id);
-                            if (!isInitialLoad && !n.is_read) {
-                                const link = n.link ? (apiBase + '/' + n.link.replace(/^\//, '')) : null;
-                                showLiveToast(n.title, n.message, link);
+                    if (data.recent_notifications && data.recent_notifications.length > 0) {
+                        data.recent_notifications.forEach(function (n) {
+                            if (!lastNotifIds.has(n.id)) {
+                                lastNotifIds.add(n.id);
+                                if (!isInitialLoad && !n.is_read) {
+                                    const link = n.link ? (apiBase + '/' + n.link.replace(/^\//, '')) : null;
+                                    showLiveToast(n.title, n.message, link);
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
 
-                // 2. Check fingerprint change (instant live refresh)
-                if (data.fingerprint) {
-                    if (lastFingerprint !== null && lastFingerprint !== data.fingerprint) {
-                        lastFingerprint = data.fingerprint;
-                        if (!isInitialLoad) {
-                            refreshPageContent('State transition detected');
-                        }
-                    } else {
-                        lastFingerprint = data.fingerprint;
+                // 2. Check fingerprint or global_fingerprint change (instant live refresh across both sides)
+                const currentFp = data.fingerprint || data.global_fingerprint;
+                const currentGlobalFp = data.global_fingerprint || currentFp;
+
+                if (currentFp) {
+                    const fpChanged = (lastFingerprint !== null && lastFingerprint !== currentFp) ||
+                                      (lastGlobalFingerprint !== null && lastGlobalFingerprint !== currentGlobalFp);
+
+                    lastFingerprint = currentFp;
+                    lastGlobalFingerprint = currentGlobalFp;
+
+                    if (fpChanged && !isInitialLoad) {
+                        refreshPageContent();
                     }
                 }
 
                 isInitialLoad = false;
             } catch (err) {
-                // Silently ignore network interruptions
+                // Silently ignore transient network interruptions
             }
         }
 
-        // Run immediately on page load, then poll every 2.5 seconds
+        // Run immediately on page load, then poll every 1.2 seconds
         pollStatus();
         setInterval(pollStatus, POLL_INTERVAL);
     })();
 });
+
 
 

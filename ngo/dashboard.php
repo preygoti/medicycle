@@ -61,7 +61,7 @@ try {
     }
 
     // 4. Recent Requests
-    $stmt = $pdo->prepare("SELECT r.*, s.supply_name, s.unit, d.tracking_number, d.delivery_status 
+    $stmt = $pdo->prepare("SELECT r.*, s.supply_name, s.unit, d.pickup_status, d.delivery_status 
                            FROM requests r 
                            JOIN medical_supplies s ON r.supply_id = s.id 
                            LEFT JOIN deliveries d ON r.id = d.request_id 
@@ -143,12 +143,12 @@ include __DIR__ . '/../includes/navbar.php';
             </div>
         </div>
 
-        <!-- SMART AI MODULE: Recommended Matches Highlight -->
+        <!-- SMART MATCH MODULE: Recommended Matches Highlight -->
         <?php if (!empty($smartMatches)): ?>
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <div>
-                        <span class="match-badge me-2"><i class="fas fa-brain"></i> AI Matchmaking</span>
+                        <span class="match-badge me-2"><i class="fas fa-sliders"></i> Rule-Based Match</span>
                         <span class="fw-bold text-dark">Recommended Supplies For Your Clinic</span>
                     </div>
                     <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="small text-decoration-none">Search All</a>
@@ -196,41 +196,42 @@ include __DIR__ . '/../includes/navbar.php';
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Item Requested</th>
+                                <th class="ps-4">Item Requested</th>
                                 <th>Quantity</th>
                                 <th>Requested Date</th>
                                 <th>Status</th>
-                                <th>Tracking #</th>
-                                <th class="text-end">Action</th>
+                                <th>Handover Status</th>
+                                <th class="text-start pe-4">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($recentRequests)): ?>
                                 <?php foreach ($recentRequests as $r): ?>
                                     <tr>
-                                        <td>
+                                        <td class="ps-4">
                                             <span class="fw-bold text-dark d-block"><?php echo e($r['supply_name']); ?></span>
                                             <span class="text-muted small"><?php echo e($r['purpose'] ?? 'Clinical outreach'); ?></span>
                                         </td>
-                                        <td class="fw-semibold"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></td>
-                                        <td class="small text-muted"><?php echo format_date($r['requested_at']); ?></td>
-                                        <td><?php echo status_badge($r['status']); ?></td>
-                                        <td>
-                                            <?php if (!empty($r['tracking_number'])): ?>
-                                                <code><?php echo e($r['tracking_number']); ?></code>
-                                                <div class="small text-muted" style="font-size:0.72rem;"><?php echo e($r['delivery_status']); ?></div>
+                                        <td class="fw-semibold text-nowrap"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></td>
+                                        <td class="small text-muted text-nowrap"><?php echo format_date($r['requested_at']); ?></td>
+                                        <td class="text-nowrap"><?php echo status_badge($r['status']); ?></td>
+                                        <td class="text-nowrap">
+                                            <?php if ($r['status'] === 'Completed'): ?>
+                                                <span class="text-success small fw-semibold"><i class="fas fa-check-double me-1"></i>Verified & Received</span>
+                                            <?php elseif (!empty($r['handover_code'])): ?>
+                                                <span class="badge bg-dark font-monospace"><i class="fas fa-qrcode text-warning me-1"></i><?php echo e($r['handover_code']); ?></span>
                                             <?php else: ?>
-                                                <span class="text-muted small">Not dispatched</span>
+                                                <span class="text-muted small">Awaiting approval</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end">
-                                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                        <td class="text-start pe-4">
+                                            <div class="d-inline-flex align-items-center justify-content-start gap-2">
                                                 <?php if (!empty($r['handover_code'])): ?>
-                                                    <a href="<?php echo BASE_URL; ?>/ngo/verify-handover.php?code=<?php echo urlencode($r['handover_code']); ?>" class="btn btn-xs btn-teal text-white py-0 px-2 fw-semibold" style="background:#0f766e; font-size:0.75rem;" title="View Handshake Pass & PIN">
+                                                    <a href="<?php echo BASE_URL; ?>/ngo/verify-handover.php?code=<?php echo urlencode($r['handover_code']); ?>" class="btn btn-xs btn-teal text-white py-0 px-2 fw-semibold" style="background:#0f766e; font-size:0.75rem; white-space: nowrap !important;" title="View Handshake Pass & PIN">
                                                         <i class="fas fa-handshake me-1"></i>Pass
                                                     </a>
                                                 <?php endif; ?>
-                                                <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem;">
+                                                <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem; white-space: nowrap !important;">
                                                     View
                                                 </a>
                                             </div>

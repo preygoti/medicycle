@@ -160,21 +160,21 @@ include __DIR__ . '/../includes/navbar.php';
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Item Details</th>
+                                <th class="ps-4">Item Details</th>
                                 <th>Category</th>
                                 <th>Quantity Available</th>
                                 <th>Condition & Seal</th>
                                 <th>Expiry Date</th>
                                 <th>Priority</th>
                                 <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-start pe-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($supplies)): ?>
                                 <?php foreach ($supplies as $s): ?>
                                     <tr>
-                                        <td>
+                                        <td class="ps-4">
                                             <a href="<?php echo BASE_URL; ?>/supplier/view-supply.php?id=<?php echo $s['id']; ?>" class="fw-bold text-dark text-decoration-none">
                                                 <?php echo e($s['supply_name']); ?>
                                             </a>
@@ -201,8 +201,8 @@ include __DIR__ . '/../includes/navbar.php';
                                             <span class="d-block text-muted small" style="font-size:0.72rem;">Score: <?php echo $s['priority_score']; ?>/100</span>
                                         </td>
                                         <td><?php echo status_badge($s['status']); ?></td>
-                                        <td class="text-end pe-3">
-                                            <div class="d-inline-flex align-items-center gap-2 justify-content-end">
+                                        <td class="text-start pe-4">
+                                            <div class="d-inline-flex align-items-center gap-2 justify-content-start">
                                                 <a href="<?php echo BASE_URL; ?>/supplier/view-supply.php?id=<?php echo $s['id']; ?>" class="btn btn-sm btn-outline-secondary rounded-2 px-2 py-1 shadow-xs" title="View Details">
                                                     <i class="fas fa-eye"></i>
                                                 </a>

@@ -362,7 +362,7 @@ include __DIR__ . '/../includes/navbar.php';
                                     <th>Batch / Lot</th>
                                     <th>Expiration Date</th>
                                     <th>Location</th>
-                                    <th class="text-end pe-4">Action</th>
+                                    <th class="text-start pe-4 text-nowrap">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -382,7 +382,7 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <?php echo e($item['category_name']); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <span class="fw-bold text-dark"><?php echo number_format($item['quantity']); ?></span>
                                             <span class="text-muted small"><?php echo e($item['unit']); ?></span>
                                         </td>
@@ -391,7 +391,7 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <?php echo e($item['batch_number'] ?: 'N/A'); ?>
                                             </span>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <div class="small fw-semibold <?php echo $isExpired ? 'text-danger' : 'text-dark'; ?>">
                                                 <i class="fas <?php echo $isExpired ? 'fa-calendar-xmark' : 'fa-calendar-check'; ?> me-1"></i>
                                                 <?php echo date('d M Y', strtotime($item['expiry_date'])); ?>
@@ -413,19 +413,19 @@ include __DIR__ . '/../includes/navbar.php';
                                         <td>
                                             <span class="text-muted small"><i class="fas fa-location-dot me-1 text-secondary"></i><?php echo e($item['location']); ?></span>
                                         </td>
-                                        <td class="text-end pe-4">
-                                            <div class="d-inline-flex align-items-center gap-2">
+                                        <td class="text-start pe-4 text-nowrap">
+                                            <div class="d-inline-flex align-items-center justify-content-start gap-2 flex-nowrap">
                                                 <?php if ($isExpired): ?>
-                                                    <button type="button" class="btn btn-sm btn-secondary disabled opacity-50 rounded-2" disabled title="Expiration date has passed. Expired items cannot be added to Medical Supply.">
-                                                        <i class="fas fa-ban me-1"></i> Add to Medical Supply
+                                                    <button type="button" class="btn btn-sm btn-secondary disabled opacity-50 rounded-2 text-nowrap d-inline-flex align-items-center gap-1 px-2.5" style="height:32px; font-size:0.78rem; white-space:nowrap !important;" disabled title="Expiration date has passed. Expired items cannot be added to Medical Supply.">
+                                                        <i class="fas fa-ban"></i> <span>Add to Medical Supply</span>
                                                     </button>
                                                 <?php else: ?>
                                                     <form action="<?php echo BASE_URL; ?>/supplier/add-supply.php" method="POST" class="d-inline m-0">
                                                         <?php echo csrf_field(); ?>
                                                         <input type="hidden" name="action" value="add_to_medical_supply">
                                                         <input type="hidden" name="supply_id" value="<?php echo $item['id']; ?>">
-                                                        <button type="submit" class="btn btn-sm btn-teal text-white shadow-xs px-3 rounded-2" style="background:#0f766e;" title="Move this item to Medical Supply">
-                                                            <i class="fas fa-plus-circle me-1"></i> Add to Medical Supply
+                                                        <button type="submit" class="btn btn-sm btn-teal text-white shadow-2xs rounded-2 text-nowrap d-inline-flex align-items-center gap-1 px-3 fw-semibold" style="background:#0f766e; height:32px; font-size:0.78rem; white-space:nowrap !important;" title="Move this item to Medical Supply">
+                                                            <i class="fas fa-plus-circle"></i> <span>Add to Medical Supply</span>
                                                         </button>
                                                     </form>
                                                 <?php endif; ?>
@@ -434,13 +434,13 @@ include __DIR__ . '/../includes/navbar.php';
                                                     <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="delete_item">
                                                     <input type="hidden" name="supply_id" value="<?php echo $item['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2" title="Delete Medical Item">
-                                                        <i class="fas fa-trash"></i>
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 d-inline-flex align-items-center justify-content-center" style="width:32px; height:32px; padding:0;" title="Delete Medical Item">
+                                                        <i class="fas fa-trash-can" style="font-size:0.8rem;"></i>
                                                     </button>
                                                 </form>
                                             </div>
                                             <?php if ($isExpired): ?>
-                                                <div class="text-danger small mt-1" style="font-size:0.73rem;">
+                                                <div class="text-danger small mt-1" style="font-size:0.72rem;">
                                                     <i class="fas fa-circle-exclamation me-1"></i>Item expired (action blocked)
                                                 </div>
                                             <?php endif; ?>

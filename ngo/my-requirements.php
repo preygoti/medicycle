@@ -78,7 +78,7 @@ include __DIR__ . '/../includes/navbar.php';
                                 <th>Required By</th>
                                 <th>Smart Matches</th>
                                 <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-start pe-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -119,16 +119,16 @@ include __DIR__ . '/../includes/navbar.php';
                                             <?php endif; ?>
                                         </td>
                                         <td><?php echo status_badge($r['status']); ?></td>
-                                        <td class="text-end">
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="<?php echo BASE_URL; ?>/ngo/edit-requirement.php?id=<?php echo $r['id']; ?>" class="btn btn-outline-primary" title="Edit Requirement">
+                                        <td class="text-start pe-4">
+                                            <div class="d-inline-flex align-items-center justify-content-start gap-2">
+                                                <a href="<?php echo BASE_URL; ?>/ngo/edit-requirement.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-primary rounded-2 px-2 py-1 shadow-xs" title="Edit Requirement">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="<?php echo BASE_URL; ?>/ngo/my-requirements.php" method="POST" class="d-inline" onsubmit="return confirm('Delete this requirement post?');">
+                                                <form action="<?php echo BASE_URL; ?>/ngo/my-requirements.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this requirement post?');">
                                                     <?php echo csrf_field(); ?>
                                                     <input type="hidden" name="action" value="delete">
                                                     <input type="hidden" name="requirement_id" value="<?php echo $r['id']; ?>">
-                                                    <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 shadow-xs" title="Delete">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>

@@ -258,20 +258,33 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
                             <?php echo csrf_field(); ?>
                             <input type="hidden" name="action" value="verify_and_complete">
                             
-                            <label class="form-label text-muted text-uppercase mb-2 text-center d-block fw-semibold" style="letter-spacing:0.05em; font-size:0.75rem;">
-                                6-Digit Verification PIN
-                            </label>
+                            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                                <label class="form-label text-muted text-uppercase mb-0 fw-semibold" style="letter-spacing:0.05em; font-size:0.75rem;">
+                                    6-Digit Verification PIN
+                                </label>
+                                <button type="button" id="btn-clear-pin" class="btn btn-link btn-sm p-0 text-decoration-none text-secondary fw-semibold" style="font-size:0.73rem;">
+                                    <i class="fas fa-rotate-left me-1"></i>Clear
+                                </button>
+                            </div>
                             
                             <!-- 6 Digit PIN Boxes -->
                             <div class="d-flex justify-content-center gap-2 mb-2">
                                 <?php for ($i = 0; $i < 6; $i++): ?>
                                     <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                                           id="pin<?php echo $i + 1; ?>"
                                            class="form-control text-center fw-bold otp-pin-input <?php echo $isWrongCode ? 'is-invalid' : ''; ?>" 
-                                           data-index="<?php echo $i; ?>" autocomplete="off">
+                                           data-index="<?php echo $i; ?>" autocomplete="off"
+                                           <?php echo ($isWrongCode && $i === 0) ? 'autofocus' : ''; ?>>
                                 <?php endfor; ?>
                             </div>
 
-                            <input type="hidden" name="handover_code" id="hidden_handover_code" value="<?php echo e($searchedCode); ?>">
+                            <?php if ($isWrongCode): ?>
+                                <div class="text-danger text-center fw-semibold mb-2" style="font-size:0.76rem;">
+                                    <i class="fas fa-circle-exclamation me-1"></i>Invalid PIN cleared — type the correct 6-digit code
+                                </div>
+                            <?php endif; ?>
+
+                            <input type="hidden" name="handover_code" id="hidden_handover_code" value="">
 
                             <p class="text-muted text-center mb-3" style="font-size:0.78rem;">
                                 Enter the 6 numbers shown on the recipient's MediCycle Handover Pass
@@ -295,174 +308,6 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-        <!-- Consignment Details Card (Shown when code is searched/scanned/verified) -->
-        <?php if (!empty($lookedUpConsignment)): ?>
-            <?php 
-                $c = $lookedUpConsignment; 
-                $isReady = in_array($c['status'], ['Approved', 'Ready for Handover', 'In Transit', 'Accepted', 'Collected']);
-                $isCompleted = ($c['status'] === 'Completed');
-            ?>
-            <div class="card border-0 shadow rounded-4 mb-4 overflow-hidden" id="consignment-result-card" style="border-top: 5px solid <?php echo $isCompleted ? '#10b981' : '#0f766e'; ?> !important;">
-                <div class="card-header bg-white py-3 px-4 d-flex flex-wrap justify-content-between align-items-center border-bottom">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-teal-subtle text-teal border px-2 py-1" style="background:#ccfbf1; color:#0f766e;">
-                            <i class="fas fa-box-medical me-1"></i>Medical Supply
-                        </span>
-                        <h5 class="fw-bold text-dark mb-0"><?php echo e($c['supply_name']); ?></h5>
-                    </div>
-                    <div>
-                        <?php if ($isCompleted): ?>
-                            <span class="badge bg-success px-3 py-2 fs-6"><i class="fas fa-check-double me-1"></i> Delivery Completed</span>
-                        <?php elseif ($isReady): ?>
-                            <span class="badge bg-warning text-dark px-3 py-2 fs-6"><i class="fas fa-clock me-1"></i> Ready for Handover</span>
-                        <?php else: ?>
-                            <span class="badge bg-secondary px-3 py-2 fs-6"><?php echo e($c['status']); ?></span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="card-body p-4">
-                    <div class="row g-4">
-                        <!-- Left Details: Supply Specs -->
-                        <div class="col-md-6 col-lg-4">
-                            <h6 class="fw-bold text-muted text-uppercase small mb-3">Supply Specification</h6>
-                            <div class="bg-light p-3 rounded-3 mb-3 border">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted small">Category:</span>
-                                    <span class="fw-semibold small"><?php echo e($c['category_name'] ?? 'Consumable'); ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted small">Handover Volume:</span>
-                                    <span class="fw-bold text-teal"><?php echo number_format($c['requested_quantity']) . ' ' . e($c['unit']); ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted small">Expiry Date:</span>
-                                    <span class="fw-semibold text-danger small"><?php echo format_date($c['expiry_date']); ?></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2">
-                                    <span class="text-muted small">Condition:</span>
-                                    <span class="badge bg-white text-dark border"><?php echo e($c['condition_status']); ?></span>
-                                </div>
-                                <?php if (!empty($c['batch_number'])): ?>
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted small">Batch / Lot #:</span>
-                                        <span class="font-monospace small"><?php echo e($c['batch_number']); ?></span>
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="p-3 rounded-3 text-center border" style="background:#f0fdfa;">
-                                <div class="small text-muted text-uppercase fw-bold" style="font-size:0.75rem;">Verified Handshake Code</div>
-                                <div class="fs-3 fw-bold font-monospace text-teal my-1" style="letter-spacing:0.12em;">
-                                    <?php echo e($c['handover_code']); ?>
-                                </div>
-                                <div class="d-flex justify-content-center gap-2 mt-2">
-                                    <button type="button" class="btn btn-xs btn-outline-teal py-1 px-2 font-monospace" data-bs-toggle="modal" data-bs-target="#resultPassModal<?php echo $c['id']; ?>">
-                                        <i class="fas fa-qrcode me-1"></i> View Full Pass
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Result Pass Modal -->
-                        <div class="modal fade" id="resultPassModal<?php echo $c['id']; ?>" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                <div class="modal-content border-0 shadow-lg rounded-4">
-                                    <div class="modal-header border-bottom py-3">
-                                        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                                                <i class="fas fa-handshake"></i>
-                                            </span>
-                                            Handshake Verification Pass
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body p-4 text-center">
-                                        <?php echo render_handshake_pass_html($c['handover_code'], $c['id'], 'Handover Collection Pass'); ?>
-                                    </div>
-                                    <div class="modal-footer border-top py-2">
-                                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Middle Details: Parties Involved -->
-                        <div class="col-md-6 col-lg-5">
-                            <h6 class="fw-bold text-muted text-uppercase small mb-3">Donor & Recipient Parties</h6>
-                            
-                            <!-- Donor / Supplier -->
-                            <div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 mb-3 border">
-                                <div class="rounded-circle p-2 bg-primary-subtle text-primary mt-1" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="fas fa-hospital"></i>
-                                </div>
-                                <div>
-                                    <div class="small text-muted text-uppercase fw-bold" style="font-size:0.7rem;">Donor / Supplier</div>
-                                    <div class="fw-bold text-dark"><?php echo e($c['supplier_org'] ?: $c['supplier_name']); ?></div>
-                                    <div class="small text-muted"><?php echo e($c['supplier_city'] ?? ''); ?> &bull; Contact: <?php echo e($c['supplier_name']); ?> (<?php echo e($c['supplier_phone']); ?>)</div>
-                                </div>
-                            </div>
-
-                            <!-- Recipient / NGO -->
-                            <div class="d-flex align-items-start gap-3 p-3 bg-light rounded-3 mb-3 border">
-                                <div class="rounded-circle p-2 bg-success-subtle text-success mt-1" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center;">
-                                    <i class="fas fa-clinic-medical"></i>
-                                </div>
-                                <div>
-                                    <div class="small text-muted text-uppercase fw-bold" style="font-size:0.7rem;">Recipient Clinic / NGO</div>
-                                    <div class="fw-bold text-dark"><?php echo e($c['requester_org'] ?: $c['requester_name']); ?></div>
-                                    <div class="small text-muted"><?php echo e($c['requester_city'] ?? ''); ?> &bull; Contact: <?php echo e($c['requester_name']); ?> (<?php echo e($c['requester_phone']); ?>)</div>
-                                </div>
-                            </div>
-
-                            <?php if (!empty($c['courier_name'])): ?>
-                                <div class="small text-muted px-2">
-                                    <i class="fas fa-truck text-secondary me-1"></i> Assigned Courier: <strong><?php echo e($c['courier_name']); ?></strong> (<?php echo e($c['courier_phone']); ?>)
-                                </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <!-- Right Details: Action Execution -->
-                        <div class="col-lg-3 d-flex flex-column justify-content-center text-center">
-                            <?php if ($isNewlyCompleted): ?>
-                                <div class="p-3 bg-success bg-opacity-10 text-success rounded-3 border border-success">
-                                    <i class="fas fa-check-circle fs-2 mb-2 text-success"></i>
-                                    <h6 class="fw-bold mb-1">Delivery Completed</h6>
-                                    <p class="text-muted mb-0" style="font-size:0.75rem;">Consignment successfully transferred and closed.</p>
-                                    <div class="text-secondary mt-2 fw-semibold" style="font-size:0.72rem;">Completed: <?php echo format_datetime($c['completed_at']); ?></div>
-                                </div>
-                            <?php elseif ($isAlreadyCompleted): ?>
-                                <div class="p-3 bg-secondary bg-opacity-10 text-secondary rounded-3 border border-secondary">
-                                    <i class="fas fa-ban fs-2 text-danger mb-2"></i>
-                                    <h6 class="fw-bold text-dark mb-1">Code Already Redeemed</h6>
-                                    <p class="text-muted mb-0" style="font-size:0.75rem;">This pass cannot be used a second time.</p>
-                                    <div class="text-dark mt-2 fw-semibold" style="font-size:0.72rem;">Completed On: <?php echo format_datetime($c['completed_at']); ?></div>
-                                </div>
-                            <?php elseif ($isReady): ?>
-                                <div class="p-3 bg-light rounded-3 border text-center">
-                                    <i class="fas fa-handshake fs-2 text-teal mb-2" style="color:#0f766e;"></i>
-                                    <h6 class="fw-bold text-dark mb-1" style="font-size:0.95rem;">Ready for Physical Release</h6>
-                                    <p class="text-muted mb-3" style="font-size:0.75rem;">Confirming will deduct stock and mark consignment delivered.</p>
-                                    
-                                    <form action="" method="POST">
-                                        <?php echo csrf_field(); ?>
-                                        <input type="hidden" name="action" value="verify_and_complete">
-                                        <input type="hidden" name="handover_code" value="<?php echo e($c['handover_code']); ?>">
-                                        <button type="submit" class="btn btn-success w-100 py-2 fw-semibold rounded-3 shadow-2xs" style="font-size:0.875rem;">
-                                            <i class="fas fa-check-circle me-1"></i> Confirm & Complete Delivery
-                                        </button>
-                                    </form>
-                                </div>
-                            <?php else: ?>
-                                <div class="alert alert-warning p-2 small mb-0" style="font-size:0.78rem;">
-                                    Consignment status is <strong><?php echo e($c['status']); ?></strong>. Please ensure the lot is accepted before handover.
-                                </div>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
         <!-- Active Consignments Ready for Handover Table -->
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
@@ -476,27 +321,27 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
                     <table class="table table-hover align-middle mb-0 small">
                         <thead class="table-light">
                             <tr>
-                                <th>Approved Date</th>
+                                <th class="ps-4">Approved Date</th>
                                 <th>Medical Item</th>
                                 <th>Quantity</th>
                                 <th>From (Supplier)</th>
                                 <th>To (Recipient NGO)</th>
                                 <th><?php echo ($role === 'ngo') ? '6-Digit PIN' : 'Recipient Secret PIN'; ?></th>
-                                <th class="text-end">Verification Action</th>
+                                <th class="text-start pe-4 text-nowrap">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($pendingHandovers)): ?>
                                 <?php foreach ($pendingHandovers as $ph): ?>
                                     <tr>
-                                        <td>
+                                        <td class="ps-4 text-nowrap">
                                             <span class="badge bg-light text-dark border"><i class="fas fa-calendar-check text-teal me-1"></i><?php echo format_date($ph['approved_at'] ?? $ph['created_at']); ?></span>
                                         </td>
                                         <td>
                                             <div class="fw-bold text-dark"><?php echo e($ph['supply_name']); ?></div>
                                             <div class="text-muted small">Exp: <?php echo format_date($ph['expiry_date']); ?></div>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <span class="badge bg-light text-dark border"><?php echo number_format($ph['requested_quantity']) . ' ' . e(format_unit($ph['unit'])); ?></span>
                                         </td>
                                         <td>
@@ -507,9 +352,9 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
                                             <div class="fw-semibold text-dark"><?php echo e($ph['requester_org'] ?: $ph['requester_name']); ?></div>
                                             <div class="text-muted small"><?php echo e($ph['requester_city'] ?? ''); ?></div>
                                         </td>
-                                        <td>
+                                        <td class="text-nowrap">
                                             <?php if ($role === 'ngo'): ?>
-                                                <button type="button" class="btn btn-xs btn-outline-dark py-1 px-2 font-monospace shadow-2xs" data-bs-toggle="modal" data-bs-target="#tablePassModal<?php echo $ph['id']; ?>" title="Click to view Pass & QR">
+                                                <button type="button" class="btn btn-xs btn-outline-dark py-1 px-2 font-monospace shadow-2xs text-nowrap" data-bs-toggle="modal" data-bs-target="#tablePassModal<?php echo $ph['id']; ?>" title="Click to view Pass & QR">
                                                     <i class="fas fa-qrcode text-teal me-1"></i><?php echo e($ph['handover_code']); ?>
                                                 </button>
                                             <?php else: ?>
@@ -518,60 +363,18 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
                                                 </span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end">
+                                        <td class="text-start pe-4 text-nowrap">
                                             <?php if ($role === 'ngo'): ?>
-                                                <button type="button" class="btn btn-sm btn-teal text-white py-1 px-3 shadow-2xs" style="background:#0f766e; font-size:0.8rem;" data-bs-toggle="modal" data-bs-target="#tablePassModal<?php echo $ph['id']; ?>">
-                                                    <i class="fas fa-qrcode me-1"></i> Show Pass
+                                                <button type="button" class="btn btn-sm btn-teal text-white py-1 px-3 shadow-2xs text-nowrap d-inline-flex align-items-center gap-1" style="background:#0f766e; font-size:0.78rem; height:32px; white-space:nowrap !important;" data-bs-toggle="modal" data-bs-target="#tablePassModal<?php echo $ph['id']; ?>">
+                                                    <i class="fas fa-qrcode"></i> <span>Show Pass</span>
                                                 </button>
                                             <?php else: ?>
-                                                <button type="button" class="btn btn-sm btn-teal text-white py-1 px-3 shadow-2xs fw-semibold" style="background:#0f766e; font-size:0.8rem;" onclick="document.getElementById('pin1').focus(); window.scrollTo({top: 0, behavior: 'smooth'});">
-                                                    <i class="fas fa-handshake me-1"></i> Enter Recipient PIN
+                                                <button type="button" class="btn btn-sm btn-teal text-white py-1 px-3 shadow-2xs fw-semibold text-nowrap d-inline-flex align-items-center gap-1" style="background:#0f766e; font-size:0.78rem; height:32px; white-space:nowrap !important;" onclick="const p1 = document.getElementById('pin1'); if(p1){ p1.focus(); p1.select(); } window.scrollTo({top: 0, behavior: 'smooth'});">
+                                                    <i class="fas fa-handshake"></i> <span>Enter Recipient PIN</span>
                                                 </button>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
-
-                                    <?php if ($role === 'ngo'): ?>
-                                        <!-- Table Pass Modal (Only for Recipient NGO) -->
-                                        <div class="modal fade" id="tablePassModal<?php echo $ph['id']; ?>" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                                <div class="modal-content border-0 shadow-lg rounded-4">
-                                                    <div class="modal-header border-bottom py-3">
-                                                        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                                                                <i class="fas fa-handshake"></i>
-                                                            </span>
-                                                            Handshake Verification Pass
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body p-4 text-center">
-                                                        <?php echo render_handshake_pass_html($ph['handover_code'], $ph['id'], 'Handover Collection Pass'); ?>
-                                                        <div class="alert alert-light border small text-muted text-start mt-3 mb-0">
-                                                            <i class="fas fa-shield-halved text-teal me-1"></i> Show this QR code or 6-digit PIN to the supplier or courier to authorize collection.
-                                                        </div>
-                                                        <div class="p-3 bg-light rounded-3 text-start small mt-3">
-                                                            <div class="d-flex justify-content-between mb-1">
-                                                                <span class="text-muted">Item:</span>
-                                                                <span class="fw-bold text-dark"><?php echo e($ph['supply_name']); ?></span>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between mb-1">
-                                                                <span class="text-muted">Volume:</span>
-                                                                <span class="fw-bold text-teal"><?php echo number_format($ph['requested_quantity']) . ' ' . e(format_unit($ph['unit'])); ?></span>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between">
-                                                                <span class="text-muted">Recipient Clinic:</span>
-                                                                <span class="fw-semibold text-dark"><?php echo e($ph['requester_org'] ?: $ph['requester_name']); ?> (<?php echo e($ph['requester_city'] ?? ''); ?>)</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer border-top py-2">
-                                                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
@@ -587,7 +390,49 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
 
-
+        <!-- Table Pass Modals for NGO (Placed outside table for clean DOM & live sync) -->
+        <?php if ($role === 'ngo' && !empty($pendingHandovers)): ?>
+            <?php foreach ($pendingHandovers as $ph): ?>
+                <div class="modal fade" id="tablePassModal<?php echo $ph['id']; ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 shadow-lg rounded-4">
+                            <div class="modal-header border-bottom py-3">
+                                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                    <span class="rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="background:#ccfbf1; color:#0f766e; width:36px; height:36px;">
+                                        <i class="fas fa-handshake"></i>
+                                    </span>
+                                    Handshake Verification Pass
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4 text-start">
+                                <?php echo render_handshake_pass_html($ph['handover_code'], $ph['id'], 'Donor: ' . ($ph['supplier_org'] ?: $ph['supplier_name'])); ?>
+                                <div class="alert alert-light border small text-muted text-start mt-3 mb-0 rounded-3">
+                                    <i class="fas fa-shield-halved text-teal me-1"></i> Show this QR code or 6-digit PIN to the supplier or courier to authorize collection.
+                                </div>
+                                <div class="p-3 bg-light rounded-3 border text-start small mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                                        <span class="text-muted">Item:</span>
+                                        <span class="fw-bold text-dark"><?php echo e($ph['supply_name']); ?></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom mt-1">
+                                        <span class="text-muted">Volume:</span>
+                                        <span class="fw-bold text-teal"><?php echo number_format($ph['requested_quantity']) . ' ' . e(format_unit($ph['unit'])); ?></span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mt-1">
+                                        <span class="text-muted">Recipient Clinic:</span>
+                                        <span class="fw-semibold text-dark"><?php echo e($ph['requester_org'] ?: $ph['requester_name']); ?> (<?php echo e($ph['requester_city'] ?? ''); ?>)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top py-2">
+                                <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
 
     </div>
 </div>
@@ -596,56 +441,14 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+window.initVerifyHandoverTerminal = function() {
     const pinInputs = document.querySelectorAll('.otp-pin-input');
     const hiddenCode = document.getElementById('hidden_handover_code');
     const lookupForm = document.getElementById('code-lookup-form');
+    const btnClearPin = document.getElementById('btn-clear-pin');
     let html5QrCode = null;
 
-    // Prepopulate PIN inputs if code was searched
-    if (hiddenCode && hiddenCode.value) {
-        const val = hiddenCode.value.replace(/\D/g, '');
-        for (let i = 0; i < 6; i++) {
-            if (pinInputs[i] && val[i]) {
-                pinInputs[i].value = val[i];
-            }
-        }
-    }
-
-    // Auto-advance and backspace handling for 6-Digit PIN boxes
-    pinInputs.forEach((input, index) => {
-        input.addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            this.classList.remove('is-invalid');
-            if (this.value.length === 1 && index < pinInputs.length - 1) {
-                pinInputs[index + 1].focus();
-            }
-            syncPinToHidden();
-        });
-
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Backspace' && this.value === '' && index > 0) {
-                pinInputs[index - 1].focus();
-            }
-        });
-
-        input.addEventListener('paste', function(e) {
-            e.preventDefault();
-            const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
-            if (pasteData) {
-                for (let i = 0; i < 6; i++) {
-                    if (pinInputs[i] && pasteData[i]) {
-                        pinInputs[i].value = pasteData[i];
-                        pinInputs[i].classList.remove('is-invalid');
-                    }
-                }
-                syncPinToHidden();
-                if (pasteData.length >= 6) {
-                    lookupForm.submit();
-                }
-            }
-        });
-    });
+    if (!pinInputs.length) return;
 
     function syncPinToHidden() {
         let fullPin = '';
@@ -655,6 +458,116 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    function clearAllPins(focusFirst) {
+        pinInputs.forEach(inp => {
+            inp.value = '';
+            inp.classList.remove('is-invalid');
+        });
+        if (hiddenCode) hiddenCode.value = '';
+        if (focusFirst && pinInputs[0]) {
+            pinInputs[0].focus();
+        }
+    }
+
+    if (btnClearPin) {
+        btnClearPin.onclick = function() {
+            clearAllPins(true);
+        };
+    }
+
+    // Prepopulate PIN inputs ONLY if a valid non-error code was searched
+    if (hiddenCode && hiddenCode.value) {
+        const val = hiddenCode.value.replace(/\D/g, '');
+        for (let i = 0; i < 6; i++) {
+            if (pinInputs[i] && val[i]) {
+                pinInputs[i].value = val[i];
+            }
+        }
+    } else if (pinInputs[0] && pinInputs[0].classList.contains('is-invalid')) {
+        // Auto-focus first box on wrong code so user can immediately type new code
+        setTimeout(() => { pinInputs[0].focus(); }, 60);
+    }
+
+    // Effortless entry, overwrite, auto-advance, and backspace handling for 6-Digit PIN boxes
+    pinInputs.forEach((input, index) => {
+        input.addEventListener('focus', function() {
+            this.select();
+        });
+
+        input.addEventListener('click', function() {
+            this.select();
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                pinInputs.forEach(inp => inp.classList.remove('is-invalid'));
+                if (this.value !== '') {
+                    this.value = '';
+                    syncPinToHidden();
+                } else if (index > 0) {
+                    pinInputs[index - 1].value = '';
+                    pinInputs[index - 1].focus();
+                    syncPinToHidden();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowLeft' && index > 0) {
+                e.preventDefault();
+                pinInputs[index - 1].focus();
+                return;
+            }
+
+            if (e.key === 'ArrowRight' && index < pinInputs.length - 1) {
+                e.preventDefault();
+                pinInputs[index + 1].focus();
+                return;
+            }
+
+            // If user types a digit directly (even if box already has a digit), overwrite and advance immediately
+            if (/^[0-9]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                e.preventDefault();
+                // If typing on the first box while all 6 boxes were already full, clear the rest first for fresh entry
+                if (index === 0 && hiddenCode && hiddenCode.value.length === 6) {
+                    pinInputs.forEach(inp => { inp.value = ''; });
+                }
+                pinInputs.forEach(inp => inp.classList.remove('is-invalid'));
+                this.value = e.key;
+                syncPinToHidden();
+                if (index < pinInputs.length - 1) {
+                    pinInputs[index + 1].focus();
+                }
+            }
+        });
+
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '').slice(-1);
+            pinInputs.forEach(inp => inp.classList.remove('is-invalid'));
+            if (this.value.length === 1 && index < pinInputs.length - 1) {
+                pinInputs[index + 1].focus();
+            }
+            syncPinToHidden();
+        });
+
+        input.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            if (pasteData) {
+                for (let i = 0; i < 6; i++) {
+                    if (pinInputs[i]) {
+                        pinInputs[i].value = pasteData[i] || '';
+                        pinInputs[i].classList.remove('is-invalid');
+                    }
+                }
+                syncPinToHidden();
+                if (pasteData.length >= 6 && lookupForm) {
+                    lookupForm.submit();
+                }
+            }
+        });
+    });
+
     // Camera QR Code Scanner using html5-qrcode
     const btnStartScanner = document.getElementById('btn-start-scanner');
     const btnStopScanner = document.getElementById('btn-stop-scanner');
@@ -663,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hudOverlay = document.getElementById('scanner-hud-overlay');
     const qrFileInput = document.getElementById('qr-input-file');
 
-    function onScanSuccess(decodedText, decodedResult) {
+    function onScanSuccess(decodedText) {
         if (html5QrCode && html5QrCode.isScanning) {
             html5QrCode.stop().then(() => {
                 if (qrPlaceholder) qrPlaceholder.classList.remove('d-none');
@@ -673,9 +586,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }).catch(err => console.error(err));
         }
 
-        scanStatus.innerHTML = `<span class="text-teal fw-bold"><i class="fas fa-spinner fa-spin me-1"></i> Validating Handshake Code: ${decodedText}...</span>`;
+        if (scanStatus) {
+            scanStatus.innerHTML = `<span class="text-teal fw-bold"><i class="fas fa-spinner fa-spin me-1"></i> Validating Handshake Code: ${decodedText}...</span>`;
+        }
 
-        // Direct submission or AJAX verification
         fetch('verify-handover.php?ajax=1', {
             method: 'POST',
             headers: {
@@ -690,24 +604,24 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                scanStatus.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> Verified! Delivery Completed.</span>`;
+                if (scanStatus) scanStatus.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i> Verified! Delivery Completed.</span>`;
                 window.location.href = `verify-handover.php?verified_success=1&code=${encodeURIComponent(data.code || decodedText)}`;
             } else {
                 if (data.error_type === 'already_completed') {
-                    scanStatus.innerHTML = `<span class="text-warning fw-bold"><i class="fas fa-shield-halved me-1"></i> Code Already Used! Cannot reuse.</span>`;
+                    if (scanStatus) scanStatus.innerHTML = `<span class="text-warning fw-bold"><i class="fas fa-shield-halved me-1"></i> Code Already Used! Cannot reuse.</span>`;
                 } else {
-                    scanStatus.innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-times-circle me-1"></i> Invalid Code: ${data.error || 'Does not match.'}</span>`;
+                    if (scanStatus) scanStatus.innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-times-circle me-1"></i> Invalid Code: ${data.error || 'Does not match.'}</span>`;
                 }
                 window.location.href = `verify-handover.php?code=${encodeURIComponent(decodedText)}`;
             }
         })
-        .catch(err => {
+        .catch(() => {
             window.location.href = `verify-handover.php?code=${encodeURIComponent(decodedText)}`;
         });
     }
 
     if (btnStartScanner) {
-        btnStartScanner.addEventListener('click', function() {
+        btnStartScanner.onclick = function() {
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("qr-reader");
             }
@@ -715,7 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (hudOverlay) hudOverlay.classList.remove('d-none');
             if (btnStartScanner) btnStartScanner.classList.add('d-none');
             if (btnStopScanner) btnStopScanner.classList.remove('d-none');
-            scanStatus.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i> Launching camera viewfinder...</span>';
+            if (scanStatus) scanStatus.innerHTML = '<span class="text-info"><i class="fas fa-spinner fa-spin me-1"></i> Launching camera viewfinder...</span>';
 
             html5QrCode.start(
                 { facingMode: "environment" },
@@ -725,52 +639,51 @@ document.addEventListener('DOMContentLoaded', function() {
                     aspectRatio: 1.0
                 },
                 onScanSuccess,
-                (errorMessage) => {
-                    // Scanning loop in progress
-                }
+                () => {}
             ).then(() => {
-                scanStatus.innerHTML = '<span class="text-success fw-semibold"><i class="fas fa-circle-dot fa-fade me-1 text-teal"></i> Camera active. Center QR code inside viewfinder.</span>';
+                if (scanStatus) scanStatus.innerHTML = '<span class="text-success fw-semibold"><i class="fas fa-circle-dot fa-fade me-1 text-teal"></i> Camera active. Center QR code inside viewfinder.</span>';
             }).catch(err => {
-                scanStatus.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i> Camera unavailable: ${err}. Please use upload or 6-digit PIN.</span>`;
+                if (scanStatus) scanStatus.innerHTML = `<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i> Camera unavailable: ${err}. Please use upload or 6-digit PIN.</span>`;
                 if (qrPlaceholder) qrPlaceholder.classList.remove('d-none');
                 if (hudOverlay) hudOverlay.classList.add('d-none');
                 if (btnStartScanner) btnStartScanner.classList.remove('d-none');
                 if (btnStopScanner) btnStopScanner.classList.add('d-none');
             });
-        });
+        };
     }
 
     if (btnStopScanner) {
-        btnStopScanner.addEventListener('click', function() {
+        btnStopScanner.onclick = function() {
             if (html5QrCode && html5QrCode.isScanning) {
                 html5QrCode.stop().then(() => {
                     if (qrPlaceholder) qrPlaceholder.classList.remove('d-none');
                     if (hudOverlay) hudOverlay.classList.add('d-none');
                     if (btnStartScanner) btnStartScanner.classList.remove('d-none');
                     if (btnStopScanner) btnStopScanner.classList.add('d-none');
-                    scanStatus.innerText = "Scanner stopped.";
+                    if (scanStatus) scanStatus.innerText = "Scanner stopped.";
                 }).catch(err => console.error(err));
             }
-        });
+        };
     }
 
-    // QR Image File Scan
     if (qrFileInput) {
-        qrFileInput.addEventListener('change', function(e) {
+        qrFileInput.onchange = function(e) {
             if (e.target.files.length === 0) return;
             const imageFile = e.target.files[0];
             if (!html5QrCode) {
                 html5QrCode = new Html5Qrcode("qr-reader");
             }
-            scanStatus.innerText = "Scanning selected image file...";
+            if (scanStatus) scanStatus.innerText = "Scanning selected image file...";
             html5QrCode.scanFile(imageFile, true)
                 .then(decodedText => {
-                    onScanSuccess(decodedText, null);
+                    onScanSuccess(decodedText);
                 })
-                .catch(err => {
-                    scanStatus.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i> No QR code found in file. Please ensure clear image.</span>`;
+                .catch(() => {
+                    if (scanStatus) scanStatus.innerHTML = `<span class="text-danger"><i class="fas fa-times-circle me-1"></i> No QR code found in file. Please ensure clear image.</span>`;
                 });
-        });
+        };
     }
-});
+};
+
+document.addEventListener('DOMContentLoaded', window.initVerifyHandoverTerminal);
 </script>

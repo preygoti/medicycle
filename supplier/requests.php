@@ -218,19 +218,19 @@ include __DIR__ . '/../includes/navbar.php';
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Supply Item</th>
+                                <th class="ps-4">Supply Item</th>
                                 <th>Recipient Organization</th>
                                 <th>Requested Qty</th>
                                 <th>Urgency & Date</th>
                                 <th>Handover Status</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-start pe-4 text-nowrap">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($requests)): ?>
                                 <?php foreach ($requests as $r): ?>
                                     <tr id="req-<?php echo $r['id']; ?>">
-                                        <td>
+                                        <td class="ps-4">
                                             <span class="fw-bold text-dark d-block"><?php echo e($r['supply_name']); ?></span>
                                             <span class="text-muted small">In Stock: <?php echo $r['available_qty'] . ' ' . e($r['unit']); ?></span>
                                         </td>
@@ -260,9 +260,9 @@ include __DIR__ . '/../includes/navbar.php';
                                                 </div>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end pe-3 text-nowrap">
+                                        <td class="text-start pe-4 text-nowrap">
                                             <?php if ($r['status'] === 'Pending'): ?>
-                                                <div class="d-inline-flex align-items-center gap-2 justify-content-end">
+                                                <div class="d-inline-flex align-items-center gap-2 justify-content-start">
                                                     <button type="button" class="btn btn-sm btn-success rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#acceptModal<?php echo $r['id']; ?>">
                                                         <i class="fas fa-check"></i> Accept
                                                     </button>

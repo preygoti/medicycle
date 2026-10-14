@@ -56,20 +56,20 @@ include __DIR__ . '/../includes/navbar.php';
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Item Requested</th>
+                                <th class="ps-4">Item Requested</th>
                                 <th>Supplying Donor</th>
                                 <th>Quantity</th>
                                 <th>Pickup Date & Code</th>
                                 <th>Status</th>
                                 <th>Pickup Instructions</th>
-                                <th class="text-end">Actions</th>
+                                <th class="text-start pe-4 text-nowrap">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($requests)): ?>
                                 <?php foreach ($requests as $r): ?>
                                     <tr>
-                                        <td>
+                                        <td class="ps-4">
                                             <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="fw-bold text-dark text-decoration-none">
                                                 <?php echo e($r['supply_name']); ?>
                                             </a>
@@ -79,23 +79,23 @@ include __DIR__ . '/../includes/navbar.php';
                                             <span class="fw-semibold text-dark d-block"><?php echo e($r['supplier_name']); ?></span>
                                             <span class="text-muted small"><i class="fas fa-map-marker-alt me-1 text-danger"></i><?php echo e($r['supplier_city'] ?? $r['supply_location']); ?></span>
                                         </td>
-                                        <td class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></td>
-                                        <td>
+                                        <td class="fw-bold text-teal text-nowrap"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></td>
+                                        <td class="text-nowrap">
                                             <div class="small text-muted mb-1">
                                                 <i class="far fa-calendar-alt me-1"></i><?php echo format_date($r['preferred_collection_date'] ?? $r['requested_at']); ?>
                                             </div>
                                             <?php if (!empty($r['handover_code'])): ?>
-                                                <button type="button" class="btn btn-xs btn-dark py-1 px-2 font-monospace shadow-2xs" data-bs-toggle="modal" data-bs-target="#qrModal<?php echo $r['id']; ?>" title="Click to view QR & 6-Digit Pass">
+                                                <button type="button" class="btn btn-xs btn-dark py-1 px-2 font-monospace shadow-2xs text-nowrap" data-bs-toggle="modal" data-bs-target="#qrModal<?php echo $r['id']; ?>" title="Click to view QR & 6-Digit Pass">
                                                     <i class="fas fa-qrcode text-warning me-1"></i><?php echo e($r['handover_code']); ?>
                                                 </button>
                                             <?php else: ?>
                                                 <span class="badge bg-light text-muted border">Code on Approval</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?php echo status_badge($r['status']); ?></td>
+                                        <td class="text-nowrap"><?php echo status_badge($r['status']); ?></td>
                                         <td>
                                             <?php if (!empty($r['supplier_remarks'])): ?>
-                                                <span class="text-dark small d-block" style="max-width: 200px;">
+                                                <span class="text-dark small d-block" style="max-width: 180px;">
                                                     <i class="fas fa-comment-dots text-primary me-1"></i><?php echo e($r['supplier_remarks']); ?>
                                                 </span>
                                             <?php elseif ($r['status'] === 'Pending'): ?>
@@ -104,62 +104,21 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <span class="text-muted small">Standard facility pickup</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="text-end">
-                                            <div class="d-flex justify-content-end align-items-center gap-1">
-                                                <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-secondary" title="View Details">
-                                                    <i class="fas fa-eye me-1"></i> Details
+                                        <td class="text-start pe-4 text-nowrap">
+                                            <div class="d-inline-flex justify-content-start align-items-center gap-2 flex-nowrap">
+                                                <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-secondary text-nowrap d-inline-flex align-items-center gap-1 px-2.5" style="height:32px; font-size:0.78rem; white-space:nowrap !important;" title="View Details">
+                                                    <i class="fas fa-eye"></i> <span>Details</span>
                                                 </a>
                                                 <?php if (!empty($r['handover_code']) && in_array($r['status'], ['Approved', 'Accepted', 'Ready for Handover'])): ?>
-                                                    <button type="button" class="btn btn-sm btn-teal text-white shadow-2xs fw-semibold" style="background:#0f766e;" data-bs-toggle="modal" data-bs-target="#qrModal<?php echo $r['id']; ?>" title="Show Pickup Handshake Pass & QR">
-                                                        <i class="fas fa-qrcode me-1"></i> Show Pass
+                                                    <button type="button" class="btn btn-sm btn-teal text-white shadow-2xs fw-semibold text-nowrap d-inline-flex align-items-center gap-1 px-3" style="background:#0f766e; height:32px; font-size:0.78rem; white-space:nowrap !important;" data-bs-toggle="modal" data-bs-target="#qrModal<?php echo $r['id']; ?>" title="Show Pickup Handshake Pass & QR">
+                                                        <i class="fas fa-qrcode"></i> <span>Show Pass</span>
                                                     </button>
                                                 <?php elseif ($r['status'] === 'Completed'): ?>
-                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="fas fa-check-double me-1"></i>Received</span>
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 text-nowrap d-inline-flex align-items-center gap-1" style="height:32px; font-size:0.76rem; white-space:nowrap !important;"><i class="fas fa-check-double"></i> Received</span>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
-                                    <?php if (!empty($r['handover_code'])): ?>
-                                        <div class="modal fade" id="qrModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                                <div class="modal-content border-0 shadow-lg rounded-4">
-                                                    <div class="modal-header border-bottom py-3">
-                                                        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                                                                <i class="fas fa-qrcode"></i>
-                                                            </span>
-                                                            Pickup Verification Pass
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body p-4 text-center">
-                                                        <?php echo render_handshake_pass_html($r['handover_code'], $r['id'], 'Donor: ' . ($r['supplier_name'] ?? 'Medical Facility')); ?>
-                                                        <div class="alert alert-light border small text-muted text-start mt-3 mb-0">
-                                                            <div class="fw-semibold text-dark mb-1"><i class="fas fa-shield-halved text-teal me-1"></i> Handshake Verification Rule:</div>
-                                                            Show this QR code or 6-digit PIN to the supplier or courier during collection. Handover will be marked Completed only when the other party verifies your code.
-                                                        </div>
-                                                        <div class="p-3 bg-light rounded-3 text-start small mt-3">
-                                                            <div class="d-flex justify-content-between mb-1">
-                                                                <span class="text-muted">Item:</span>
-                                                                <span class="fw-bold text-dark"><?php echo e($r['supply_name']); ?></span>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between mb-1">
-                                                                <span class="text-muted">Quantity:</span>
-                                                                <span class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></span>
-                                                            </div>
-                                                            <div class="d-flex justify-content-between">
-                                                                <span class="text-muted">Donor Location:</span>
-                                                                <span class="fw-semibold text-dark"><?php echo e($r['supplier_city'] ?? $r['supply_location']); ?></span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer border-top py-2">
-                                                        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
@@ -175,6 +134,53 @@ include __DIR__ . '/../includes/navbar.php';
                 </div>
             </div>
         </div>
+
+        <!-- Pickup Verification Pass Modals (Placed cleanly outside table for valid DOM & live sync) -->
+        <?php if (!empty($requests)): ?>
+            <?php foreach ($requests as $r): ?>
+                <?php if (!empty($r['handover_code'])): ?>
+                    <div class="modal fade" id="qrModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                <div class="modal-header border-bottom py-3">
+                                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                        <span class="rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="background:#ccfbf1; color:#0f766e; width:36px; height:36px;">
+                                            <i class="fas fa-qrcode"></i>
+                                        </span>
+                                        Pickup Verification Pass
+                                    </h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body p-4 text-start">
+                                    <?php echo render_handshake_pass_html($r['handover_code'], $r['id'], 'Donor: ' . ($r['supplier_name'] ?? 'Medical Facility')); ?>
+                                    <div class="alert alert-light border small text-muted text-start mt-3 mb-0 rounded-3">
+                                        <div class="fw-semibold text-dark mb-1"><i class="fas fa-shield-halved text-teal me-1"></i> Handshake Verification Rule:</div>
+                                        Show this QR code or 6-digit PIN to the supplier or courier during collection. Handover will be marked Completed automatically as soon as the other party verifies your code.
+                                    </div>
+                                    <div class="p-3 bg-light rounded-3 border text-start small mt-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 pb-1 border-bottom">
+                                            <span class="text-muted">Item:</span>
+                                            <span class="fw-bold text-dark text-end"><?php echo e($r['supply_name']); ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-1.5 pb-1 border-bottom mt-1">
+                                            <span class="text-muted">Quantity:</span>
+                                            <span class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center mt-1">
+                                            <span class="text-muted">Donor Location:</span>
+                                            <span class="fw-semibold text-dark"><?php echo e($r['supplier_city'] ?? $r['supply_location']); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-top py-2">
+                                    <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        <?php endif; ?>
 
     </div>
 </div>
