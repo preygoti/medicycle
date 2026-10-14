@@ -23,9 +23,7 @@ $isRegisterActive = ($currentScript === 'register.php');
 <nav class="navbar navbar-expand-lg navbar-medicycle sticky-top shadow-sm">
     <div class="container-fluid px-3 px-lg-4">
         <a class="navbar-brand d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/index.php">
-            <span class="brand-icon rounded-circle p-1 bg-teal-light text-teal d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: #ccfbf1; color: #0f766e;">
-                <i class="fas fa-hand-holding-medical fs-5"></i>
-            </span>
+            <img src="<?php echo BASE_URL; ?>/assets/images/logo-icon.png" width="36" height="36" alt="MediCycle" class="rounded-circle shadow-xs" style="object-fit: cover;">
             <span class="fw-bold tracking-tight text-teal" style="color: #0f766e;">MediCycle</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">

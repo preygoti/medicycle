@@ -254,6 +254,10 @@ function send_smtp_socket($host, $port, $encryption, $username, $password, $from
     $write("DATA");
     $read(354);
 
+    $logoFile = APP_ROOT . '/assets/images/logo-icon.png';
+    $hasLogo = file_exists($logoFile);
+    $logoData = $hasLogo ? base64_encode(file_get_contents($logoFile)) : '';
+
     $boundary = "----=_Part_" . md5(uniqid());
     $headers = [
         "From: =?UTF-8?B?" . base64_encode($fromName) . "?= <{$fromEmail}>",
@@ -261,23 +265,28 @@ function send_smtp_socket($host, $port, $encryption, $username, $password, $from
         "Subject: =?UTF-8?B?" . base64_encode($subject) . "?=",
         "Date: " . date('r'),
         "MIME-Version: 1.0",
-        "Content-Type: multipart/alternative; boundary=\"{$boundary}\"",
-        "",
-        "--{$boundary}",
-        "Content-Type: text/plain; charset=UTF-8",
-        "Content-Transfer-Encoding: base64",
-        "",
-        base64_encode(strip_tags($htmlBody)),
+        "Content-Type: multipart/related; boundary=\"{$boundary}\"",
         "",
         "--{$boundary}",
         "Content-Type: text/html; charset=UTF-8",
         "Content-Transfer-Encoding: base64",
         "",
         base64_encode($htmlBody),
-        "",
-        "--{$boundary}--",
-        "."
+        ""
     ];
+
+    if (!empty($logoData)) {
+        $headers[] = "--{$boundary}";
+        $headers[] = "Content-Type: image/png; name=\"logo-icon.png\"";
+        $headers[] = "Content-Transfer-Encoding: base64";
+        $headers[] = "Content-ID: <medicycle-logo>";
+        $headers[] = "Content-Disposition: inline; filename=\"logo-icon.png\"";
+        $headers[] = "";
+        $headers[] = chunk_split($logoData);
+    }
+
+    $headers[] = "--{$boundary}--";
+    $headers[] = ".";
 
     $write(implode("\r\n", $headers));
     $read(250);
@@ -309,19 +318,13 @@ function log_mail_locally(string $toEmail, string $subject, string $htmlBody): v
  * Render the branded MediCycle HTML Email Template
  */
 function render_medicycle_email_template(string $title, string $subtitle, string $otp, string $instructions, string $expiryNotice = 'This code expires in 10 minutes.'): string {
-    $logoPath = APP_ROOT . '/assets/images/logo-icon.png';
-    $logoBase64 = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
-    
     $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
     $logoUrl = !empty($baseUrl) ? "{$baseUrl}/assets/images/logo-icon.png" : "";
 
-    $logoHtml = '';
-    if (!empty($logoBase64)) {
-        $logoHtml = '<img src="data:image/png;base64,' . $logoBase64 . '" width="54" height="54" alt="MediCycle Logo" style="display:block;margin:0 auto;border-radius:12px;border:none;">';
-    } elseif (!empty($logoUrl)) {
-        $logoHtml = '<img src="' . htmlspecialchars($logoUrl) . '" width="54" height="54" alt="MediCycle Logo" style="display:block;margin:0 auto;border-radius:12px;border:none;">';
-    } else {
-        $logoHtml = '<span style="font-size:32px;line-height:1;color:#0f766e;">&#10010;</span>';
+    $logoHtml = '<img src="cid:medicycle-logo" width="60" height="60" alt="MediCycle Logo" style="display:block;margin:0 auto;border-radius:14px;border:none;">';
+    if (!empty($logoUrl)) {
+        // Fallback for web preview
+        $logoHtml = '<img src="cid:medicycle-logo" onerror="this.onerror=null;this.src=\'' . htmlspecialchars($logoUrl) . '\';" width="60" height="60" alt="MediCycle Logo" style="display:block;margin:0 auto;border-radius:14px;border:none;">';
     }
 
     return <<<HTML
