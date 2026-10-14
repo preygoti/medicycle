@@ -309,6 +309,21 @@ function log_mail_locally(string $toEmail, string $subject, string $htmlBody): v
  * Render the branded MediCycle HTML Email Template
  */
 function render_medicycle_email_template(string $title, string $subtitle, string $otp, string $instructions, string $expiryNotice = 'This code expires in 10 minutes.'): string {
+    $logoPath = APP_ROOT . '/assets/images/logo-icon.png';
+    $logoBase64 = file_exists($logoPath) ? base64_encode(file_get_contents($logoPath)) : '';
+    
+    $baseUrl = defined('BASE_URL') ? rtrim(BASE_URL, '/') : '';
+    $logoUrl = !empty($baseUrl) ? "{$baseUrl}/assets/images/logo-icon.png" : "";
+
+    $logoHtml = '';
+    if (!empty($logoBase64)) {
+        $logoHtml = '<img src="data:image/png;base64,' . $logoBase64 . '" width="54" height="54" alt="MediCycle Logo" style="display:block;margin:0 auto;border-radius:12px;border:none;">';
+    } elseif (!empty($logoUrl)) {
+        $logoHtml = '<img src="' . htmlspecialchars($logoUrl) . '" width="54" height="54" alt="MediCycle Logo" style="display:block;margin:0 auto;border-radius:12px;border:none;">';
+    } else {
+        $logoHtml = '<span style="font-size:32px;line-height:1;color:#0f766e;">&#10010;</span>';
+    }
+
     return <<<HTML
 <!DOCTYPE html>
 <html>
@@ -318,16 +333,16 @@ function render_medicycle_email_template(string $title, string $subtitle, string
 <title>{$title}</title>
 <style>
   body { margin: 0; padding: 0; background-color: #F0FDFA; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0F172A; }
-  .email-container { max-width: 580px; margin: 30px auto; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-  .email-header { background: #0F766E; padding: 32px 24px; text-align: center; }
-  .email-brand { color: #FFFFFF; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-  .email-tagline { color: #5EEAD4; font-size: 13px; font-weight: 500; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .email-container { max-width: 580px; margin: 30px auto; background: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+  .email-header { background: #0F766E; padding: 32px 24px 28px 24px; text-align: center; }
+  .email-brand { color: #FFFFFF; font-size: 26px; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+  .email-tagline { color: #5EEAD4; font-size: 11px; font-weight: 700; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
   .email-body { padding: 36px 32px; }
   .email-title { font-size: 20px; font-weight: 700; color: #0F172A; margin: 0 0 12px 0; }
   .email-text { font-size: 15px; line-height: 1.6; color: #475569; margin: 0 0 24px 0; }
-  .otp-box { background: #F0FDFA; border: 2px dashed #0F766E; border-radius: 10px; padding: 24px; text-align: center; margin: 28px 0; }
+  .otp-box { background: #F0FDFA; border: 2px dashed #0F766E; border-radius: 12px; padding: 24px; text-align: center; margin: 28px 0; }
   .otp-label { font-size: 12px; text-transform: uppercase; color: #0F766E; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
-  .otp-code { font-size: 36px; font-weight: 800; letter-spacing: 10px; color: #0F766E; font-family: 'Courier New', Courier, monospace; margin: 0; padding-left: 10px; }
+  .otp-code { font-size: 38px; font-weight: 800; letter-spacing: 12px; color: #0F766E; font-family: 'Courier New', Courier, monospace; margin: 0; padding-left: 12px; }
   .otp-expiry { font-size: 13px; color: #64748B; margin-top: 10px; }
   .security-notice { background: #F8FAFC; border-left: 4px solid #94A3B8; padding: 12px 16px; font-size: 13px; color: #64748B; line-height: 1.5; border-radius: 4px; margin-top: 24px; }
   .email-footer { background: #F8FAFC; padding: 24px; text-align: center; border-top: 1px solid #E2E8F0; font-size: 12px; color: #94A3B8; }
@@ -336,14 +351,21 @@ function render_medicycle_email_template(string $title, string $subtitle, string
 <body>
 <div class="email-container">
   <div class="email-header">
-    <div class="email-brand">&#9877; MediCycle</div>
+    <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto 12px auto;">
+      <tr>
+        <td align="center" valign="middle" style="background: #ffffff; border-radius: 14px; width: 62px; height: 62px; padding: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+          {$logoHtml}
+        </td>
+      </tr>
+    </table>
+    <div class="email-brand">MediCycle</div>
     <div class="email-tagline">Smart Medical Supply Redistribution</div>
   </div>
   <div class="email-body">
     <h2 class="email-title">{$title}</h2>
     <p class="email-text">{$subtitle}</p>
     <div class="otp-box">
-      <div class="otp-label">Your 6-Digit Verification Code</div>
+      <div class="otp-label">Your 6-Digit Verification PIN</div>
       <div class="otp-code">{$otp}</div>
       <div class="otp-expiry">&#9200; {$expiryNotice}</div>
     </div>
@@ -353,7 +375,7 @@ function render_medicycle_email_template(string $title, string $subtitle, string
     </div>
   </div>
   <div class="email-footer">
-    &copy; 2026 MediCycle. Responsible Healthcare Resource Redistribution.<br>
+    &copy; 2026 MediCycle Platform. Responsible Healthcare Resource Redistribution.<br>
     Non-drug medical consumables only.
   </div>
 </div>
