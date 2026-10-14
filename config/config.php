@@ -10,21 +10,33 @@ if (!defined('APP_ROOT')) {
 
 // Determine the web root URL dynamically
 if (!defined('BASE_URL')) {
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-    $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-    
-    // Calculate relative path from DOCUMENT_ROOT to project directory
-    $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'])) : '';
-    $appRoot = str_replace('\\', '/', APP_ROOT);
-    
-    if (!empty($docRoot) && strpos($appRoot, $docRoot) === 0) {
-        $relativePath = substr($appRoot, strlen($docRoot));
-        $baseUrl = rtrim($protocol . $host . $relativePath, '/');
+    $appUrl = getenv('APP_URL');
+    if (!empty($appUrl)) {
+        define('BASE_URL', rtrim($appUrl, '/'));
     } else {
-        // Fallback or PHP built-in web server running directly in project root
-        $baseUrl = rtrim($protocol . $host, '/');
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)
+            || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https')
+            || (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on')
+            || (!empty($_SERVER['HTTP_CF_VISITOR']) && strpos($_SERVER['HTTP_CF_VISITOR'], 'https') !== false)
+            || (!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) === 'on');
+
+        $protocol = $isHttps ? "https://" : "http://";
+        $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        
+        // Calculate relative path from DOCUMENT_ROOT to project directory
+        $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'])) : '';
+        $appRoot = str_replace('\\', '/', APP_ROOT);
+        
+        if (!empty($docRoot) && strpos($appRoot, $docRoot) === 0) {
+            $relativePath = substr($appRoot, strlen($docRoot));
+            $baseUrl = rtrim($protocol . $host . $relativePath, '/');
+        } else {
+            // Fallback or PHP built-in web server running directly in project root
+            $baseUrl = rtrim($protocol . $host, '/');
+        }
+        define('BASE_URL', $baseUrl);
     }
-    define('BASE_URL', $baseUrl);
 }
 
 // Application settings
