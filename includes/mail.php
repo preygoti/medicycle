@@ -94,19 +94,35 @@ function verify_email_otp(PDO $pdo, string $email, string $enteredOtp, string $o
     if ((int)$otpRecord['attempts'] >= 5) {
         $lockStmt = $pdo->prepare("UPDATE email_otps SET is_used = 1 WHERE id = ?");
         $lockStmt->execute([$otpRecord['id']]);
-        return ['valid' => false, 'message' => 'Too many incorrect attempts. For security, this code was locked. Please request a new code.'];
+        return [
+            'valid' => false,
+            'max_attempts' => true,
+            'message' => 'You have reached the maximum attempts limit. For your security, this code was locked. Please request a new verification code below.'
+        ];
     }
 
     // Increment attempts
+    $newAttempts = (int)$otpRecord['attempts'] + 1;
     $attStmt = $pdo->prepare("UPDATE email_otps SET attempts = attempts + 1 WHERE id = ?");
     $attStmt->execute([$otpRecord['id']]);
 
     // Verify bcrypt hash
     if (!password_verify($enteredOtp, $otpRecord['otp_hash'])) {
-        $remainingAttempts = 5 - ((int)$otpRecord['attempts'] + 1);
+        $remainingAttempts = 5 - $newAttempts;
+        if ($remainingAttempts <= 0) {
+            // Lock and deactivate code
+            $lockStmt = $pdo->prepare("UPDATE email_otps SET is_used = 1 WHERE id = ?");
+            $lockStmt->execute([$otpRecord['id']]);
+            return [
+                'valid' => false,
+                'max_attempts' => true,
+                'message' => 'You have used all 5 attempts. For security, this verification code has been deactivated. Please request a new code below.'
+            ];
+        }
         return [
             'valid' => false,
-            'message' => "Incorrect verification code. {$remainingAttempts} attempt(s) remaining."
+            'max_attempts' => false,
+            'message' => "Incorrect verification code. You have {$remainingAttempts} attempt(s) remaining."
         ];
     }
 

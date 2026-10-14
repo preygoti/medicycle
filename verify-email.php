@@ -115,12 +115,28 @@ include __DIR__ . '/includes/navbar.php';
                     <?php echo render_flash_messages(); ?>
 
                     <?php if (!empty($errors)): ?>
+                        <?php 
+                            $hasMaxAttempts = false;
+                            foreach ($errors as $err) {
+                                if (stripos($err, 'attempts') !== false || stripos($err, 'expired') !== false || stripos($err, 'request a new') !== false) {
+                                    $hasMaxAttempts = true;
+                                    break;
+                                }
+                            }
+                        ?>
                         <div class="alert alert-danger shadow-sm rounded-3 py-2 px-3 small">
                             <ul class="mb-0 ps-3">
                                 <?php foreach ($errors as $error): ?>
                                     <li><?php echo e($error); ?></li>
                                 <?php endforeach; ?>
                             </ul>
+                            <?php if ($hasMaxAttempts): ?>
+                                <div class="mt-2 text-center pt-2 border-top border-danger border-opacity-25">
+                                    <a href="<?php echo BASE_URL; ?>/verify-email.php?email=<?php echo urlencode($user['email']); ?>&action=resend" class="btn btn-sm btn-danger text-white fw-semibold rounded-pill px-3 shadow-xs">
+                                        <i class="fas fa-rotate-right me-1"></i> Send Me a New Code Now
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
