@@ -1,0 +1,33 @@
+# MediCycle Apache Configuration
+Options -Indexes
+Options +FollowSymLinks
+
+# Set default charset
+AddDefaultCharset UTF-8
+
+# Prevent directory listing
+DirectoryIndex index.php index.html
+
+# Block direct access to sensitive files
+<FilesMatch "^\.(env|git|gitignore)|(\.(sql|md|log|json|lock))$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Block access to database and config backup directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Optional: Force HTTPS if supported
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+    
+    # Disallow direct browser viewing of internal database dumps
+    RewriteRule ^database/.*\.sql$ - [F,L]
+    RewriteRule ^config/\.env$ - [F,L]
+</IfModule>
