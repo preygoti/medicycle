@@ -336,9 +336,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }, { passive: true });
     })();
 
-    // 7. Real-Time Auto-Refresh Poller Engine (Instant Cross-Side Synchronization without Manual Refresh)
+    // 7. Real-Time Auto-Refresh Poller Engine (High-Performance Portal Synchronization)
     (function initRealtimePoller() {
-        if (!document.querySelector('.app-container') && !document.querySelector('.dashboard-card')) {
+        // Only activate background poller on authenticated portal pages with an active sidebar
+        if (!document.querySelector('.app-sidebar')) {
             return;
         }
 
@@ -349,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let pendingRefresh = false;
         let isRefreshing = false;
         let lastKeystrokeTime = 0;
-        const POLL_INTERVAL = 1200; // 1.2 seconds for near-instant synchronization
+        const POLL_INTERVAL = 10000; // 10s relaxed interval; multi-tab updates sync in <50ms via BroadcastChannel
 
         // Track actual typing activity so focused inputs in background windows never block live updates
         document.addEventListener('keydown', function (e) {
@@ -668,9 +669,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Run immediately on page load, then poll every 1.2 seconds
+        // Run immediately on page load, then poll every 10 seconds only while tab is visible
         pollStatus();
-        setInterval(pollStatus, POLL_INTERVAL);
+        setInterval(function() {
+            if (document.visibilityState === 'visible') {
+                pollStatus();
+            }
+        }, POLL_INTERVAL);
+
+        // Instantly poll whenever user switches back to this tab
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                pollStatus();
+            }
+        });
     })();
 
     // --------------------------------------------------------------------------
