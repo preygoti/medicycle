@@ -54,6 +54,12 @@ function create_email_otp(PDO $pdo, string $email, string $otpType, ?int $userId
         VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), 0, 0, NOW())");
     $insStmt->execute([$userId, $email, $otpHash, $otpType]);
 
+    // Store in session as fallback for environments with blocked outbound mail
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        $_SESSION['last_otp_' . $otpType] = $plainOtp;
+        $_SESSION['last_otp_email'] = $email;
+    }
+
     return [
         'success' => true,
         'otp' => $plainOtp,

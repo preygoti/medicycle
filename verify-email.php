@@ -178,8 +178,8 @@ include __DIR__ . '/includes/navbar.php';
                                 <i class="far fa-clock me-1 text-teal"></i> Code remains valid for <strong>10 minutes</strong>.
                             </div>
                             <?php
-                            $devOtp = '';
-                            if (file_exists(APP_ROOT . '/logs/mail.log')) {
+                            $devOtp = $_SESSION['last_otp_registration'] ?? '';
+                            if (empty($devOtp) && file_exists(APP_ROOT . '/logs/mail.log')) {
                                 $logContent = file_get_contents(APP_ROOT . '/logs/mail.log');
                                 if (preg_match_all('/TO:\s*' . preg_quote($user['email'], '/') . '.*?\n\s*OTP_CODE:\s*(\d{6})/is', $logContent, $matches)) {
                                     $devOtp = end($matches[1]);
