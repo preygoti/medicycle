@@ -79,6 +79,9 @@ define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: 'pmjmytmvjygennrp');
 define('SMTP_FROM_EMAIL', getenv('SMTP_FROM_EMAIL') ?: 'preygoti11@gmail.com');
 define('SMTP_FROM_NAME', getenv('SMTP_FROM_NAME') ?: 'Medi Cycle');
 
+// Google Apps Script Mail Relay (HTTPS Webhook for free hosts like InfinityFree)
+define('GOOGLE_MAIL_RELAY_URL', getenv('GOOGLE_MAIL_RELAY_URL') ?: '');
+
 // Require database connection
 require_once __DIR__ . '/database.php';
 require_once APP_ROOT . '/includes/session.php';

@@ -157,12 +157,30 @@ function send_medicycle_mail(string $toEmail, string $toName, string $subject, s
     $fromName = defined('SMTP_FROM_NAME') ? SMTP_FROM_NAME : 'Medi Cycle';
 
     $isSmtpConfigured = !empty($smtpUser) && !empty($smtpPass);
+    $relayUrl = defined('GOOGLE_MAIL_RELAY_URL') ? trim(GOOGLE_MAIL_RELAY_URL) : '';
 
     $sent = false;
     $errorMsg = '';
 
-    // If real SMTP credentials are provided, attempt SMTP socket connection
-    if ($isSmtpConfigured) {
+    // 1. If Google Mail Relay Webhook is configured, send over HTTPS (bypasses all host firewall blocks)
+    if (!empty($relayUrl)) {
+        try {
+            $sent = send_via_google_relay($relayUrl, $toEmail, $toName, $subject, $htmlBody);
+            if ($sent) {
+                log_mail_locally($toEmail, $subject, $htmlBody);
+                return [
+                    'success' => true,
+                    'message' => 'Email delivered via Google Mail Relay.'
+                ];
+            }
+        } catch (Exception $e) {
+            $errorMsg = $e->getMessage();
+            error_log("MediCycle Google Relay Error: " . $errorMsg);
+        }
+    }
+
+    // 2. If real SMTP credentials are provided, attempt direct SMTP socket connection
+    if (!$sent && $isSmtpConfigured) {
         try {
             $sent = send_smtp_socket(
                 $smtpHost, $smtpPort, $smtpEnc, $smtpUser, $smtpPass,
@@ -301,6 +319,70 @@ function send_smtp_socket($host, $port, $encryption, $username, $password, $from
     fclose($socket);
 
     return true;
+}
+
+/**
+ * Send an email via Google Apps Script Mail Relay Webhook over HTTPS (Port 443)
+ * Never blocked by free host firewalls (InfinityFree, etc.)
+ */
+function send_via_google_relay(string $relayUrl, string $toEmail, string $toName, string $subject, string $htmlBody): bool {
+    $payload = json_encode([
+        'to' => $toEmail,
+        'toName' => $toName,
+        'subject' => $subject,
+        'html' => $htmlBody
+    ]);
+
+    // 1. Try cURL
+    if (function_exists('curl_init')) {
+        $ch = curl_init($relayUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Accept: application/json'
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $res = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($res !== false && ($httpCode === 200 || $httpCode === 302)) {
+            $json = json_decode($res, true);
+            if ($json && (!empty($json['success']) || (isset($json['status']) && $json['status'] === 'success'))) {
+                return true;
+            }
+            if (stripos($res, 'success') !== false) {
+                return true;
+            }
+        }
+    }
+
+    // 2. Stream context fallback
+    $opts = [
+        'http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/json\r\nAccept: application/json\r\n",
+            'content' => $payload,
+            'timeout' => 15,
+            'ignore_errors' => true,
+            'follow_location' => 1
+        ],
+        'ssl' => [
+            'verify_peer' => false,
+            'verify_peer_name' => false
+        ]
+    ];
+    $ctx = stream_context_create($opts);
+    $res = @file_get_contents($relayUrl, false, $ctx);
+    if ($res !== false && stripos($res, 'success') !== false) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
