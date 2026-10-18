@@ -128,12 +128,12 @@ $isRegisterActive = ($currentScript === 'register.php');
                 <?php else: ?>
                     <!-- Public Website Header (Home, About, How It Works, Contact) -->
                     <li class="nav-item">
-                        <a class="nav-link <?php echo $isLoginActive ? 'active fw-bold' : ''; ?> fw-semibold text-dark px-2" href="<?php echo BASE_URL; ?>/login.php">
-                            <i class="fas fa-sign-in-alt text-teal me-1"></i> Login
+                        <a class="btn btn-header-login <?php echo $isLoginActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/login.php">
+                            <i class="fas fa-sign-in-alt me-1"></i> Login
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-sm btn-teal text-white shadow-sm px-3" href="<?php echo BASE_URL; ?>/register.php">
+                        <a class="btn btn-header-signup <?php echo $isRegisterActive ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/register.php">
                             <i class="fas fa-user-plus me-1"></i> Sign Up
                         </a>
                     </li>
