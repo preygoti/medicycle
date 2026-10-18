@@ -162,11 +162,7 @@ include __DIR__ . '/includes/navbar.php';
                         </button>
                     </form>
 
-                    <!-- Clean Quick Access Options -->
                     <div class="mt-4 pt-3 border-top text-center">
-                        <button type="button" class="btn btn-sm btn-outline-secondary w-100 py-2 mb-3 rounded-3" onclick="fillDemo('admin@medicycle.org', 'Admin@123')">
-                            <i class="fas fa-shield-alt text-teal me-1"></i> Fill System Administrator Login (Admin@123)
-                        </button>
                         <div class="small text-muted">
                             Need a new supplier or NGO clinic account? 
                             <a href="<?php echo BASE_URL; ?>/register.php" class="fw-bold text-teal text-decoration-none ms-1">Register Organization</a>
@@ -180,10 +176,6 @@ include __DIR__ . '/includes/navbar.php';
 </div>
 
 <script>
-function fillDemo(email, pass) {
-    document.getElementById('email').value = email;
-    document.getElementById('password').value = pass;
-}
 function toggleLoginPassword(btn) {
     const input = document.getElementById('password');
     const icon = btn.querySelector('i');
