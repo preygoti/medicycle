@@ -370,35 +370,8 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
 }
 
-/* Header Public Auth Action Buttons */
-.btn-header-login {
-    background-color: #f0fdfa !important;
-    border: 1px solid #99f6e4 !important;
-    color: #0f766e !important;
-    font-weight: 600 !important;
-    font-size: 0.875rem !important;
-    padding: 0.42rem 1.05rem !important;
-    border-radius: 50px !important;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 0.35rem !important;
-    box-shadow: 0 1px 2px rgba(15, 118, 110, 0.05) !important;
-    text-decoration: none !important;
-}
-
-.btn-header-login:hover, .btn-header-login:focus {
-    background-color: #0f766e !important;
-    border-color: #0f766e !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.22) !important;
-    transform: translateY(-1px);
-}
-
-.btn-header-login:hover i {
-    color: #ffffff !important;
-}
-
+/* Header Public Auth Action Buttons (Matching Solid Teal Style) */
+.btn-header-login,
 .btn-header-signup {
     background-color: #0f766e !important;
     border: 1px solid #0f766e !important;
@@ -410,16 +383,23 @@ h1, h2, h3, h4, h5, h6 {
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     display: inline-flex !important;
     align-items: center !important;
-    gap: 0.35rem !important;
+    gap: 0.38rem !important;
     box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25) !important;
     text-decoration: none !important;
 }
 
+.btn-header-login i,
+.btn-header-signup i {
+    color: #ffffff !important;
+    font-size: 0.82rem;
+}
+
+.btn-header-login:hover, .btn-header-login:focus,
 .btn-header-signup:hover, .btn-header-signup:focus {
     background-color: #0d9488 !important;
     border-color: #0d9488 !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35) !important;
+    box-shadow: 0 4px 14px rgba(15, 118, 110, 0.38) !important;
     transform: translateY(-1px);
 }
 
