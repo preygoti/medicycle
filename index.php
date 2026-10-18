@@ -62,7 +62,7 @@ include __DIR__ . '/includes/navbar.php';
     <div class="container py-lg-4">
         <div class="row align-items-center gy-5">
             <div class="col-lg-7 reveal-fade-left">
-                <div class="badge bg-light text-teal px-3 py-2 rounded-pill fw-semibold mb-3 border" style="background:#ccfbf1; color:#0f766e;">
+                <div class="badge bg-light text-teal px-3 py-2 rounded-pill fw-semibold mb-3 border d-inline-flex align-items-center mx-auto mx-lg-0" style="background:#ccfbf1; color:#0f766e;">
                     <i class="fas fa-hand-holding-medical me-1"></i> Smart Medical Supply Redistribution System
                 </div>
                 <h1 class="hero-title mb-3">
@@ -128,9 +128,9 @@ include __DIR__ . '/includes/navbar.php';
 <!-- Safety & Protocol Trust Ribbon Buffer -->
 <section class="bg-light border-bottom py-3">
     <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-            <div class="d-flex align-items-center gap-3">
-                <div class="rounded-circle d-inline-flex p-2" style="background:#ccfbf1; color:#0f766e;">
+        <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between text-center text-lg-start gap-3">
+            <div class="d-flex flex-column flex-sm-row align-items-center text-center text-sm-start gap-3">
+                <div class="rounded-circle d-inline-flex p-2 flex-shrink-0" style="background:#ccfbf1; color:#0f766e;">
                     <i class="fas fa-shield-halved fs-5"></i>
                 </div>
                 <div>
@@ -138,7 +138,7 @@ include __DIR__ . '/includes/navbar.php';
                     <span class="text-muted small">We redistribute unopened PPE, examination gloves, sterile bandages, dressing packs, and non-drug diagnostic strips.</span>
                 </div>
             </div>
-            <a href="<?php echo BASE_URL; ?>/how-it-works.php" class="btn btn-sm btn-outline-secondary">Redistribution Guide</a>
+            <a href="<?php echo BASE_URL; ?>/how-it-works.php" class="btn btn-sm btn-outline-secondary flex-shrink-0 mx-auto mx-lg-0">Redistribution Guide</a>
         </div>
     </div>
 </section>
@@ -243,33 +243,33 @@ include __DIR__ . '/includes/navbar.php';
 <section class="py-5 bg-white">
     <div class="container py-3">
         <div class="row g-5 align-items-center mb-5 pb-4 border-bottom">
-            <div class="col-lg-5 reveal-fade-left">
-                <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2">For Healthcare Suppliers</span>
+            <div class="col-lg-5 text-center text-lg-start reveal-fade-left">
+                <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2 d-inline-flex align-items-center mx-auto mx-lg-0">For Healthcare Suppliers</span>
                 <h2 class="fw-bold text-dark mb-3">Have Eligible Medical Surplus?</h2>
                 <p class="text-muted">Turn surplus stock into life-saving aid for under-resourced clinics rather than writing off unusable goods to medical waste incinerators.</p>
             </div>
             <div class="col-lg-7 reveal-fade-right">
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-boxes-stacked text-teal me-2"></i>Effortless Listing</div>
                             <p class="text-muted small mb-0">Register inventory with batch numbers, package seals, and storage specifications in under 2 minutes.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-clock text-teal me-2"></i>Expiry Prioritization</div>
                             <p class="text-muted small mb-0">Automated urgency scoring prioritizes near-expiry items so they reach clinics well before becoming invalid.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-key text-teal me-2"></i>Handover Security</div>
                             <p class="text-muted small mb-0">Each approved request generates a secure PIN code that the recipient presents in person.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-award text-teal me-2"></i>Impact Analytics</div>
                             <p class="text-muted small mb-0">Generate ESG-ready summaries of kilograms diverted from landfills and community lives supported.</p>
                         </div>
@@ -282,33 +282,33 @@ include __DIR__ . '/includes/navbar.php';
             <div class="col-lg-7 order-2 order-lg-1 reveal-fade-left">
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-search text-green me-2"></i>Verified Search</div>
                             <p class="text-muted small mb-0">Filter live surplus by consumable category, pickup city, packaging condition, and expiry date.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-bullhorn text-green me-2"></i>Broadcast Clinical Needs</div>
                             <p class="text-muted small mb-0">Post specific requirements for upcoming free medical camps and notify nearby registered suppliers.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-certificate text-green me-2"></i>Zero Intermediary Fees</div>
                             <p class="text-muted small mb-0">100% free peer-to-peer connection for verified NGOs, trust hospitals, and charitable dispensaries.</p>
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="p-3 border rounded-3 h-100 bg-light">
+                        <div class="p-3 border rounded-3 h-100 bg-light text-center text-sm-start">
                             <div class="fw-bold text-dark mb-1"><i class="fas fa-file-invoice text-green me-2"></i>Audited Handover Slips</div>
                             <p class="text-muted small mb-0">Automated collection certificates for internal regulatory and NGO governance audits.</p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-5 order-1 order-lg-2 reveal-fade-right">
-                <span class="badge bg-green text-green px-3 py-2 rounded-pill fw-semibold mb-2">For NGOs & Clinics</span>
+            <div class="col-lg-5 order-1 order-lg-2 text-center text-lg-start reveal-fade-right">
+                <span class="badge bg-green text-green px-3 py-2 rounded-pill fw-semibold mb-2 d-inline-flex align-items-center mx-auto mx-lg-0">For NGOs & Clinics</span>
                 <h2 class="fw-bold text-dark mb-3">Looking for Medical Supplies?</h2>
                 <p class="text-muted">Access factory-sealed personal protective equipment, sterile wound care, dressings, and non-drug kits donated by verified suppliers.</p>
             </div>
@@ -320,27 +320,31 @@ include __DIR__ . '/includes/navbar.php';
 <section class="py-5 bg-teal-subtle">
     <div class="container py-3">
         <div class="row align-items-center gy-4">
-            <div class="col-lg-6 reveal-fade-left">
-                <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2">Algorithmic Resource Allocation</span>
+            <div class="col-lg-6 text-center text-lg-start reveal-fade-left">
+                <span class="badge bg-teal text-teal px-3 py-2 rounded-pill fw-semibold mb-2 d-inline-flex align-items-center mx-auto mx-lg-0">Algorithmic Resource Allocation</span>
                 <h2 class="fw-bold text-dark mb-3">Intelligent Urgency & Proximity Matching</h2>
                 <p class="text-muted">MediCycle incorporates a multi-factor recommendation engine that connects surplus batches with recipient needs using clinical urgency, geographical proximity, and shelf-life scoring.</p>
-                <ul class="list-unstyled text-secondary small mb-4">
-                    <li class="mb-2"><i class="fas fa-check-circle text-teal me-2"></i><strong>Shelf-Life Priority:</strong> Items with less than 60 days remaining are boosted in search results.</li>
-                    <li class="mb-2"><i class="fas fa-check-circle text-teal me-2"></i><strong>Proximity Weighting:</strong> Prioritizes local city matching to eliminate cross-state logistics overhead.</li>
-                    <li class="mb-2"><i class="fas fa-check-circle text-teal me-2"></i><strong>Condition Verification:</strong> Only factory-sealed and sterile items with intact outer boxes qualify.</li>
-                </ul>
-                <a href="<?php echo BASE_URL; ?>/how-it-works.php" class="btn btn-outline-primary">
-                    <i class="fas fa-cogs me-1"></i> Learn More About Algorithm
-                </a>
+                <div class="d-flex justify-content-center justify-content-lg-start mb-4">
+                    <ul class="list-unstyled text-secondary small text-start mb-0 d-inline-block">
+                        <li class="mb-2"><i class="fas fa-check-circle text-teal me-2"></i><strong>Shelf-Life Priority:</strong> Items with less than 60 days remaining are boosted in search results.</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-teal me-2"></i><strong>Proximity Weighting:</strong> Prioritizes local city matching to eliminate cross-state logistics overhead.</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-teal me-2"></i><strong>Condition Verification:</strong> Only factory-sealed and sterile items with intact outer boxes qualify.</li>
+                    </ul>
+                </div>
+                <div class="d-flex justify-content-center justify-content-lg-start mb-4 mb-lg-0">
+                    <a href="<?php echo BASE_URL; ?>/how-it-works.php" class="btn btn-outline-primary">
+                        <i class="fas fa-cogs me-1"></i> Learn More About Algorithm
+                    </a>
+                </div>
             </div>
             <div class="col-lg-6">
                 <div class="card border-0 shadow-lg p-4 rounded-4 bg-white">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 mb-3 text-center text-sm-start">
                         <span class="match-badge"><i class="fas fa-bolt"></i> 92% Match Score</span>
                         <span class="badge bg-light text-secondary border">Simulated Allocation</span>
                     </div>
-                    <h5 class="fw-bold text-dark mb-1">Nitrile Examination Gloves (Size M)</h5>
-                    <p class="text-muted small mb-3">Donor: Apollo Healthcare Hub &bull; Ahmedabad</p>
+                    <h5 class="fw-bold text-dark mb-1 text-center text-sm-start">Nitrile Examination Gloves (Size M)</h5>
+                    <p class="text-muted small mb-3 text-center text-sm-start">Donor: Apollo Healthcare Hub &bull; Ahmedabad</p>
                     <div class="p-3 bg-light rounded-3 mb-3">
                         <div class="d-flex justify-content-between small mb-1">
                             <span>Clinical Need Match:</span>
@@ -377,7 +381,7 @@ include __DIR__ . '/includes/navbar.php';
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm h-100 p-4 border-start border-4 border-success">
-                    <h5 class="fw-bold text-success mb-3">
+                    <h5 class="fw-bold text-success mb-3 text-center text-md-start">
                         <i class="fas fa-check-circle me-2"></i> Eligible for Redistribution
                     </h5>
                     <ul class="list-unstyled small text-secondary mb-0">
@@ -392,7 +396,7 @@ include __DIR__ . '/includes/navbar.php';
 
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm h-100 p-4 border-start border-4 border-danger">
-                    <h5 class="fw-bold text-danger mb-3">
+                    <h5 class="fw-bold text-danger mb-3 text-center text-md-start">
                         <i class="fas fa-times-circle me-2"></i> Strictly Prohibited Items
                     </h5>
                     <ul class="list-unstyled small text-secondary mb-0">
