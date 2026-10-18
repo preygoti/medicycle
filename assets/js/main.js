@@ -104,6 +104,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        let isUserClickScrolling = false;
+        let userScrollTimeout = null;
+
         // Smooth scroll on bookmark link click
         mainNavLinks.forEach(function (link) {
             link.addEventListener('click', function (e) {
@@ -111,6 +114,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const targetEl = document.getElementById(targetId);
                 if (targetEl) {
                     e.preventDefault();
+
+                    // Immediately switch active highlight to the clicked tab without lingering on previous
+                    isUserClickScrolling = true;
+                    clearTimeout(userScrollTimeout);
+                    mainNavLinks.forEach(function (l) { l.classList.remove('active'); });
+                    this.classList.add('active');
+
                     const navbar = document.querySelector('.navbar');
                     const navbarOffset = (navbar ? navbar.offsetHeight : 70) + 12;
                     const elementPosition = targetEl.getBoundingClientRect().top;
@@ -128,16 +138,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         location.hash = '#' + targetId;
                     }
 
-                    // Update active state immediately
-                    mainNavLinks.forEach(function (l) { l.classList.remove('active'); });
-                    this.classList.add('active');
-
                     // Collapse mobile menu if open
                     const navbarCollapse = document.getElementById('navbarMain');
                     if (navbarCollapse && navbarCollapse.classList.contains('show')) {
                         const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
                         if (bsCollapse) bsCollapse.hide();
                     }
+
+                    // Resume scroll listener only after smooth scroll has finished
+                    userScrollTimeout = setTimeout(function () {
+                        isUserClickScrolling = false;
+                    }, 800);
                 }
             });
         });
@@ -146,8 +157,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sections.length > 0) {
             let isScrolling = false;
             const onScroll = function () {
+                // If user just clicked a nav tab, do NOT revert the active indicator while scrolling
+                if (isUserClickScrolling) return;
+
                 const navbar = document.querySelector('.navbar');
-                const scrollPos = window.pageYOffset + (navbar ? navbar.offsetHeight : 70) + 30;
+                const scrollPos = window.pageYOffset + (navbar ? navbar.offsetHeight : 70) + 40;
+
+                // Handle bottom of page
+                if ((window.innerHeight + window.pageYOffset) >= document.body.offsetHeight - 60) {
+                    const lastSec = sections[sections.length - 1];
+                    mainNavLinks.forEach(function (l) { l.classList.remove('active'); });
+                    lastSec.link.classList.add('active');
+                    return;
+                }
+
                 let current = sections[0];
                 for (let i = 0; i < sections.length; i++) {
                     if (sections[i].el.offsetTop <= scrollPos) {

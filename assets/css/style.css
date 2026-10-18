@@ -226,8 +226,8 @@ h1, h2, h3, h4, h5, h6 {
     background-color: rgba(15, 118, 110, 0.08);
 }
 
-/* Prominent indicator line below the active page heading */
-.navbar-nav .nav-link.active::after {
+/* Prominent indicator line below the active page heading with instant transition */
+.navbar-nav .nav-link::after {
     content: '';
     position: absolute;
     bottom: 3px;
@@ -237,6 +237,15 @@ h1, h2, h3, h4, h5, h6 {
     background: linear-gradient(90deg, #0F766E, #14B8A6);
     border-radius: 4px;
     box-shadow: 0 2px 5px rgba(15, 118, 110, 0.35);
+    opacity: 0;
+    transform: scaleX(0);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+    transform-origin: center;
+}
+
+.navbar-nav .nav-link.active::after {
+    opacity: 1;
+    transform: scaleX(1);
 }
 
 /* Page Heading Accent Headline/Underline */
@@ -995,11 +1004,16 @@ footer.medicycle-footer .footer-title {
         max-width: 320px;
     }
 
-    .navbar-medicycle .navbar-nav .nav-link.active::after {
+    .navbar-medicycle .navbar-nav .nav-link::after {
         width: 38px;
         left: 50%;
-        transform: translateX(-50%);
+        right: auto;
+        transform: translateX(-50%) scaleX(0);
         bottom: 5px;
+    }
+
+    .navbar-medicycle .navbar-nav .nav-link.active::after {
+        transform: translateX(-50%) scaleX(1);
     }
 
     .navbar-medicycle .navbar-collapse .ms-auto {
