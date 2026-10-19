@@ -4,12 +4,27 @@
  * PDO connection with robust error handling and UTF-8 encoding.
  */
 
-// Load environment variables if available
-$db_host = getenv('DB_HOST') ?: '127.0.0.1';
-$db_port = getenv('DB_PORT') ?: '3306';
-$db_name = getenv('DB_NAME') ?: 'medicycle_db';
-$db_user = getenv('DB_USER') ?: 'root';
-$db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+// Auto-detect environment: InfinityFree cloud production vs local development
+$httpHost = $_SERVER['HTTP_HOST'] ?? '';
+$isInfinityFree = (strpos($httpHost, 'infinityfree') !== false) 
+               || (strpos($httpHost, 'rf.gd') !== false)
+               || (isset($_SERVER['DOCUMENT_ROOT']) && strpos($_SERVER['DOCUMENT_ROOT'], 'htdocs') !== false && !is_dir('C:/xampp'));
+
+if ($isInfinityFree) {
+    // InfinityFree Cloud Production MySQL
+    $db_host = getenv('DB_HOST') ?: 'sql206.infinityfree.com';
+    $db_port = getenv('DB_PORT') ?: '3306';
+    $db_name = getenv('DB_NAME') ?: 'if0_43175843_medicycle';
+    $db_user = getenv('DB_USER') ?: 'if0_43175843';
+    $db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'PreyGoti123';
+} else {
+    // Localhost Development (XAMPP)
+    $db_host = getenv('DB_HOST') ?: '127.0.0.1';
+    $db_port = getenv('DB_PORT') ?: '3306';
+    $db_name = getenv('DB_NAME') ?: 'medicycle_db';
+    $db_user = getenv('DB_USER') ?: 'root';
+    $db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';
+}
 
 $dsn = "mysql:host={$db_host};port={$db_port};dbname={$db_name};charset=utf8mb4";
 
