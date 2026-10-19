@@ -18,8 +18,8 @@ $selectedCode = clean($_GET['code'] ?? '');
 // Fetch active collection passes awaiting pickup/handover
 $activeStmt = $pdo->prepare("
     SELECT r.*, ms.supply_name, ms.unit, ms.batch_number, ms.expiry_date,
-           su.name AS supplier_name, so.organization_name AS supplier_org, 
-           so.address AS supplier_address, so.city AS supplier_city, so.phone AS supplier_phone
+           su.name AS supplier_name, su.phone AS supplier_phone,
+           so.organization_name AS supplier_org, so.address AS supplier_address, so.city AS supplier_city
     FROM requests r
     JOIN medical_supplies ms ON r.supply_id = ms.id
     JOIN users su ON ms.supplier_id = su.id
@@ -36,7 +36,7 @@ $activePasses = $activeStmt->fetchAll(PDO::FETCH_ASSOC);
 $historyStmt = $pdo->prepare("
     SELECT r.*, ms.supply_name, ms.unit, ms.batch_number,
            su.name AS supplier_name, so.organization_name AS supplier_org,
-           d.completed_at
+           COALESCE(r.completed_at, d.delivered_at, r.updated_at) AS completed_at
     FROM requests r
     JOIN medical_supplies ms ON r.supply_id = ms.id
     JOIN users su ON ms.supplier_id = su.id
