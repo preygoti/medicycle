@@ -20,6 +20,84 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $remarks = clean($_POST['remarks'] ?? '');
         $enteredCode = strtoupper(trim(clean($_POST['handover_code'] ?? '')));
 
+        // Action: Fulfill a broadcast clinic requirement
+        if ($action === 'fulfill_requirement') {
+            $requirementId = (int)($_POST['requirement_id'] ?? 0);
+            $supplyId = (int)($_POST['supply_id'] ?? 0);
+
+            try {
+                $reqStmt = $pdo->prepare("SELECT req.*, u.name as clinic_name, u.email as clinic_email, o.organization_name, o.city as clinic_city 
+                                          FROM requirements req 
+                                          JOIN users u ON req.organization_id = u.id 
+                                          LEFT JOIN organizations o ON u.id = o.user_id 
+                                          WHERE req.id = ? LIMIT 1");
+                $reqStmt->execute([$requirementId]);
+                $clinicReq = $reqStmt->fetch();
+
+                if (!$clinicReq || $clinicReq['status'] !== 'Active') {
+                    throw new Exception("This clinic requirement is either no longer active or already fulfilled.");
+                }
+
+                $pdo->beginTransaction();
+                $handoverCode = generate_handover_code();
+
+                // If a supply from inventory was chosen
+                $selectedSupply = null;
+                if ($supplyId > 0) {
+                    $supStmt = $pdo->prepare("SELECT * FROM medical_supplies WHERE id = ? AND supplier_id = ? AND status = 'Available' LIMIT 1");
+                    $supStmt->execute([$supplyId, $userId]);
+                    $selectedSupply = $supStmt->fetch();
+                    if ($selectedSupply) {
+                        $deductQty = min((int)$clinicReq['required_quantity'], (int)$selectedSupply['quantity']);
+                        $remainingQty = $selectedSupply['quantity'] - $deductQty;
+                        $newStatus = ($remainingQty == 0) ? 'Reserved' : 'Available';
+                        $updSupply = $pdo->prepare("UPDATE medical_supplies SET quantity = ?, status = ?, updated_at = NOW() WHERE id = ?");
+                        $updSupply->execute([$remainingQty, $newStatus, $supplyId]);
+                    }
+                }
+
+                // 1. Mark requirement as Fulfilled
+                $updReq = $pdo->prepare("UPDATE requirements SET status = 'Fulfilled', fulfilled_by_supplier_id = ?, handover_code = ?, fulfilled_at = NOW() WHERE id = ?");
+                $updReq->execute([$userId, $handoverCode, $requirementId]);
+
+                // 2. Also insert into requests table with Accepted status so both parties have a direct handover tracking code in Verify Handover
+                $insReq = $pdo->prepare("INSERT INTO requests 
+                    (supply_id, requester_id, requested_quantity, purpose, urgency, status, supplier_remarks, handover_code, requested_at, approved_at) 
+                    VALUES (?, ?, ?, ?, ?, 'Accepted', ?, ?, NOW(), NOW())");
+                $insReq->execute([
+                    $selectedSupply ? $selectedSupply['id'] : null,
+                    $clinicReq['organization_id'],
+                    $clinicReq['required_quantity'],
+                    'Fulfilled Clinical Requirement: ' . $clinicReq['supply_name'],
+                    $clinicReq['urgency'],
+                    $remarks ?: 'Supplier accepted to fulfill this broadcast clinical requirement.',
+                    $handoverCode
+                ]);
+
+                // 3. Notify the NGO clinic
+                $supplierOrg = $_SESSION['org_name'] ?? 'Healthcare Supplier';
+                create_notification(
+                    $pdo,
+                    $clinicReq['organization_id'],
+                    'Clinic Requirement Accepted by Supplier!',
+                    "{$supplierOrg} accepted to fulfill your requirement for {$clinicReq['required_quantity']} {$clinicReq['unit']} of {$clinicReq['supply_name']}. Handover Code: {$handoverCode}.",
+                    'ngo/my-requirements.php'
+                );
+
+                $pdo->commit();
+                set_flash('success', "Clinic requirement accepted! Handover Code #{$handoverCode} generated. The clinic has been notified.");
+                header('Location: ' . BASE_URL . '/supplier/requests.php?tab=broadcasts');
+                exit;
+
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                error_log("Fulfill requirement error: " . $e->getMessage());
+                set_flash('danger', $e->getMessage());
+                header('Location: ' . BASE_URL . '/supplier/requests.php?tab=broadcasts');
+                exit;
+            }
+        }
+
         try {
             // Verify that this request belongs to one of this supplier's supplies
             $reqStmt = $pdo->prepare("SELECT r.*, s.supplier_id, s.supply_name, s.quantity, s.unit, s.location, 
@@ -163,9 +241,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all requests for this supplier's supplies
+// Tab switcher: direct supply requests vs posted clinic broadcast requirements
+$currentTab = clean($_GET['tab'] ?? '');
+if (empty($currentTab)) {
+    $currentTab = 'direct';
+}
+
 $statusFilter = clean($_GET['status'] ?? '');
 
+// 1. Fetch direct requests for this supplier's inventory supplies
 $sql = "SELECT r.*, s.supply_name, s.unit, s.quantity as available_qty, s.location as pickup_hub,
                u.name as requester_name, u.email as requester_email, u.phone as requester_phone,
                o.organization_name, o.city as ngo_city, o.organization_type
@@ -187,6 +271,32 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $requests = $stmt->fetchAll();
 
+// 2. Fetch clinic requirements broadcast by NGOs/clinics
+$clinicReqStmt = $pdo->prepare("
+    SELECT req.*, c.category_name,
+           u.name as clinic_contact_name, u.email as clinic_email, u.phone as clinic_phone,
+           o.organization_name, o.city as clinic_city, o.address as clinic_address, o.organization_type,
+           sup.name as fulfilled_supplier_name
+    FROM requirements req
+    JOIN categories c ON req.category_id = c.id
+    JOIN users u ON req.organization_id = u.id
+    LEFT JOIN organizations o ON u.id = o.user_id
+    LEFT JOIN users sup ON req.fulfilled_by_supplier_id = sup.id
+    ORDER BY CASE WHEN req.status = 'Active' THEN 0 ELSE 1 END, req.created_at DESC
+");
+$clinicReqStmt->execute();
+$clinicRequirements = $clinicReqStmt->fetchAll();
+
+$activeClinicReqCount = 0;
+foreach ($clinicRequirements as $cr) {
+    if ($cr['status'] === 'Active') $activeClinicReqCount++;
+}
+
+// 3. Supplier's available supplies for fulfillment dropdown
+$mySuppliesStmt = $pdo->prepare("SELECT id, supply_name, quantity, unit, batch_number, expiry_date, location FROM medical_supplies WHERE supplier_id = ? AND status = 'Available' AND quantity > 0 ORDER BY supply_name ASC");
+$mySuppliesStmt->execute([$userId]);
+$myAvailableSupplies = $mySuppliesStmt->fetchAll();
+
 $pageTitle = 'Incoming Requests & Handovers';
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/navbar.php';
@@ -197,184 +307,386 @@ include __DIR__ . '/../includes/navbar.php';
     <div class="app-content">
         <?php echo render_flash_messages(); ?>
 
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-3">
             <div>
                 <h3 class="fw-bold text-dark mb-1">Incoming Requests & Direct Handovers</h3>
-                <p class="text-muted small mb-0">Manage clinic requests, issue Handover Codes, and verify direct collections</p>
+                <p class="text-muted small mb-0">Manage clinic requests, fulfill broadcast clinical needs, and issue Handover Codes</p>
             </div>
-            <!-- Status filter buttons with space between them -->
-            <div class="d-flex flex-wrap gap-2">
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo empty($statusFilter) ? 'btn-secondary text-white fw-semibold' : 'btn-outline-secondary bg-white'; ?>">All</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Pending" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Pending' ? 'btn-warning text-dark fw-bold' : 'btn-outline-warning text-dark bg-white'; ?>">Pending</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Accepted" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Accepted' ? 'btn-info text-white fw-bold' : 'btn-outline-info bg-white'; ?>">Accepted</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Ready for Handover" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Ready for Handover' ? 'btn-primary text-white fw-bold' : 'btn-outline-primary bg-white'; ?>">Ready</a>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?status=Completed" class="btn btn-sm rounded-pill px-3 shadow-xs <?php echo $statusFilter === 'Completed' ? 'btn-success text-white fw-bold' : 'btn-outline-success bg-white'; ?>">Completed</a>
-            </div>
+            <?php if ($currentTab !== 'broadcasts'): ?>
+                <!-- Status filter buttons with dedicated .filter-pill class (Zero white-on-white glitch) -->
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=direct" class="filter-pill <?php echo empty($statusFilter) ? 'active-all' : ''; ?>">All</a>
+                    <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=direct&status=Pending" class="filter-pill <?php echo $statusFilter === 'Pending' ? 'active-pending' : ''; ?>">Pending</a>
+                    <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=direct&status=Accepted" class="filter-pill <?php echo $statusFilter === 'Accepted' ? 'active-accepted' : ''; ?>">Accepted</a>
+                    <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=direct&status=Ready for Handover" class="filter-pill <?php echo $statusFilter === 'Ready for Handover' ? 'active-ready' : ''; ?>">Ready</a>
+                    <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=direct&status=Completed" class="filter-pill <?php echo $statusFilter === 'Completed' ? 'active-completed' : ''; ?>">Completed</a>
+                </div>
+            <?php endif; ?>
         </div>
 
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Supply Item</th>
-                                <th>Recipient Organization</th>
-                                <th>Requested Qty</th>
-                                <th>Urgency & Date</th>
-                                <th>Handover Status</th>
-                                <th class="text-start pe-4 text-nowrap">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($requests)): ?>
-                                <?php foreach ($requests as $r): ?>
-                                    <tr id="req-<?php echo $r['id']; ?>">
-                                        <td class="ps-4">
-                                            <span class="fw-bold text-dark d-block"><?php echo e($r['supply_name']); ?></span>
-                                            <span class="text-muted small">In Stock: <?php echo $r['available_qty'] . ' ' . e($r['unit']); ?></span>
-                                        </td>
-                                        <td>
-                                            <span class="fw-semibold text-dark d-block"><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></span>
-                                            <span class="text-muted small">
-                                                <i class="fas fa-map-marker-alt me-1 text-danger"></i><?php echo e($r['ngo_city'] ?? 'City N/A'); ?> | 
-                                                <i class="fas fa-phone me-1"></i><?php echo e($r['requester_phone']); ?>
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold fs-6 text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e($r['unit']); ?></span>
-                                        </td>
-                                        <td>
-                                            <?php echo priority_badge($r['urgency'] ?? 'Medium'); ?>
-                                            <?php if (!empty($r['preferred_collection_date'])): ?>
-                                                <div class="small text-muted mt-1">
-                                                    <i class="far fa-calendar-alt me-1"></i>Pickup: <?php echo format_date($r['preferred_collection_date']); ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <?php echo status_badge($r['status']); ?>
-                                            <?php if (!empty($r['supplier_remarks'])): ?>
-                                                <div class="text-muted small mt-1 text-truncate" style="max-width: 150px;" title="<?php echo e($r['supplier_remarks']); ?>">
-                                                    <i class="fas fa-comment-dots me-1"></i><?php echo e($r['supplier_remarks']); ?>
-                                                </div>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td class="text-start pe-4 text-nowrap">
-                                            <?php if ($r['status'] === 'Pending'): ?>
-                                                <div class="d-inline-flex align-items-center gap-2 justify-content-start">
-                                                    <button type="button" class="btn btn-sm btn-success rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#acceptModal<?php echo $r['id']; ?>">
-                                                        <i class="fas fa-check"></i> Accept
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#rejectModal<?php echo $r['id']; ?>">
-                                                        <i class="fas fa-times"></i> Reject
-                                                    </button>
-                                                </div>
-                                            <?php elseif (in_array($r['status'], ['Accepted', 'Ready for Handover', 'In Transit', 'Collected'])): ?>
-                                                <span class="badge rounded-pill bg-light text-secondary border px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
-                                                    <i class="fas fa-handshake text-teal"></i> Verify at Handover
+        <!-- Mode Tab Navigation: Direct Requisitions vs Clinic Requirements Broadcasts -->
+        <ul class="nav nav-pills custom-req-tabs mb-4 gap-2" id="requestModeTabs">
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 py-2 fw-semibold <?php echo $currentTab !== 'broadcasts' ? 'active shadow-sm' : 'bg-white border text-secondary'; ?>" href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=direct">
+                    <i class="fas fa-boxes-packing me-1"></i> Direct Supply Requests 
+                    <span class="badge rounded-pill ms-2 <?php echo $currentTab !== 'broadcasts' ? 'bg-white text-teal' : 'bg-secondary text-white'; ?>"><?php echo count($requests); ?></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link rounded-pill px-4 py-2 fw-semibold <?php echo $currentTab === 'broadcasts' ? 'active shadow-sm' : 'bg-white border text-secondary'; ?>" href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=broadcasts">
+                    <i class="fas fa-bullhorn me-1"></i> Posted Clinic Requirements 
+                    <?php if ($activeClinicReqCount > 0): ?>
+                        <span class="badge rounded-pill ms-2 bg-danger text-white"><?php echo $activeClinicReqCount; ?> Active</span>
+                    <?php else: ?>
+                        <span class="badge rounded-pill ms-2 bg-light text-secondary"><?php echo count($clinicRequirements); ?></span>
+                    <?php endif; ?>
+                </a>
+            </li>
+        </ul>
+
+        <?php if ($currentTab !== 'broadcasts' && $activeClinicReqCount > 0): ?>
+            <!-- Alert Banner for Broadcast Clinical Needs -->
+            <div class="alert alert-info border-0 shadow-xs rounded-4 d-flex flex-wrap align-items-center justify-content-between mb-4 py-3 px-3 gap-2" style="background:#f0fdfa; border-left:4px solid #0f766e !important;">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                        <i class="fas fa-bullhorn"></i>
+                    </span>
+                    <span class="small fw-semibold text-dark">
+                        <strong><?php echo $activeClinicReqCount; ?> Clinic Requirement<?php echo $activeClinicReqCount > 1 ? 's' : ''; ?></strong> broadcast by recipient healthcare clinics waiting for supplier supplies.
+                    </span>
+                </div>
+                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=broadcasts" class="btn btn-sm text-white rounded-pill px-3 shadow-2xs fw-semibold" style="background:#0f766e;">
+                    View Clinic Needs <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($currentTab === 'broadcasts'): ?>
+            <!-- Clinic Requirements Broadcasts Table -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                            <i class="fas fa-bullhorn text-teal"></i> Clinic Requirements Broadcast Network
+                        </h6>
+                        <small class="text-muted">Broadcast needs from clinics seeking medicine and medical supplies</small>
+                    </div>
+                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold">
+                        <?php echo count($clinicRequirements); ?> Total Needs
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Item Needed</th>
+                                    <th>Clinic / Recipient Organization</th>
+                                    <th>Quantity Needed</th>
+                                    <th>Urgency & Required By</th>
+                                    <th>Broadcast Status</th>
+                                    <th class="text-start pe-4 text-nowrap">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($clinicRequirements)): ?>
+                                    <?php foreach ($clinicRequirements as $cr): ?>
+                                        <tr id="clinic-req-<?php echo $cr['id']; ?>">
+                                            <td class="ps-4">
+                                                <span class="fw-bold text-dark d-block"><?php echo e($cr['supply_name']); ?></span>
+                                                <span class="badge bg-light text-secondary border mt-1" style="font-size:0.7rem;"><?php echo e($cr['category_name']); ?></span>
+                                                <?php if (!empty($cr['description'])): ?>
+                                                    <div class="text-muted small mt-1 text-truncate" style="max-width: 220px;" title="<?php echo e($cr['description']); ?>">
+                                                        <i class="fas fa-info-circle me-1 text-teal"></i><?php echo e($cr['description']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold text-dark d-block"><?php echo e($cr['organization_name'] ?? $cr['clinic_contact_name']); ?></span>
+                                                <span class="text-muted small">
+                                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i><?php echo e($cr['clinic_city']); ?> | 
+                                                    <i class="fas fa-phone me-1"></i><?php echo e($cr['clinic_phone'] ?: 'N/A'); ?>
                                                 </span>
-                                            <?php else: ?>
-                                                <?php if ($r['status'] === 'Completed'): ?>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold fs-6 text-teal"><?php echo number_format($cr['required_quantity']) . ' ' . e($cr['unit']); ?></span>
+                                            </td>
+                                            <td>
+                                                <?php echo priority_badge($cr['urgency'] ?? 'Medium'); ?>
+                                                <?php if (!empty($cr['required_by'])): ?>
+                                                    <div class="small text-muted mt-1">
+                                                        <i class="far fa-calendar-alt me-1"></i>Needed: <?php echo format_date($cr['required_by']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo status_badge($cr['status']); ?>
+                                                <?php if (!empty($cr['handover_code'])): ?>
+                                                    <div class="mt-1">
+                                                        <span class="badge rounded-pill text-white fw-bold px-2 py-1 shadow-2xs" style="background:#0f766e; font-size:0.68rem;">
+                                                            <i class="fas fa-qrcode me-1"></i> Code: <?php echo e($cr['handover_code']); ?>
+                                                        </span>
+                                                    </div>
+                                                <?php endif; ?>
+                                                <?php if (!empty($cr['fulfilled_supplier_name'])): ?>
+                                                    <div class="small text-muted mt-1" style="font-size:0.7rem;">
+                                                        Fulfilled by: <?php echo e($cr['fulfilled_supplier_name']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-start pe-4 text-nowrap">
+                                                <?php if ($cr['status'] === 'Active'): ?>
+                                                    <button type="button" class="btn btn-sm text-white rounded-pill px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1 fw-semibold" style="background:#0f766e;" data-bs-toggle="modal" data-bs-target="#fulfillModal<?php echo $cr['id']; ?>">
+                                                        <i class="fas fa-hand-holding-medical"></i> Fulfill Need
+                                                    </button>
+                                                <?php else: ?>
                                                     <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
                                                         <i class="fas fa-circle-check"></i> Fulfilled
                                                     </span>
-                                                <?php elseif ($r['status'] === 'Rejected'): ?>
-                                                    <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
-                                                        <i class="fas fa-circle-xmark"></i> Declined
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="badge rounded-pill bg-light text-secondary border px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
-                                                        <i class="fas fa-check-circle text-muted"></i> No Action Needed
-                                                    </span>
                                                 <?php endif; ?>
-                                            <?php endif; ?>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Fulfill Modal -->
+                                        <?php if ($cr['status'] === 'Active'): ?>
+                                            <div class="modal fade" id="fulfillModal<?php echo $cr['id']; ?>" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content border-0 shadow-lg rounded-4">
+                                                        <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
+                                                            <?php echo csrf_field(); ?>
+                                                            <input type="hidden" name="action" value="fulfill_requirement">
+                                                            <input type="hidden" name="requirement_id" value="<?php echo $cr['id']; ?>">
+                                                            <div class="modal-header border-bottom py-3">
+                                                                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                                                    <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                                                                        <i class="fas fa-hand-holding-medical"></i>
+                                                                    </span>
+                                                                    Fulfill Clinic Requirement
+                                                                </h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body p-4">
+                                                                <div class="p-3 rounded-3 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                        <strong class="text-dark fs-6"><?php echo e($cr['supply_name']); ?></strong>
+                                                                        <span class="badge bg-teal text-white" style="background:#0f766e;"><?php echo number_format($cr['required_quantity']) . ' ' . e($cr['unit']); ?></span>
+                                                                    </div>
+                                                                    <div class="small text-muted">Clinic: <?php echo e($cr['organization_name'] ?? $cr['clinic_contact_name']); ?> (<?php echo e($cr['clinic_city']); ?>)</div>
+                                                                    <?php if (!empty($cr['description'])): ?>
+                                                                        <div class="small text-secondary mt-1"><em>"<?php echo e($cr['description']); ?>"</em></div>
+                                                                    <?php endif; ?>
+                                                                </div>
+
+                                                                <div class="mb-3">
+                                                                    <label class="form-label small fw-semibold">Allocate From Your Listed Inventory (Optional)</label>
+                                                                    <select name="supply_id" class="form-select form-select-sm">
+                                                                        <option value="0">-- Provide Directly / Source Direct --</option>
+                                                                        <?php foreach ($myAvailableSupplies as $sup): ?>
+                                                                            <option value="<?php echo $sup['id']; ?>">
+                                                                                <?php echo e($sup['supply_name']); ?> (Available: <?php echo $sup['quantity'] . ' ' . e($sup['unit']); ?> | Batch: <?php echo e($sup['batch_number'] ?: 'N/A'); ?>)
+                                                                            </option>
+                                                                        <?php endforeach; ?>
+                                                                    </select>
+                                                                    <div class="form-text small">Selecting a batch automatically reserves inventory for this clinic.</div>
+                                                                </div>
+
+                                                                <div class="mb-2">
+                                                                    <label class="form-label small fw-semibold">Collection / Pickup Instructions</label>
+                                                                    <textarea name="remarks" class="form-control form-control-sm" rows="3" placeholder="e.g. Ready for pickup at Pharmacy Dispatch Counter, Mon-Fri 10am-4pm. Please show Handover Code."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer border-top py-3">
+                                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-teal text-white rounded-pill px-4 shadow-xs fw-semibold" style="background:#0f766e;">
+                                                                    <i class="fas fa-check-circle me-1"></i> Accept & Issue Handover Code
+                                                                </button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fas fa-clipboard-check fs-3 text-secondary d-block mb-2"></i>
+                                            No active clinical requirements posted by clinics at the moment.
                                         </td>
                                     </tr>
-
-                                    <!-- Accept Modal -->
-                                    <div class="modal fade" id="acceptModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow-lg rounded-4">
-                                                <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
-                                                    <?php echo csrf_field(); ?>
-                                                    <input type="hidden" name="action" value="accept">
-                                                    <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                    <div class="modal-header border-bottom py-3">
-                                                        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                                                                <i class="fas fa-check"></i>
-                                                            </span>
-                                                            Accept Requisition Request
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body p-4">
-                                                        <p class="text-secondary small mb-3">
-                                                            Accepting this request will allocate <strong><?php echo $r['requested_quantity'] . ' ' . e($r['unit']); ?></strong> of <strong><?php echo e($r['supply_name']); ?></strong> to <strong><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></strong>. The recipient clinic will receive their secure verification code for pickup.
-                                                        </p>
-                                                        <div class="mb-2">
-                                                            <label class="form-label small fw-semibold">Pickup / Handover Instructions</label>
-                                                            <textarea name="remarks" class="form-control" rows="3" placeholder="e.g. Ready for collection Mon-Fri 10am-4pm at Main Pharmacy Counter."></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer border-top py-3">
-                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-xs">
-                                                            <i class="fas fa-check-circle me-1"></i> Confirm & Accept Request
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Reject Modal -->
-                                    <div class="modal fade" id="rejectModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content border-0 shadow-lg rounded-4">
-                                                <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
-                                                    <?php echo csrf_field(); ?>
-                                                    <input type="hidden" name="action" value="reject">
-                                                    <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                    <div class="modal-header border-bottom py-3">
-                                                        <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
-                                                            <span class="rounded-circle p-2 d-inline-flex" style="background:#fee2e2; color:#ef4444;">
-                                                                <i class="fas fa-times"></i>
-                                                            </span>
-                                                            Decline Requisition Request
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                    </div>
-                                                    <div class="modal-body p-4">
-                                                        <div class="mb-2">
-                                                            <label class="form-label small fw-semibold">Reason for Declining *</label>
-                                                            <textarea name="remarks" class="form-control" rows="3" placeholder="Stock reserved, clinic capacity mismatch, or other reason..." required></textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer border-top py-3">
-                                                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                        <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-xs">Decline Request</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="fas fa-inbox fs-3 text-secondary d-block mb-2"></i>
-                                        No requisition requests found matching your filter.
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        <?php else: ?>
+            <!-- Direct Supply Requests Table -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Supply Item</th>
+                                    <th>Recipient Organization</th>
+                                    <th>Requested Qty</th>
+                                    <th>Urgency & Date</th>
+                                    <th>Handover Status</th>
+                                    <th class="text-start pe-4 text-nowrap">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($requests)): ?>
+                                    <?php foreach ($requests as $r): ?>
+                                        <tr id="req-<?php echo $r['id']; ?>">
+                                            <td class="ps-4">
+                                                <span class="fw-bold text-dark d-block"><?php echo e($r['supply_name']); ?></span>
+                                                <span class="text-muted small">In Stock: <?php echo $r['available_qty'] . ' ' . e($r['unit']); ?></span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-semibold text-dark d-block"><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></span>
+                                                <span class="text-muted small">
+                                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i><?php echo e($r['ngo_city'] ?? 'City N/A'); ?> | 
+                                                    <i class="fas fa-phone me-1"></i><?php echo e($r['requester_phone']); ?>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-bold fs-6 text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e($r['unit']); ?></span>
+                                            </td>
+                                            <td>
+                                                <?php echo priority_badge($r['urgency'] ?? 'Medium'); ?>
+                                                <?php if (!empty($r['preferred_collection_date'])): ?>
+                                                    <div class="small text-muted mt-1">
+                                                        <i class="far fa-calendar-alt me-1"></i>Pickup: <?php echo format_date($r['preferred_collection_date']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php echo status_badge($r['status']); ?>
+                                                <?php if (!empty($r['supplier_remarks'])): ?>
+                                                    <div class="text-muted small mt-1 text-truncate" style="max-width: 150px;" title="<?php echo e($r['supplier_remarks']); ?>">
+                                                        <i class="fas fa-comment-dots me-1"></i><?php echo e($r['supplier_remarks']); ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-start pe-4 text-nowrap">
+                                                <?php if ($r['status'] === 'Pending'): ?>
+                                                    <div class="d-inline-flex align-items-center gap-2 justify-content-start">
+                                                        <button type="button" class="btn btn-sm btn-success rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#acceptModal<?php echo $r['id']; ?>">
+                                                            <i class="fas fa-check"></i> Accept
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-2 px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#rejectModal<?php echo $r['id']; ?>">
+                                                            <i class="fas fa-times"></i> Reject
+                                                        </button>
+                                                    </div>
+                                                <?php elseif (in_array($r['status'], ['Accepted', 'Ready for Handover', 'In Transit', 'Collected'])): ?>
+                                                    <span class="badge rounded-pill bg-light text-secondary border px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                        <i class="fas fa-handshake text-teal"></i> Verify at Handover
+                                                    </span>
+                                                <?php else: ?>
+                                                    <?php if ($r['status'] === 'Completed'): ?>
+                                                        <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                            <i class="fas fa-circle-check"></i> Fulfilled
+                                                        </span>
+                                                    <?php elseif ($r['status'] === 'Rejected'): ?>
+                                                        <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                            <i class="fas fa-circle-xmark"></i> Declined
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="badge rounded-pill bg-light text-secondary border px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" style="font-size:0.76rem;">
+                                                            <i class="fas fa-check-circle text-muted"></i> No Action Needed
+                                                        </span>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Accept Modal -->
+                                        <div class="modal fade" id="acceptModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                                    <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
+                                                        <?php echo csrf_field(); ?>
+                                                        <input type="hidden" name="action" value="accept">
+                                                        <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
+                                                        <div class="modal-header border-bottom py-3">
+                                                            <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                                                <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                                                                    <i class="fas fa-check"></i>
+                                                                </span>
+                                                                Accept Requisition Request
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body p-4">
+                                                            <p class="text-secondary small mb-3">
+                                                                Accepting this request will allocate <strong><?php echo $r['requested_quantity'] . ' ' . e($r['unit']); ?></strong> of <strong><?php echo e($r['supply_name']); ?></strong> to <strong><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></strong>. The recipient clinic will receive their secure verification code for pickup.
+                                                            </p>
+                                                            <div class="mb-2">
+                                                                <label class="form-label small fw-semibold">Pickup / Handover Instructions</label>
+                                                                <textarea name="remarks" class="form-control" rows="3" placeholder="e.g. Ready for collection Mon-Fri 10am-4pm at Main Pharmacy Counter."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-top py-3">
+                                                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-success rounded-pill px-4 shadow-xs">
+                                                                <i class="fas fa-check-circle me-1"></i> Confirm & Accept Request
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Reject Modal -->
+                                        <div class="modal fade" id="rejectModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow-lg rounded-4">
+                                                    <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
+                                                        <?php echo csrf_field(); ?>
+                                                        <input type="hidden" name="action" value="reject">
+                                                        <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
+                                                        <div class="modal-header border-bottom py-3">
+                                                            <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                                                                <span class="rounded-circle p-2 d-inline-flex" style="background:#fee2e2; color:#ef4444;">
+                                                                    <i class="fas fa-times"></i>
+                                                                </span>
+                                                                Decline Requisition Request
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body p-4">
+                                                            <div class="mb-2">
+                                                                <label class="form-label small fw-semibold">Reason for Declining *</label>
+                                                                <textarea name="remarks" class="form-control" rows="3" placeholder="Stock reserved, clinic capacity mismatch, or other reason..." required></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer border-top py-3">
+                                                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-xs">Decline Request</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fas fa-inbox fs-3 text-secondary d-block mb-2"></i>
+                                            No requisition requests found matching your filter.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
 
     </div>
 </div>

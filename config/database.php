@@ -21,6 +21,11 @@ $options = [
 
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+    try {
+        $pdo->exec("SET time_zone = '+05:30'");
+    } catch (Exception $tzEx) {
+        // Fallback silently if hosting MySQL restricts timezone commands
+    }
 } catch (PDOException $e) {
     // In production, log error instead of raw message
     error_log("Database connection error: " . $e->getMessage());

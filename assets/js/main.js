@@ -373,7 +373,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let pendingRefresh = false;
         let isRefreshing = false;
         let lastKeystrokeTime = 0;
-        const POLL_INTERVAL = 10000; // 10s relaxed interval; multi-tab updates sync in <50ms via BroadcastChannel
+        const POLL_INTERVAL = 20000; // 20s relaxed interval to optimize server response and minimize PHP thread contention
 
         // Track actual typing activity so focused inputs in background windows never block live updates
         document.addEventListener('keydown', function (e) {
@@ -418,14 +418,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // If this page load just displayed a flash alert (meaning an action was just submitted), ping all other tabs immediately
         if (document.querySelector('.alert-dismissible')) {
-            setTimeout(broadcastStateChange, 80);
+            setTimeout(broadcastStateChange, 120);
         }
-
-        // Also ping when any form is submitted
-        document.addEventListener('submit', function () {
-            setTimeout(broadcastStateChange, 250);
-            setTimeout(broadcastStateChange, 800);
-        }, true);
 
         // Web Audio chime for live incoming updates
         function playSoftChime() {

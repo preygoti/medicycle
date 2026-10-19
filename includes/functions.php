@@ -41,6 +41,39 @@ function format_datetime($datetimeStr, $format = 'd M Y, h:i A') {
 }
 
 /**
+ * Human-friendly relative time (e.g. Just now, 5m ago, 2h ago, Yesterday)
+ * Perfectly synced with Asia/Kolkata timezone
+ */
+function time_ago($datetimeStr) {
+    if (empty($datetimeStr) || $datetimeStr === '0000-00-00 00:00:00') {
+        return 'Just now';
+    }
+    $timestamp = is_numeric($datetimeStr) ? (int)$datetimeStr : strtotime($datetimeStr);
+    if (!$timestamp) return 'Just now';
+
+    $diff = time() - $timestamp;
+    if ($diff < 45) {
+        return 'Just now';
+    }
+    $minutes = round($diff / 60);
+    if ($minutes < 60) {
+        return $minutes . 'm ago';
+    }
+    $hours = round($diff / 3600);
+    if ($hours < 24) {
+        return $hours . 'h ago';
+    }
+    $days = round($diff / 86400);
+    if ($days === 1) {
+        return 'Yesterday';
+    }
+    if ($days < 7) {
+        return $days . 'd ago';
+    }
+    return date('d M', $timestamp);
+}
+
+/**
  * Format packaging unit safely, ensuring raw numbers are converted to clean Units
  */
 function format_unit($unit) {
@@ -281,8 +314,9 @@ function render_handshake_pass_html($code, $requestId = null, $title = 'Handover
  */
 function create_notification($pdo, $user_id, $title, $message, $link = null) {
     try {
-        $stmt = $pdo->prepare("INSERT INTO notifications (user_id, title, message, link, is_read, created_at) VALUES (?, ?, ?, ?, 0, NOW())");
-        return $stmt->execute([$user_id, $title, $message, $link]);
+        $now = date('Y-m-d H:i:s');
+        $stmt = $pdo->prepare("INSERT INTO notifications (user_id, title, message, link, is_read, created_at) VALUES (?, ?, ?, ?, 0, ?)");
+        return $stmt->execute([$user_id, $title, $message, $link, $now]);
     } catch (PDOException $e) {
         error_log("Failed to insert notification: " . $e->getMessage());
         return false;

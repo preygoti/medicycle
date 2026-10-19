@@ -70,10 +70,22 @@ $isRegisterActive = ($currentScript === 'register.php');
                             <?php if (!empty($recentNotifs)): ?>
                                 <?php foreach ($recentNotifs as $notif): ?>
                                     <li class="p-2 border-bottom small <?php echo $notif['is_read'] ? '' : 'bg-light rounded'; ?>">
-                                        <div class="fw-semibold text-dark"><?php echo e($notif['title']); ?></div>
-                                        <div class="text-muted small mt-1"><?php echo e($notif['message']); ?></div>
-                                        <div class="text-secondary small mt-1" style="font-size: 0.72rem;">
-                                            <i class="far fa-clock me-1"></i><?php echo format_datetime($notif['created_at']); ?>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <div class="fw-semibold text-dark"><?php echo e($notif['title']); ?></div>
+                                            <span class="badge rounded-pill text-teal border border-teal-subtle bg-teal-subtle" style="font-size:0.62rem; padding: 2px 7px;">
+                                                <?php echo time_ago($notif['created_at']); ?>
+                                            </span>
+                                        </div>
+                                        <div class="text-muted small mt-1" style="font-size:0.78rem; line-height:1.35;"><?php echo e($notif['message']); ?></div>
+                                        <div class="d-flex justify-content-between align-items-center text-secondary small mt-1 pt-1" style="font-size: 0.70rem;">
+                                            <span title="<?php echo format_datetime($notif['created_at']); ?>">
+                                                <i class="far fa-clock me-1 text-teal"></i><?php echo format_datetime($notif['created_at'], 'h:i A'); ?>
+                                            </span>
+                                            <?php if (!empty($notif['link'])): ?>
+                                                <a href="<?php echo BASE_URL . '/' . ltrim($notif['link'], '/'); ?>" class="text-teal text-decoration-none fw-bold" style="font-size:0.72rem;">
+                                                    Open <i class="fas fa-arrow-right ms-1"></i>
+                                                </a>
+                                            <?php endif; ?>
                                         </div>
                                     </li>
                                 <?php endforeach; ?>

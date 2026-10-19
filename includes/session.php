@@ -71,6 +71,10 @@ function current_user() {
     if (!is_logged_in()) {
         return null;
     }
+    static $cachedUser = null;
+    if ($cachedUser !== null) {
+        return $cachedUser;
+    }
     global $pdo;
     if (isset($pdo) && !empty($_SESSION['user_id'])) {
         try {
@@ -94,7 +98,7 @@ function current_user() {
             $_SESSION['verification_status'] = $u['verification_status'] ?? 'verified';
         } catch (Exception $e) {}
     }
-    return [
+    $cachedUser = [
         'id' => $_SESSION['user_id'],
         'name' => $_SESSION['user_name'] ?? 'User',
         'email' => $_SESSION['user_email'] ?? '',
@@ -103,6 +107,7 @@ function current_user() {
         'org_name' => $_SESSION['org_name'] ?? null,
         'verification_status' => $_SESSION['verification_status'] ?? 'verified',
     ];
+    return $cachedUser;
 }
 
 /**

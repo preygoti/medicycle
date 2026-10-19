@@ -118,7 +118,16 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <span class="badge bg-light text-muted border">No match yet</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?php echo status_badge($r['status']); ?></td>
+                                        <td>
+                                            <?php echo status_badge($r['status']); ?>
+                                            <?php if (!empty($r['handover_code'])): ?>
+                                                <div class="mt-1">
+                                                    <span class="badge rounded-pill text-white fw-bold px-2 py-1 shadow-2xs" style="background:#0f766e; font-size:0.7rem;">
+                                                        <i class="fas fa-qrcode me-1"></i> Code: <?php echo e($r['handover_code']); ?>
+                                                    </span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="text-start pe-4">
                                             <div class="d-inline-flex align-items-center justify-content-start gap-2">
                                                 <a href="<?php echo BASE_URL; ?>/ngo/edit-requirement.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-primary rounded-2 px-2 py-1 shadow-xs" title="Edit Requirement">

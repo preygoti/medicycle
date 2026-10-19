@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $s['id'],
                         'New Supply Need Broadcast',
                         "{$orgName} posted a clinical need for {$formData['required_quantity']} {$formData['unit']} of {$formData['supply_name']} in {$formData['city']}.",
-                        'supplier/inventory.php'
+                        'supplier/requests.php?tab=broadcasts'
                     );
                 }
 
