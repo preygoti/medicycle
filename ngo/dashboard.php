@@ -227,8 +227,8 @@ include __DIR__ . '/../includes/navbar.php';
                                         <td class="text-start pe-4">
                                             <div class="d-inline-flex align-items-center justify-content-start gap-2">
                                                 <?php if (!empty($r['handover_code'])): ?>
-                                                    <a href="<?php echo BASE_URL; ?>/ngo/verify-handover.php?code=<?php echo urlencode($r['handover_code']); ?>" class="btn btn-xs btn-teal text-white py-0 px-2 fw-semibold" style="background:#0f766e; font-size:0.75rem; white-space: nowrap !important;" title="View Handshake Pass & PIN">
-                                                        <i class="fas fa-handshake me-1"></i>Pass
+                                                    <a href="<?php echo BASE_URL; ?>/ngo/code-pass.php?code=<?php echo urlencode($r['handover_code']); ?>" class="btn btn-xs btn-teal text-white py-0 px-2 fw-semibold" style="background:#0f766e; font-size:0.75rem; white-space: nowrap !important;" title="View Collection Pass & PIN">
+                                                        <i class="fas fa-qrcode me-1"></i>Pass
                                                     </a>
                                                 <?php endif; ?>
                                                 <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem; white-space: nowrap !important;">
