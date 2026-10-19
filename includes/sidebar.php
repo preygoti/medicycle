@@ -145,7 +145,7 @@ $userRole = $currentUser['role'] ?? ($_SESSION['role'] ?? '');
             </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo (is_active_link('code-pass.php', 'ngo') || is_active_link('verify-handover.php', 'ngo')); ?>" href="<?php echo BASE_URL; ?>/ngo/code-pass.php">
-                    <i class="fas fa-qrcode text-teal"></i> Code Pass & Scanner
+                    <i class="fas fa-id-card text-teal"></i> Handover Code Pass
                 </a>
             </li>
             <li class="nav-item">
