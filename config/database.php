@@ -12,13 +12,18 @@ $isInfinityFree = (strpos($httpHost, 'infinityfree') !== false)
 
 if ($isInfinityFree) {
     // InfinityFree Cloud Production MySQL
-    $db_host = getenv('DB_HOST') ?: 'sql206.infinityfree.com';
+    // If .env locally had 127.0.0.1 or medicycle_db, ignore them on InfinityFree
+    $envHost = getenv('DB_HOST');
+    $db_host = (!empty($envHost) && $envHost !== '127.0.0.1' && $envHost !== 'localhost') ? $envHost : 'sql206.infinityfree.com';
     $db_port = getenv('DB_PORT') ?: '3306';
-    $db_name = getenv('DB_NAME') ?: 'if0_43175843_medicycle';
-    $db_user = getenv('DB_USER') ?: 'if0_43175843';
-    $db_pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : 'PreyGoti123';
+    $envDb = getenv('DB_NAME');
+    $db_name = (!empty($envDb) && $envDb !== 'medicycle_db') ? $envDb : 'if0_43175843_medicycle_db';
+    $envUser = getenv('DB_USER');
+    $db_user = (!empty($envUser) && $envUser !== 'root') ? $envUser : 'if0_43175843';
+    $envPass = getenv('DB_PASS');
+    $db_pass = ($envPass !== false && $envPass !== '') ? $envPass : 'PreyGoti123';
 } else {
-    // Localhost Development (XAMPP)
+    // Localhost Development (XAMPP / Local tunnel)
     $db_host = getenv('DB_HOST') ?: '127.0.0.1';
     $db_port = getenv('DB_PORT') ?: '3306';
     $db_name = getenv('DB_NAME') ?: 'medicycle_db';
@@ -35,7 +40,20 @@ $options = [
 ];
 
 try {
-    $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+    try {
+        $pdo = new PDO($dsn, $db_user, $db_pass, $options);
+    } catch (PDOException $firstEx) {
+        // Fallback between if0_43175843_medicycle_db and if0_43175843_medicycle if hosting DB naming differs
+        if ($isInfinityFree && ($db_name === 'if0_43175843_medicycle_db' || $db_name === 'if0_43175843_medicycle')) {
+            $alt_name = ($db_name === 'if0_43175843_medicycle_db') ? 'if0_43175843_medicycle' : 'if0_43175843_medicycle_db';
+            $alt_dsn = "mysql:host={$db_host};port={$db_port};dbname={$alt_name};charset=utf8mb4";
+            $pdo = new PDO($alt_dsn, $db_user, $db_pass, $options);
+            $db_name = $alt_name;
+        } else {
+            throw $firstEx;
+        }
+    }
+    
     try {
         $pdo->exec("SET time_zone = '+05:30'");
     } catch (Exception $tzEx) {
