@@ -21,6 +21,46 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 
 }
 $_SESSION['last_activity'] = time();
 
+// Multi-Account / Role-Isolated Session Context Synchronization
+// Allows opening Supplier in Tab 1 and NGO in Tab 2 in the same browser without collision
+$reqUri = $_SERVER['REQUEST_URI'] ?? '';
+$scriptPath = $_SERVER['SCRIPT_NAME'] ?? '';
+$activeRoleContext = null;
+
+if (str_contains($reqUri, '/supplier/') || str_contains($scriptPath, '/supplier/')) {
+    $activeRoleContext = 'supplier';
+} elseif (str_contains($reqUri, '/ngo/') || str_contains($scriptPath, '/ngo/')) {
+    $activeRoleContext = 'ngo';
+} elseif (str_contains($reqUri, '/delivery/') || str_contains($scriptPath, '/delivery/')) {
+    $activeRoleContext = 'delivery';
+} elseif (isset($_GET['role']) && in_array($_GET['role'], ['supplier', 'ngo', 'delivery'], true)) {
+    $activeRoleContext = $_GET['role'];
+}
+
+if ($activeRoleContext && !empty($_SESSION['accounts'][$activeRoleContext])) {
+    $acc = $_SESSION['accounts'][$activeRoleContext];
+    $_SESSION['user_id'] = $acc['user_id'];
+    $_SESSION['role'] = $acc['role'];
+    $_SESSION['user_name'] = $acc['user_name'];
+    $_SESSION['user_email'] = $acc['user_email'];
+    $_SESSION['org_id'] = $acc['org_id'] ?? null;
+    $_SESSION['org_name'] = $acc['org_name'] ?? null;
+    $_SESSION['verification_status'] = $acc['verification_status'] ?? 'verified';
+} elseif (!empty($_SESSION['role']) && !empty($_SESSION['user_id'])) {
+    if (!isset($_SESSION['accounts']) || !is_array($_SESSION['accounts'])) {
+        $_SESSION['accounts'] = [];
+    }
+    $_SESSION['accounts'][$_SESSION['role']] = [
+        'user_id' => $_SESSION['user_id'],
+        'user_name' => $_SESSION['user_name'] ?? '',
+        'user_email' => $_SESSION['user_email'] ?? '',
+        'role' => $_SESSION['role'],
+        'org_id' => $_SESSION['org_id'] ?? null,
+        'org_name' => $_SESSION['org_name'] ?? null,
+        'verification_status' => $_SESSION['verification_status'] ?? 'verified'
+    ];
+}
+
 // Generate CSRF token if not set
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));

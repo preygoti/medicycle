@@ -62,6 +62,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $_SESSION['org_name'] = $user['organization_name'] ?? $user['name'];
                         $_SESSION['verification_status'] = $user['verification_status'] ?? 'verified';
                         $_SESSION['last_activity'] = time();
+
+                        // Multi-Account: record role-specific session so tabs don't collide
+                        if (!isset($_SESSION['accounts']) || !is_array($_SESSION['accounts'])) {
+                            $_SESSION['accounts'] = [];
+                        }
+                        $_SESSION['accounts'][$user['role']] = [
+                            'user_id' => $user['id'],
+                            'user_name' => $user['name'],
+                            'user_email' => $user['email'],
+                            'role' => $user['role'],
+                            'org_id' => $user['org_id'],
+                            'org_name' => $user['organization_name'] ?? $user['name'],
+                            'verification_status' => $user['verification_status'] ?? 'verified'
+                        ];
                         
                         set_flash('success', 'Welcome back, ' . e($user['name']) . '!');
                         

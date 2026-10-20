@@ -638,7 +638,15 @@ document.addEventListener('DOMContentLoaded', function () {
         async function pollStatus() {
             try {
                 const apiBase = window.BASE_URL ? window.BASE_URL.replace(/\/$/, '') : '';
-                const res = await fetch(apiBase + '/api/poll_status.php?_t=' + Date.now(), {
+                let roleParam = '';
+                if (window.location.pathname.indexOf('/supplier/') !== -1) {
+                    roleParam = '&role=supplier';
+                } else if (window.location.pathname.indexOf('/ngo/') !== -1) {
+                    roleParam = '&role=ngo';
+                } else if (window.location.pathname.indexOf('/delivery/') !== -1) {
+                    roleParam = '&role=delivery';
+                }
+                const res = await fetch(apiBase + '/api/poll_status.php?_t=' + Date.now() + roleParam, {
                     headers: { 'Accept': 'application/json' },
                     cache: 'no-store'
                 });
