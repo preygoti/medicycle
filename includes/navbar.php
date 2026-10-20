@@ -31,23 +31,25 @@ $isRegisterActive = ($currentScript === 'register.php');
         </button>
         
         <div class="collapse navbar-collapse" id="navbarMain">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 gap-lg-2" id="mainNavLinks">
-                <li class="nav-item">
-                    <a class="nav-link <?php echo ($currentScript === 'index.php' && $isPublicPage) ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/index.php#home" data-bookmark="home">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#about" data-bookmark="about">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#how-it-works" data-bookmark="how-it-works">How It Works</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#safety" data-bookmark="safety">Safety & Quality</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#contact" data-bookmark="contact">Contact</a>
-                </li>
-            </ul>
+            <?php if ($isPublicPage): ?>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 gap-lg-2" id="mainNavLinks">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo ($currentScript === 'index.php') ? 'active' : ''; ?>" href="<?php echo BASE_URL; ?>/index.php#home" data-bookmark="home">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#about" data-bookmark="about">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#how-it-works" data-bookmark="how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#safety" data-bookmark="safety">Safety & Quality</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>/index.php#contact" data-bookmark="contact">Contact</a>
+                    </li>
+                </ul>
+            <?php endif; ?>
 
             <ul class="navbar-nav ms-auto align-items-center gap-2">
                 <?php if (!$isPublicPage && $currentUser): ?>

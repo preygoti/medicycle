@@ -92,7 +92,7 @@ section, header, footer, main, .app-container, .hero-section {
 
 /* Bookmark Section Anchors Scroll Margin */
 section[id] {
-    scroll-margin-top: 72px;
+    scroll-margin-top: 76px !important;
 }
 
 /* Typography Helpers */
@@ -1045,23 +1045,49 @@ footer.medicycle-footer .footer-title {
         margin: 0.65rem auto 1.15rem !important;
     }
 
-    /* Modern Mobile Navbar Floating Card Dropdown */
+    /* Sleek Mobile Navbar Header (Zero Wasted Space) */
+    .navbar-medicycle {
+        padding: 0.42rem 0 !important;
+    }
+
+    .navbar-brand {
+        font-size: 1.15rem !important;
+        gap: 0.45rem !important;
+    }
+
+    .navbar-brand img {
+        width: 32px !important;
+        height: 32px !important;
+    }
+
+    .navbar-toggler {
+        padding: 0.28rem 0.55rem !important;
+        font-size: 0.92rem !important;
+        border-radius: 8px !important;
+        border: 1.5px solid rgba(15, 118, 110, 0.25) !important;
+        box-shadow: none !important;
+    }
+
+    /* Compact, Sleek Mobile Navbar Dropdown (No Giant Gaps or Hidden Text) */
     .navbar-medicycle .navbar-collapse {
-        background: rgba(255, 255, 255, 0.98);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(15, 118, 110, 0.14);
-        border-radius: 20px;
-        margin-top: 0.85rem;
-        padding: 1.25rem 1rem;
-        box-shadow: 0 22px 45px -8px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 118, 110, 0.06);
-        animation: mobileMenuFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        background: #ffffff !important;
+        border: 1px solid rgba(226, 232, 240, 0.95) !important;
+        border-top: 1px solid #f1f5f9 !important;
+        border-radius: 16px !important;
+        margin-top: 0.45rem !important;
+        margin-bottom: 0.5rem !important;
+        padding: 0.65rem 0.85rem !important;
+        box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.16) !important;
+        max-height: calc(100vh - 80px) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        animation: mobileMenuFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     @keyframes mobileMenuFadeIn {
         from {
             opacity: 0;
-            transform: translateY(-8px) scale(0.97);
+            transform: translateY(-6px) scale(0.98);
         }
         to {
             opacity: 1;
@@ -1072,40 +1098,34 @@ footer.medicycle-footer .footer-title {
     .navbar-medicycle .navbar-nav {
         text-align: center;
         align-items: center;
+        gap: 0.2rem !important;
     }
 
     .navbar-medicycle .navbar-nav .nav-link {
         justify-content: center;
         text-align: center;
-        font-size: 0.98rem;
-        padding: 0.7rem 1.25rem;
-        margin: 0.2rem 0;
-        border-radius: 12px;
+        font-size: 0.92rem !important;
+        padding: 0.48rem 1rem !important;
+        margin: 0.1rem 0 !important;
+        border-radius: 8px !important;
         width: 100%;
-        max-width: 320px;
+        max-width: 300px;
+        font-weight: 500 !important;
     }
 
     .navbar-medicycle .navbar-nav .nav-link::after {
-        width: 38px;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%) scaleX(0);
-        bottom: 5px;
-    }
-
-    .navbar-medicycle .navbar-nav .nav-link.active::after {
-        transform: translateX(-50%) scaleX(1);
+        display: none !important;
     }
 
     .navbar-medicycle .navbar-collapse .ms-auto {
         width: 100%;
-        margin-top: 0.85rem;
-        padding-top: 0.85rem;
-        border-top: 1px solid rgba(226, 232, 240, 0.9);
+        margin-top: 0.45rem !important;
+        padding-top: 0.45rem !important;
+        border-top: 1px solid #f1f5f9 !important;
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.65rem;
+        gap: 0.45rem !important;
     }
 
     .navbar-medicycle .navbar-collapse .ms-auto .nav-item {
@@ -1116,8 +1136,12 @@ footer.medicycle-footer .footer-title {
     .navbar-medicycle .navbar-collapse .ms-auto .btn,
     .navbar-medicycle .navbar-collapse .ms-auto .nav-link {
         width: 100%;
-        max-width: 280px;
+        max-width: 260px;
         margin: 0 auto;
+        padding: 0.48rem 1rem !important;
+        font-size: 0.88rem !important;
+        border-radius: 50px !important;
+        font-weight: 600 !important;
         justify-content: center;
     }
 
@@ -1140,7 +1164,7 @@ footer.medicycle-footer .footer-title {
 
 @media (max-width: 575.98px) {
     .hero-section {
-        padding: 3.5rem 0;
+        padding: 2.75rem 0 3.25rem !important;
     }
     .hero-section::before,
     .hero-section::after {
@@ -1997,9 +2021,9 @@ input[type="date"].form-control:focus {
     }
     .app-sidebar {
         width: 100% !important;
-        position: sticky !important;
-        top: 56px !important;
-        z-index: 1020 !important;
+        position: relative !important;
+        top: 0 !important;
+        z-index: 10 !important;
         height: auto !important;
         max-height: none !important;
         border-right: none !important;
@@ -2114,7 +2138,7 @@ input[type="date"].form-control:focus {
         display: none !important;
     }
     .app-content {
-        padding: 1rem !important;
+        padding: 1.15rem 0.9rem !important;
     }
 }
 

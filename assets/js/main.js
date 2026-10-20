@@ -121,8 +121,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     mainNavLinks.forEach(function (l) { l.classList.remove('active'); });
                     this.classList.add('active');
 
-                    const navbar = document.querySelector('.navbar');
-                    const navbarOffset = (navbar ? navbar.offsetHeight : 70) + 12;
+                    // Collapse mobile menu immediately so target section positions cleanly below header
+                    const navbarCollapse = document.getElementById('navbarMain');
+                    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                        bsCollapse.hide();
+                    }
+
+                    const isMobile = window.innerWidth < 992;
+                    const navbarOffset = isMobile ? 64 : 76;
                     const elementPosition = targetEl.getBoundingClientRect().top;
                     const offsetPosition = elementPosition + window.pageYOffset - navbarOffset;
 
@@ -136,13 +143,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         history.pushState(null, null, '#' + targetId);
                     } else {
                         location.hash = '#' + targetId;
-                    }
-
-                    // Collapse mobile menu if open
-                    const navbarCollapse = document.getElementById('navbarMain');
-                    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
-                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                        if (bsCollapse) bsCollapse.hide();
                     }
 
                     // Resume scroll listener only after smooth scroll has finished
