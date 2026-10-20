@@ -152,26 +152,15 @@ include __DIR__ . '/../includes/navbar.php';
                                     </h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                 </div>
-                                <div class="modal-body p-4 text-start">
-                                    <?php echo render_handshake_pass_html($r['handover_code'], $r['id'], 'Donor: ' . ($r['supplier_name'] ?? 'Medical Facility')); ?>
-                                    <div class="alert alert-light border small text-muted text-start mt-3 mb-0 rounded-3">
-                                        <div class="fw-semibold text-dark mb-1"><i class="fas fa-shield-halved text-teal me-1"></i> Handshake Verification Rule:</div>
-                                        Show this QR code or 6-digit PIN to the supplier or courier during collection. Handover will be marked Completed automatically as soon as the other party verifies your code.
-                                    </div>
-                                    <div class="p-3 bg-light rounded-3 border text-start small mt-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1.5 pb-1 border-bottom">
-                                            <span class="text-muted">Item:</span>
-                                            <span class="fw-bold text-dark text-end"><?php echo e($r['supply_name']); ?></span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mb-1.5 pb-1 border-bottom mt-1">
-                                            <span class="text-muted">Quantity:</span>
-                                            <span class="fw-bold text-teal"><?php echo number_format($r['requested_quantity']) . ' ' . e(format_unit($r['unit'])); ?></span>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mt-1">
-                                            <span class="text-muted">Donor Location:</span>
-                                            <span class="fw-semibold text-dark"><?php echo e($r['supplier_city'] ?? $r['supply_location']); ?></span>
-                                        </div>
-                                    </div>
+                                <div class="modal-body p-3 p-md-4 text-start">
+                                    <?php 
+                                    $passDetails = [
+                                        'item' => $r['supply_name'],
+                                        'quantity' => number_format($r['requested_quantity']) . ' ' . format_unit($r['unit']),
+                                        'location' => $r['supplier_city'] ?? $r['supply_location'] ?? ''
+                                    ];
+                                    echo render_handshake_pass_html($r['handover_code'], $r['id'], 'Donor: ' . ($r['supplier_name'] ?? 'Medical Facility'), $passDetails); 
+                                    ?>
                                 </div>
                                 <div class="modal-footer border-top py-2">
                                     <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Close</button>

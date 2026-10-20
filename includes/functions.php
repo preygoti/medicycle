@@ -265,18 +265,18 @@ function get_handshake_qr_url($code, $requestId = null) {
 /**
  * Render visual Handshake QR & 6-digit pass card HTML
  */
-function render_handshake_pass_html($code, $requestId = null, $title = 'Handover Collection Pass') {
+function render_handshake_pass_html($code, $requestId = null, $title = 'Handover Collection Pass', $details = []) {
     $qrUrl = get_handshake_qr_url($code, $requestId);
     $digits = str_split(str_pad(preg_replace('/[^0-9]/', '', (string)$code), 6, '0'));
     
-    $html = '<div class="handshake-pass-card mb-3 text-start">';
+    $html = '<div class="handshake-pass-card mb-0 text-start shadow-sm border rounded-4 overflow-hidden">';
     $html .= '  <div class="handshake-pass-header text-start">';
     $html .= '    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 position-relative" style="z-index:2;">';
     $html .= '      <span class="badge bg-white fw-bold px-2.5 py-1 d-inline-flex align-items-center gap-1" style="color:#0f766e; font-size:0.7rem; letter-spacing:0.03em;"><i class="fas fa-shield-alt"></i> SECURE COLLECTION PASS</span>';
     $html .= '      <span class="badge px-2.5 py-1 d-inline-flex align-items-center gap-1" style="background:rgba(255,255,255,0.18); color:#ffffff; border:1px solid rgba(255,255,255,0.32); font-size:0.7rem;"><i class="fas fa-check-circle"></i> VERIFIED CLAIM</span>';
     $html .= '    </div>';
     $html .= '    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 position-relative" style="z-index:2;">';
-    $html .= '      <h5 class="fw-bold mb-0 text-white text-start" style="font-size:1.08rem;">' . e($title) . '</h5>';
+    $html .= '      <h5 class="fw-bold mb-0 text-white text-start" style="font-size:1.05rem;">' . e($title) . '</h5>';
     $html .= '      <span class="small text-white opacity-85 d-inline-flex align-items-center gap-1" style="font-size:0.74rem;"><i class="fas fa-lock"></i> Confidential Handshake</span>';
     $html .= '    </div>';
     $html .= '  </div>';
@@ -291,20 +291,46 @@ function render_handshake_pass_html($code, $requestId = null, $title = 'Handover
     $html .= '      </div>';
     
     $html .= '      <div class="col-12 col-sm-8 text-center">';
-    $html .= '        <div class="small text-muted text-uppercase fw-bold mb-2" style="letter-spacing:0.06em; font-size:0.74rem;">Your 6-Digit Handshake PIN</div>';
+    $html .= '        <div class="small text-muted text-uppercase fw-bold mb-1" style="letter-spacing:0.06em; font-size:0.72rem;">Your 6-Digit Handshake PIN</div>';
     $html .= '        <div class="handshake-digits-row justify-content-center my-2">';
     foreach ($digits as $d) {
         $html .= '      <div class="handshake-digit-tile">' . e($d) . '</div>';
     }
     $html .= '        </div>';
-    $html .= '        <p class="text-muted small mb-3 mx-auto" style="font-size:0.79rem; max-width: 310px; line-height:1.4;">Present this QR code or 6-digit PIN to the supplying donor upon physical collection to verify and release supplies.</p>';
+    $html .= '        <p class="text-muted small mb-3 mx-auto" style="font-size:0.78rem; max-width: 320px; line-height:1.4;">Present this QR code or 6-digit PIN to release supplies upon physical collection.</p>';
     $html .= '        <div class="d-flex flex-wrap justify-content-center gap-2">';
-    $html .= '          <button type="button" class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold" style="font-size:0.76rem;" onclick="navigator.clipboard.writeText(\'' . e($code) . '\'); this.innerHTML=\'<i class=\\\'fas fa-check me-1\\\'></i> Copied!\'; setTimeout(() => { this.innerHTML=\'<i class=\\\'fas fa-copy me-1\\\'></i> Copy PIN\'; }, 1800);"><i class="fas fa-copy me-1"></i> Copy PIN</button>';
-    $html .= '          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold" style="font-size:0.76rem;" onclick="window.print();"><i class="fas fa-print me-1"></i> Print Pass</button>';
+    $html .= '          <button type="button" class="btn btn-sm btn-outline-teal rounded-pill px-3 fw-semibold" style="font-size:0.76rem;" onclick="copyHandshakePIN(\'' . e($code) . '\', this)"><i class="fas fa-copy me-1"></i> Copy PIN</button>';
+    $html .= '          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold" style="font-size:0.76rem;" onclick="printCollectionPass(this)"><i class="fas fa-print me-1"></i> Print Pass</button>';
     $html .= '        </div>';
     $html .= '      </div>';
     $html .= '    </div>';
     $html .= '  </div>';
+
+    if (!empty($details)) {
+        $html .= '  <div class="px-3 py-2.5 bg-light border-top text-start">';
+        $html .= '    <div class="row g-2 align-items-center">';
+        if (!empty($details['item'])) {
+            $html .= '      <div class="col-6">';
+            $html .= '        <span class="text-muted d-block" style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600;">SUPPLY ITEM</span>';
+            $html .= '        <span class="fw-bold text-dark text-truncate d-block" style="font-size:0.83rem;" title="' . e($details['item']) . '">' . e($details['item']) . '</span>';
+            $html .= '      </div>';
+        }
+        if (!empty($details['quantity'])) {
+            $html .= '      <div class="col-6 text-end">';
+            $html .= '        <span class="text-muted d-block" style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.04em; font-weight:600;">QUANTITY</span>';
+            $html .= '        <span class="fw-bold text-teal" style="font-size:0.85rem;">' . e($details['quantity']) . '</span>';
+            $html .= '      </div>';
+        }
+        if (!empty($details['location'])) {
+            $html .= '      <div class="col-12 mt-1 pt-1 border-top border-light-subtle d-flex justify-content-between align-items-center">';
+            $html .= '        <span class="text-muted" style="font-size:0.72rem;"><i class="fas fa-map-marker-alt text-danger me-1"></i>Location:</span>';
+            $html .= '        <span class="fw-semibold text-dark" style="font-size:0.76rem;">' . e($details['location']) . '</span>';
+            $html .= '      </div>';
+        }
+        $html .= '    </div>';
+        $html .= '  </div>';
+    }
+
     $html .= '</div>';
     return $html;
 }

@@ -1429,17 +1429,22 @@ footer.medicycle-footer .footer-title {
    ========================================================================= */
 .modal-backdrop {
     background-color: rgba(15, 23, 42, 0.45) !important;
-    backdrop-filter: blur(12px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(180%) !important;
+    backdrop-filter: blur(10px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+    z-index: 105000 !important;
 }
 
 .modal-backdrop.show {
     opacity: 1 !important;
 }
 
+.modal {
+    z-index: 105005 !important;
+}
+
 .modal.show {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    /* Kept clean without backdrop-filter on the container to prevent blurry dialog content on mobile Safari & Chrome */
+    pointer-events: auto !important;
 }
 
 .modal-content {
@@ -2664,6 +2669,75 @@ input[type="date"].form-control:focus {
     background-color: #0f766e !important;
     color: #ffffff !important;
     border-color: #0f766e !important;
+}
+
+/* =========================================================================
+   SINGLE-PAGE PASS PRINTING RULES (Exact 1 Physical Page)
+   ========================================================================= */
+@page {
+    size: auto;
+    margin: 10mm;
+}
+
+@media print {
+    html, body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* Suppress everything by default */
+    body * {
+        visibility: hidden !important;
+    }
+
+    /* Completely hide background layouts, navigation, and overlays */
+    .navbar-medicycle,
+    .app-sidebar,
+    .sidebar-overlay,
+    .modal-backdrop,
+    .modal-header,
+    .modal-footer,
+    .btn-close,
+    footer,
+    #syncStatusPill,
+    #live-sync-pill,
+    #live-toast-pill,
+    .live-status-pill {
+        display: none !important;
+    }
+
+    /* Isolate and print ONLY the collection pass card on exactly 1 page */
+    .printable-pass-target,
+    .printable-pass-target * {
+        visibility: visible !important;
+    }
+
+    .printable-pass-target {
+        position: absolute !important;
+        top: 0 !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 100% !important;
+        max-width: 560px !important;
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        border: 2px solid #0f766e !important;
+        border-radius: 14px !important;
+        background: #ffffff !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Suppress action buttons when printing */
+    .printable-pass-target .btn,
+    .printable-pass-target button {
+        display: none !important;
+    }
 }
 
 

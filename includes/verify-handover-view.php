@@ -408,25 +408,15 @@ $pendingHandovers = $pdo->query($pendingSql)->fetchAll(PDO::FETCH_ASSOC);
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <div class="modal-body p-4 text-start">
-                                <?php echo render_handshake_pass_html($ph['handover_code'], $ph['id'], 'Donor: ' . ($ph['supplier_org'] ?: $ph['supplier_name'])); ?>
-                                <div class="alert alert-light border small text-muted text-start mt-3 mb-0 rounded-3">
-                                    <i class="fas fa-shield-halved text-teal me-1"></i> Show this QR code or 6-digit PIN to the supplier or courier to authorize collection.
-                                </div>
-                                <div class="p-3 bg-light rounded-3 border text-start small mt-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
-                                        <span class="text-muted">Item:</span>
-                                        <span class="fw-bold text-dark"><?php echo e($ph['supply_name']); ?></span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom mt-1">
-                                        <span class="text-muted">Volume:</span>
-                                        <span class="fw-bold text-teal"><?php echo number_format($ph['requested_quantity']) . ' ' . e(format_unit($ph['unit'])); ?></span>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center mt-1">
-                                        <span class="text-muted">Recipient Clinic:</span>
-                                        <span class="fw-semibold text-dark"><?php echo e($ph['requester_org'] ?: $ph['requester_name']); ?> (<?php echo e($ph['requester_city'] ?? ''); ?>)</span>
-                                    </div>
-                                </div>
+                            <div class="modal-body p-3 p-md-4 text-start">
+                                <?php 
+                                $phDetails = [
+                                    'item' => $ph['supply_name'],
+                                    'quantity' => number_format($ph['requested_quantity']) . ' ' . format_unit($ph['unit']),
+                                    'location' => ($ph['requester_org'] ?: $ph['requester_name']) . (!empty($ph['requester_city']) ? ' (' . $ph['requester_city'] . ')' : '')
+                                ];
+                                echo render_handshake_pass_html($ph['handover_code'], $ph['id'], 'Donor: ' . ($ph['supplier_org'] ?: $ph['supplier_name']), $phDetails); 
+                                ?>
                             </div>
                             <div class="modal-footer border-top py-2">
                                 <button type="button" class="btn btn-light btn-sm px-3" data-bs-dismiss="modal">Close</button>

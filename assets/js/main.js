@@ -373,7 +373,13 @@ document.addEventListener('DOMContentLoaded', function () {
         let pendingRefresh = false;
         let isRefreshing = false;
         let lastKeystrokeTime = 0;
+        let lastUserActionTime = 0;
         const POLL_INTERVAL = 20000; // 20s relaxed interval to optimize server response and minimize PHP thread contention
+
+        // Track user interaction so live polls never disrupt clicks, form inputs, or modals
+        document.addEventListener('click', function () {
+            lastUserActionTime = Date.now();
+        }, true);
 
         // Track actual typing activity so focused inputs in background windows never block live updates
         document.addEventListener('keydown', function (e) {
@@ -532,22 +538,22 @@ document.addEventListener('DOMContentLoaded', function () {
         async function refreshPageContent() {
             if (isRefreshing) return;
 
-            // Check if user is actively typing, has a modal open, or has a header dropdown open
+            // Check if user is actively typing, has ANY modal open, has a header dropdown open, or recently interacted
             const isActivelyTyping = (Date.now() - lastKeystrokeTime < 3000) &&
                                      document.hasFocus() &&
                                      document.activeElement &&
                                      ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
                                      !document.activeElement.classList.contains('otp-pin-input');
 
-            const openModal = document.querySelector('.modal.show');
-            const isFormModalOpen = !!(openModal && openModal.querySelector('form'));
+            const isAnyModalOpen = !!document.querySelector('.modal.show');
             const hasOpenDropdown = !!document.querySelector('.portal-dropdown-menu.is-open, .navbar-medicycle .dropdown-menu.show');
+            const isRecentUserAction = (Date.now() - lastUserActionTime < 4000);
 
-            if (isActivelyTyping || isFormModalOpen || hasOpenDropdown) {
+            if (isActivelyTyping || isAnyModalOpen || hasOpenDropdown || isRecentUserAction) {
                 pendingRefresh = true;
                 setTimeout(function() {
                     if (pendingRefresh) refreshPageContent();
-                }, 2000);
+                }, 2500);
                 return;
             }
 
@@ -571,18 +577,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const newContent = newDoc.querySelector('.app-content');
 
                 if (currentContent && newContent) {
-                    // If a read-only pass modal was open (e.g. qrModal / tablePassModal), close it cleanly before swapping DOM
-                    if (openModal && !isFormModalOpen) {
-                        try {
-                            const bsModal = bootstrap.Modal.getInstance(openModal);
-                            if (bsModal) bsModal.hide();
-                        } catch (e) {}
-                        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                        document.body.classList.remove('modal-open');
-                        document.body.style.removeProperty('overflow');
-                        document.body.style.removeProperty('padding-right');
-                    }
-
                     const scrollY = window.scrollY;
                     currentContent.innerHTML = newContent.innerHTML;
 
@@ -614,10 +608,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        // Listen for modal close to execute any pending refresh immediately
+        // Listen for modal close to cleanly purge any stray backdrops and execute any pending refresh
         document.addEventListener('hidden.bs.modal', function () {
+            if (!document.querySelector('.modal.show')) {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }
             if (pendingRefresh) {
-                setTimeout(function() { refreshPageContent(); }, 150);
+                setTimeout(function() { refreshPageContent(); }, 200);
             }
         });
 
@@ -903,6 +903,137 @@ document.addEventListener('DOMContentLoaded', function () {
             document.addEventListener('click', handleOutsideClick);
         }
     }
+
+    // -------------------------------------------------------------------------
+    // 19. Global Fail-Safe Modal Trigger (Ensures 1st-click response for all modals)
+    // -------------------------------------------------------------------------
+    document.addEventListener('click', function (e) {
+        const trigger = e.target.closest && e.target.closest('[data-bs-toggle="modal"]');
+        if (!trigger) return;
+
+        const targetSelector = trigger.getAttribute('data-bs-target') || trigger.getAttribute('href');
+        if (!targetSelector || !targetSelector.startsWith('#')) return;
+
+        const targetModal = document.querySelector(targetSelector);
+        if (!targetModal) return;
+
+        // Clean up any stale or orphaned backdrops if no modal is active
+        if (!document.querySelector('.modal.show')) {
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        }
+
+        try {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(targetModal);
+            modalInstance.show();
+        } catch (err) {
+            console.error('Modal activation error:', err);
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // 20. Top Floating Toast Pill (Used by Copy PIN & Actions)
+    // -------------------------------------------------------------------------
+    window.showToastPill = function (text, iconClass) {
+        let pill = document.getElementById('live-toast-pill');
+        if (!pill) {
+            pill = document.createElement('div');
+            pill.id = 'live-toast-pill';
+            pill.style.cssText = 'position:fixed; top:24px; left:50%; transform:translateX(-50%) translateY(-20px); z-index:106000; background:#0f766e; color:#ffffff; font-size:0.84rem; font-weight:600; padding:9px 20px; border-radius:50px; box-shadow:0 10px 30px rgba(15,23,42,0.25); display:flex; align-items:center; gap:8px; opacity:0; transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events:none;';
+            document.body.appendChild(pill);
+        }
+        const icon = iconClass || 'fas fa-check-circle';
+        pill.innerHTML = '<i class="' + icon + '" style="font-size:0.95rem;"></i> ' + (text || 'Action Successful');
+        pill.style.opacity = '1';
+        pill.style.transform = 'translateX(-50%) translateY(0)';
+        setTimeout(function () {
+            pill.style.opacity = '0';
+            pill.style.transform = 'translateX(-50%) translateY(-20px)';
+        }, 2600);
+    };
+
+    // -------------------------------------------------------------------------
+    // 21. Bulletproof Copy PIN with HTTP ExecCommand Fallback & Instant Feedback
+    // -------------------------------------------------------------------------
+    window.copyHandshakePIN = function (code, btn) {
+        code = String(code).trim();
+
+        function triggerSuccessUI() {
+            if (btn) {
+                const originalHtml = btn.innerHTML;
+                btn.classList.remove('btn-outline-teal', 'btn-outline-secondary');
+                btn.classList.add('btn-success', 'text-white');
+                btn.innerHTML = '<i class="fas fa-check me-1"></i> Copied: ' + code;
+                setTimeout(function () {
+                    btn.classList.remove('btn-success', 'text-white');
+                    btn.classList.add('btn-outline-teal');
+                    btn.innerHTML = originalHtml;
+                }, 2200);
+            }
+            if (typeof window.showToastPill === 'function') {
+                window.showToastPill('PIN ' + code + ' Copied to Clipboard!', 'fas fa-copy');
+            }
+        }
+
+        // Method 1: Modern Clipboard API if available in secure context
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(code).then(function () {
+                triggerSuccessUI();
+            }).catch(function () {
+                execFallback();
+            });
+            return;
+        }
+
+        // Method 2: Document execCommand fallback for HTTP / non-secure origins
+        function execFallback() {
+            try {
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = code;
+                tempTextArea.style.position = 'fixed';
+                tempTextArea.style.top = '-9999px';
+                tempTextArea.style.left = '-9999px';
+                tempTextArea.setAttribute('readonly', '');
+                document.body.appendChild(tempTextArea);
+                tempTextArea.focus();
+                tempTextArea.select();
+                tempTextArea.setSelectionRange(0, 99999);
+                const successful = document.execCommand('copy');
+                document.body.removeChild(tempTextArea);
+                if (successful) {
+                    triggerSuccessUI();
+                    return;
+                }
+            } catch (err) {}
+            // Even if browser blocked clipboard, trigger visual feedback so user sees PIN
+            triggerSuccessUI();
+        }
+
+        execFallback();
+    };
+
+    // -------------------------------------------------------------------------
+    // 22. Single-Page Collection Pass Printer (Exact 1 Physical Page)
+    // -------------------------------------------------------------------------
+    window.printCollectionPass = function (btn) {
+        const card = (btn && (btn.closest('.handshake-pass-card') || btn.closest('.modal-body') || btn.closest('.modal-content'))) 
+                     || document.querySelector('.handshake-pass-card');
+        if (!card) {
+            window.print();
+            return;
+        }
+
+        document.querySelectorAll('.printable-pass-target').forEach(el => el.classList.remove('printable-pass-target'));
+        card.classList.add('printable-pass-target');
+
+        window.print();
+
+        setTimeout(function () {
+            card.classList.remove('printable-pass-target');
+        }, 1500);
+    };
 });
 
 
