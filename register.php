@@ -271,8 +271,8 @@ include __DIR__ . '/includes/navbar.php';
                                 <div class="invalid-feedback">Organization name is required.</div>
                             </div>
                             <div class="col-md-4">
-                                <label for="license_number" class="form-label small fw-semibold">License / Registration Number</label>
-                                <input type="text" class="form-control" id="license_number" name="license_number" value="<?php echo e($formData['license_number']); ?>" placeholder="e.g. REG-2024-998">
+                                <label for="license_number" class="form-label small fw-semibold">License Number</label>
+                                <input type="text" class="form-control" id="license_number" name="license_number" value="<?php echo e($formData['license_number']); ?>" placeholder="e.g. LIC-2024-998">
                             </div>
 
                             <div class="col-12">

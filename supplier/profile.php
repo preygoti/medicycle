@@ -118,7 +118,7 @@ include __DIR__ . '/../includes/navbar.php';
                             <input type="text" class="form-control" id="org_name" name="org_name" value="<?php echo e($profile['organization_name'] ?? ''); ?>" required>
                         </div>
                         <div class="col-md-4">
-                            <label for="license_number" class="form-label small fw-semibold">License / Registration ID</label>
+                            <label for="license_number" class="form-label small fw-semibold">License Number</label>
                             <input type="text" class="form-control" id="license_number" name="license_number" value="<?php echo e($profile['license_number'] ?? ''); ?>">
                         </div>
 
