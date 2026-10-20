@@ -169,7 +169,13 @@ h1, h2, h3, h4, h5, h6 {
     color: #475569 !important;
     background: #F8FAFC !important;
     border: 1px solid #E2E8F0 !important;
+    cursor: pointer !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: all 0.2s ease-in-out;
+}
+.notif-icon-btn * {
+    pointer-events: none;
 }
 .notif-icon-btn:hover {
     background-color: #F1F5F9 !important;
@@ -205,7 +211,13 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid #E2E8F0;
     border-radius: 12px;
     padding: 0.3rem 0.65rem 0.3rem 0.35rem !important;
+    cursor: pointer !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: all 0.2s ease;
+}
+.user-profile-capsule * {
+    pointer-events: none;
 }
 .user-profile-capsule:hover {
     background: #F1F5F9;
@@ -1476,16 +1488,14 @@ footer.medicycle-footer .footer-title {
     padding: 0.6rem !important;
     background: #ffffff !important;
     z-index: 1060 !important;
-    animation: modernDropdownFadeIn 0.16s ease forwards;
+    opacity: 1 !important;
 }
 
-@keyframes modernDropdownFadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
+.dropdown-menu.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 .navbar-medicycle .dropdown-menu {
@@ -1497,6 +1507,16 @@ footer.medicycle-footer .footer-title {
     z-index: 1065 !important;
     float: none !important;
     box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 118, 110, 0.1) !important;
+}
+
+/* Precision Mobile Positioning for Notification Bell Dropdown (stays fully visible inside screen) */
+@media (max-width: 576px) {
+    .navbar-medicycle #notifDropdown + .dropdown-menu {
+        right: -65px !important;
+        left: auto !important;
+        width: min(300px, calc(100vw - 20px)) !important;
+        max-width: calc(100vw - 20px) !important;
+    }
 }
 
 .dropdown-item {
