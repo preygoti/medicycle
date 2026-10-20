@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Allow: /index.php
+Allow: /login.php
+Allow: /register.php
+Allow: /assets/
+
+# Disallow private user portals, authenticated dashboards, and backend routes
+Disallow: /supplier/
+Disallow: /ngo/
+Disallow: /delivery/
+Disallow: /api/
+Disallow: /includes/
+Disallow: /config/
+Disallow: /cron/
+Disallow: /reset-password.php
+Disallow: /verify-reset-otp.php
+Disallow: /verify-email.php
+Disallow: /logout.php
+
+# Sitemap index
+Sitemap: http://medicycle.infinityfreeapp.com/sitemap.xml

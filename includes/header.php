@@ -1,14 +1,74 @@
 <?php
 /**
- * MediCycle - Global HTML Header
+ * MediCycle - Global HTML Header & SEO Engine
  */
 $pageTitle = isset($pageTitle) ? $pageTitle . ' | ' . APP_NAME : APP_NAME . ' - ' . APP_TAGLINE;
+$currentDir = basename(dirname($_SERVER['PHP_SELF'] ?? ''));
+$isPortalPage = in_array($currentDir, ['supplier', 'ngo', 'delivery']);
+
+$metaDescription = isset($pageDescription) ? $pageDescription : 'MediCycle is an intelligent medical supply redistribution platform connecting hospitals, certified suppliers, clinics, and NGOs to eliminate healthcare waste and save lives.';
+$metaKeywords = 'medical supply redistribution, medical equipment donation, surplus medical supplies, NGO healthcare supplies, medical waste reduction, MediCycle';
+$canonicalUrl = BASE_URL . ($_SERVER['REQUEST_URI'] ?? '/');
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo e($pageTitle); ?></title>
+    
+    <!-- Search Engine Indexing & Robots Directives -->
+    <?php if ($isPortalPage): ?>
+        <meta name="robots" content="noindex, nofollow">
+    <?php else: ?>
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+        <meta name="googlebot" content="index, follow">
+    <?php endif; ?>
+    
+    <!-- Meta SEO Tags -->
+    <meta name="description" content="<?php echo e($metaDescription); ?>">
+    <meta name="keywords" content="<?php echo e($metaKeywords); ?>">
+    <meta name="author" content="MediCycle Team">
+    <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>">
+    
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta property="og:title" content="<?php echo e($pageTitle); ?>">
+    <meta property="og:description" content="<?php echo e($metaDescription); ?>">
+    <meta property="og:image" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    <meta property="og:site_name" content="MediCycle">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>">
+    <meta name="twitter:title" content="<?php echo e($pageTitle); ?>">
+    <meta name="twitter:description" content="<?php echo e($metaDescription); ?>">
+    <meta name="twitter:image" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    
+    <!-- Google Search Console Verification Meta Placeholder -->
+    <meta name="google-site-verification" content="w_g7TGBGz5p_QvD0qMfxv1Uu8d4Y2j0tZk">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets -->
+    <?php if (!$isPortalPage): ?>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "MediCycle",
+      "url": "<?php echo BASE_URL; ?>/",
+      "description": "Smart Medical Supply Redistribution System connecting hospitals, suppliers, and NGOs to eliminate medical waste.",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "All",
+      "author": {
+        "@type": "Organization",
+        "name": "MediCycle",
+        "url": "<?php echo BASE_URL; ?>/"
+      }
+    }
+    </script>
+    <?php endif; ?>
+
     <!-- MediCycle Favicon -->
     <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/images/favicon.png">
     
@@ -33,7 +93,7 @@ $pageTitle = isset($pageTitle) ? $pageTitle . ' | ' . APP_NAME : APP_NAME . ' - 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     
     <!-- MediCycle Custom Theme CSS with Auto Cache Busting -->
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css?v=2.8.6_<?php echo file_exists(__DIR__ . '/../assets/css/style.css') ? filemtime(__DIR__ . '/../assets/css/style.css') : time(); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css?v=2.8.7_<?php echo file_exists(__DIR__ . '/../assets/css/style.css') ? filemtime(__DIR__ . '/../assets/css/style.css') : time(); ?>">
     <script>
         window.BASE_URL = '<?php echo BASE_URL; ?>';
     </script>
