@@ -46,8 +46,8 @@ $canonicalUrl = BASE_URL . ($_SERVER['REQUEST_URI'] ?? '/');
     <meta name="twitter:description" content="<?php echo e($metaDescription); ?>">
     <meta name="twitter:image" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
     
-    <!-- Google Search Console Verification Meta Placeholder -->
-    <meta name="google-site-verification" content="w_g7TGBGz5p_QvD0qMfxv1Uu8d4Y2j0tZk">
+    <!-- Google Search Console Verification Meta Tag -->
+    <meta name="google-site-verification" content="nfmJ_SXLJ_zElY9VsFkJAryz3zJy1shhjIPzwJUamcU" />
 
     <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets -->
     <?php if (!$isPortalPage): ?>
