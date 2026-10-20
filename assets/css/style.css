@@ -846,6 +846,18 @@ input[type="password"]::-ms-clear {
     transition: border-color 0.15s ease-in-out;
 }
 
+/* Prevent Bootstrap validation exclamation mark from overlapping HTML5 date & time picker icons */
+input[type="date"].form-control,
+input[type="time"].form-control,
+input[type="datetime-local"].form-control,
+input[type="date"].form-control.is-invalid,
+.was-validated input[type="date"].form-control:invalid,
+input[type="date"].form-control.is-valid,
+.was-validated input[type="date"].form-control:valid {
+    background-image: none !important;
+    padding-right: 0.75rem !important;
+}
+
 .input-group > .btn {
     border: 1px solid var(--border-color);
     background-color: #FFFFFF;

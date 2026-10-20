@@ -472,67 +472,6 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <?php endif; ?>
                                             </td>
                                         </tr>
-
-                                        <!-- Fulfill Modal -->
-                                        <?php if ($cr['status'] === 'Active'): ?>
-                                            <div class="modal fade" id="fulfillModal<?php echo $cr['id']; ?>" tabindex="-1" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content border-0 shadow-lg rounded-4">
-                                                        <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
-                                                            <?php echo csrf_field(); ?>
-                                                            <input type="hidden" name="action" value="fulfill_requirement">
-                                                            <input type="hidden" name="requirement_id" value="<?php echo $cr['id']; ?>">
-                                                            <div class="modal-header border-bottom py-3">
-                                                                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                                    <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                                                                        <i class="fas fa-hand-holding-medical"></i>
-                                                                    </span>
-                                                                    Fulfill Clinic Requirement
-                                                                </h5>
-                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                            </div>
-                                                            <div class="modal-body p-4">
-                                                                <div class="p-3 rounded-3 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
-                                                                    <div class="d-flex justify-content-between align-items-center mb-1">
-                                                                        <strong class="text-dark fs-6"><?php echo e($cr['supply_name']); ?></strong>
-                                                                        <span class="badge bg-teal text-white" style="background:#0f766e;"><?php echo number_format($cr['required_quantity']) . ' ' . e($cr['unit']); ?></span>
-                                                                    </div>
-                                                                    <div class="small text-muted">Clinic: <?php echo e($cr['organization_name'] ?? $cr['clinic_contact_name']); ?> (<?php echo e($cr['clinic_city']); ?>)</div>
-                                                                    <?php if (!empty($cr['description'])): ?>
-                                                                        <div class="small text-secondary mt-1"><em>"<?php echo e($cr['description']); ?>"</em></div>
-                                                                    <?php endif; ?>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label class="form-label small fw-semibold">Allocate From Your Listed Inventory (Optional)</label>
-                                                                    <select name="supply_id" class="form-select form-select-sm">
-                                                                        <option value="0">-- Provide Directly / Source Direct --</option>
-                                                                        <?php foreach ($myAvailableSupplies as $sup): ?>
-                                                                            <option value="<?php echo $sup['id']; ?>">
-                                                                                <?php echo e($sup['supply_name']); ?> (Available: <?php echo $sup['quantity'] . ' ' . e($sup['unit']); ?> | Batch: <?php echo e($sup['batch_number'] ?: 'N/A'); ?>)
-                                                                            </option>
-                                                                        <?php endforeach; ?>
-                                                                    </select>
-                                                                    <div class="form-text small">Selecting a batch automatically reserves inventory for this clinic.</div>
-                                                                </div>
-
-                                                                <div class="mb-2">
-                                                                    <label class="form-label small fw-semibold">Collection / Pickup Instructions</label>
-                                                                    <textarea name="remarks" class="form-control form-control-sm" rows="3" placeholder="e.g. Ready for pickup at Pharmacy Dispatch Counter, Mon-Fri 10am-4pm. Please show Handover Code."></textarea>
-                                                                </div>
-                                                            </div>
-                                                            <div class="modal-footer border-top py-3">
-                                                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                                <button type="submit" class="btn btn-teal text-white rounded-pill px-4 shadow-xs fw-semibold" style="background:#0f766e;">
-                                                                    <i class="fas fa-check-circle me-1"></i> Accept & Send PIN to Clinic
-                                                                </button>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
-
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
@@ -628,76 +567,6 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <?php endif; ?>
                                             </td>
                                         </tr>
-
-                                        <!-- Accept Modal -->
-                                        <div class="modal fade" id="acceptModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content border-0 shadow-lg rounded-4">
-                                                    <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
-                                                        <?php echo csrf_field(); ?>
-                                                        <input type="hidden" name="action" value="accept">
-                                                        <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                        <div class="modal-header border-bottom py-3">
-                                                            <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
-                                                                <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                                                                    <i class="fas fa-check"></i>
-                                                                </span>
-                                                                Accept Requisition Request
-                                                            </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body p-4">
-                                                            <p class="text-secondary small mb-3">
-                                                                Accepting this request will allocate <strong><?php echo $r['requested_quantity'] . ' ' . e($r['unit']); ?></strong> of <strong><?php echo e($r['supply_name']); ?></strong> to <strong><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></strong>. The recipient clinic will receive their secure verification code for pickup.
-                                                            </p>
-                                                            <div class="mb-2">
-                                                                <label class="form-label small fw-semibold">Pickup / Handover Instructions</label>
-                                                                <textarea name="remarks" class="form-control" rows="3" placeholder="e.g. Ready for collection Mon-Fri 10am-4pm at Main Pharmacy Counter."></textarea>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer border-top py-3">
-                                                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-success rounded-pill px-4 shadow-xs">
-                                                                <i class="fas fa-check-circle me-1"></i> Confirm & Accept Request
-                                                            </button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Reject Modal -->
-                                        <div class="modal fade" id="rejectModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content border-0 shadow-lg rounded-4">
-                                                    <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
-                                                        <?php echo csrf_field(); ?>
-                                                        <input type="hidden" name="action" value="reject">
-                                                        <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
-                                                        <div class="modal-header border-bottom py-3">
-                                                            <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
-                                                                <span class="rounded-circle p-2 d-inline-flex" style="background:#fee2e2; color:#ef4444;">
-                                                                    <i class="fas fa-times"></i>
-                                                                </span>
-                                                                Decline Requisition Request
-                                                            </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                        </div>
-                                                        <div class="modal-body p-4">
-                                                            <div class="mb-2">
-                                                                <label class="form-label small fw-semibold">Reason for Declining *</label>
-                                                                <textarea name="remarks" class="form-control" rows="3" placeholder="Stock reserved, clinic capacity mismatch, or other reason..." required></textarea>
-                                                            </div>
-                                                        </div>
-                                                        <div class="modal-footer border-top py-3">
-                                                            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                                                            <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-xs">Decline Request</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <tr>
@@ -713,6 +582,153 @@ include __DIR__ . '/../includes/navbar.php';
                 </div>
             </div>
         <?php endif; ?>
+
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- Modals Rendered Outside Tables & Cards for Valid HTML5 & Reliable Form POST -->
+<!-- ========================================================================= -->
+
+<!-- 1. Fulfill Clinic Broadcast Need Modals -->
+<?php if (!empty($clinicRequirements)): ?>
+    <?php foreach ($clinicRequirements as $cr): ?>
+        <?php if ($cr['status'] === 'Active'): ?>
+            <div class="modal fade" id="fulfillModal<?php echo $cr['id']; ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="fulfill_requirement">
+                            <input type="hidden" name="requirement_id" value="<?php echo $cr['id']; ?>">
+                            <div class="modal-header border-bottom py-3">
+                                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                    <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                                        <i class="fas fa-hand-holding-medical"></i>
+                                    </span>
+                                    Fulfill Clinic Requirement
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="p-3 rounded-3 mb-3" style="background:#f8fafc; border:1px solid #e2e8f0;">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark fs-6"><?php echo e($cr['supply_name']); ?></strong>
+                                        <span class="badge bg-teal text-white" style="background:#0f766e;"><?php echo number_format($cr['required_quantity']) . ' ' . e($cr['unit']); ?></span>
+                                    </div>
+                                    <div class="small text-muted">Clinic: <?php echo e($cr['organization_name'] ?? $cr['clinic_contact_name']); ?> (<?php echo e($cr['clinic_city']); ?>)</div>
+                                    <?php if (!empty($cr['description'])): ?>
+                                        <div class="small text-secondary mt-1"><em>"<?php echo e($cr['description']); ?>"</em></div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold">Allocate From Your Listed Inventory (Optional)</label>
+                                    <select name="supply_id" class="form-select form-select-sm">
+                                        <option value="0">-- Provide Directly / Source Direct --</option>
+                                        <?php foreach ($myAvailableSupplies as $sup): ?>
+                                            <option value="<?php echo $sup['id']; ?>">
+                                                <?php echo e($sup['supply_name']); ?> (Available: <?php echo $sup['quantity'] . ' ' . e($sup['unit']); ?> | Batch: <?php echo e($sup['batch_number'] ?: 'N/A'); ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="form-text small">Selecting a batch automatically reserves inventory for this clinic.</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold">Collection / Pickup Instructions</label>
+                                    <textarea name="remarks" class="form-control form-control-sm" rows="3" placeholder="e.g. Ready for pickup at Pharmacy Dispatch Counter, Mon-Fri 10am-4pm. Please show Handover Code."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top py-3">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-teal text-white rounded-pill px-4 shadow-xs fw-semibold" style="background:#0f766e;">
+                                    <i class="fas fa-check-circle me-1"></i> Accept & Send PIN to Clinic
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<!-- 2. Accept & Reject Direct Requisition Modals -->
+<?php if (!empty($requests)): ?>
+    <?php foreach ($requests as $r): ?>
+        <?php if ($r['status'] === 'Pending'): ?>
+            <!-- Accept Modal -->
+            <div class="modal fade" id="acceptModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="accept">
+                            <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
+                            <div class="modal-header border-bottom py-3">
+                                <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                                    <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
+                                        <i class="fas fa-check"></i>
+                                    </span>
+                                    Accept Requisition Request
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <p class="text-secondary small mb-3">
+                                    Accepting this request will allocate <strong><?php echo $r['requested_quantity'] . ' ' . e($r['unit']); ?></strong> of <strong><?php echo e($r['supply_name']); ?></strong> to <strong><?php echo e($r['organization_name'] ?? $r['requester_name']); ?></strong>. The recipient clinic will receive their secure verification code for pickup.
+                                </p>
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold">Pickup / Handover Instructions</label>
+                                    <textarea name="remarks" class="form-control" rows="3" placeholder="e.g. Ready for collection Mon-Fri 10am-4pm at Main Pharmacy Counter."></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top py-3">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-success rounded-pill px-4 shadow-xs">
+                                    <i class="fas fa-check-circle me-1"></i> Confirm & Accept Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reject Modal -->
+            <div class="modal fade" id="rejectModal<?php echo $r['id']; ?>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow-lg rounded-4">
+                        <form action="<?php echo BASE_URL; ?>/supplier/requests.php" method="POST">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="action" value="reject">
+                            <input type="hidden" name="request_id" value="<?php echo $r['id']; ?>">
+                            <div class="modal-header border-bottom py-3">
+                                <h5 class="modal-title fw-bold text-danger d-flex align-items-center gap-2">
+                                    <span class="rounded-circle p-2 d-inline-flex" style="background:#fee2e2; color:#ef4444;">
+                                        <i class="fas fa-times"></i>
+                                    </span>
+                                    Decline Requisition Request
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold">Reason for Declining *</label>
+                                    <textarea name="remarks" class="form-control" rows="3" placeholder="Stock reserved, clinic capacity mismatch, or other reason..." required></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top py-3">
+                                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-xs">Decline Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
 
     </div>
 </div>
