@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const openModal = document.querySelector('.modal.show');
             const isFormModalOpen = !!(openModal && openModal.querySelector('form'));
-            const hasOpenDropdown = !!document.querySelector('.navbar-medicycle .dropdown-menu.show');
+            const hasOpenDropdown = !!document.querySelector('.portal-dropdown-menu.is-open, .navbar-medicycle .dropdown-menu.show');
 
             if (isActivelyTyping || isFormModalOpen || hasOpenDropdown) {
                 pendingRefresh = true;
@@ -853,53 +853,56 @@ document.addEventListener('DOMContentLoaded', function () {
     // 18. Fail-Safe Portal Header Dropdowns (Bell & User Profile)
     // -------------------------------------------------------------------------
     if (typeof window.togglePortalDropdown !== 'function') {
-        window.togglePortalDropdown = function(btn, ev) {
+        let lastToggleTime = 0;
+        window.togglePortalDropdown = function(menuId, ev) {
             if (ev) {
                 if (ev.preventDefault) ev.preventDefault();
                 if (ev.stopPropagation) ev.stopPropagation();
             }
-            var parent = btn.closest('.dropdown');
-            if (!parent) return false;
-            var menu = parent.querySelector('.dropdown-menu');
-            if (!menu) return false;
+            lastToggleTime = Date.now();
 
-            var isOpen = menu.classList.contains('show');
+            const targetMenu = document.getElementById(menuId);
+            if (!targetMenu) return false;
 
-            var allMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
-            for (var i = 0; i < allMenus.length; i++) {
-                if (allMenus[i] !== menu) {
-                    allMenus[i].classList.remove('show');
-                    var p = allMenus[i].closest('.dropdown');
-                    var b = p ? p.querySelector('#notifDropdown, #userDropdown, button, a') : null;
-                    if (b) b.setAttribute('aria-expanded', 'false');
-                }
+            const isAlreadyOpen = targetMenu.classList.contains('is-open');
+
+            const allMenus = document.querySelectorAll('.portal-dropdown-menu');
+            for (let i = 0; i < allMenus.length; i++) {
+                allMenus[i].classList.remove('is-open');
+                const triggerBtn = document.querySelector('[onclick*="' + allMenus[i].id + '"]');
+                if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'false');
             }
 
-            if (isOpen) {
-                menu.classList.remove('show');
-                btn.setAttribute('aria-expanded', 'false');
-            } else {
-                menu.classList.add('show');
-                btn.setAttribute('aria-expanded', 'true');
+            if (!isAlreadyOpen) {
+                targetMenu.classList.add('is-open');
+                const activeBtn = document.querySelector('[onclick*="' + menuId + '"]');
+                if (activeBtn) activeBtn.setAttribute('aria-expanded', 'true');
             }
             return false;
         };
-    }
 
-    if (!window._portalDropdownDocListenerAdded) {
-        window._portalDropdownDocListenerAdded = true;
-        var closeAll = function(e) {
-            if (!e.target.closest || !e.target.closest('.navbar-medicycle .dropdown')) {
-                var openMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
-                for (var j = 0; j < openMenus.length; j++) {
-                    openMenus[j].classList.remove('show');
-                    var pr = openMenus[j].closest('.dropdown');
-                    var bt = pr ? pr.querySelector('#notifDropdown, #userDropdown, button, a') : null;
-                    if (bt) bt.setAttribute('aria-expanded', 'false');
+        const handleOutsideClick = function(e) {
+            if (Date.now() - lastToggleTime < 450) {
+                return;
+            }
+            const clickedInsideMenu = e.target.closest && e.target.closest('.portal-dropdown-menu');
+            const clickedInsideTrigger = e.target.closest && e.target.closest('#notifDropdown, #userDropdown');
+
+            if (!clickedInsideMenu && !clickedInsideTrigger) {
+                const openMenus = document.querySelectorAll('.portal-dropdown-menu.is-open');
+                for (let j = 0; j < openMenus.length; j++) {
+                    openMenus[j].classList.remove('is-open');
+                    const btn = document.querySelector('[onclick*="' + openMenus[j].id + '"]');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
                 }
             }
         };
-        document.addEventListener('click', closeAll);
+
+        if (!window._portalDropdownDocListenerAdded) {
+            window._portalDropdownDocListenerAdded = true;
+            document.addEventListener('click', handleOutsideClick);
+            document.addEventListener('touchend', handleOutsideClick, { passive: true });
+        }
     }
 });
 

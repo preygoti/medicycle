@@ -31,7 +31,7 @@ $isRegisterActive = ($currentScript === 'register.php');
             <div class="d-flex align-items-center gap-1 gap-sm-2 gap-md-3">
                 <!-- Modern Notification Bell Dropdown -->
                 <div class="dropdown position-relative">
-                    <button type="button" class="btn notif-icon-btn position-relative" id="notifDropdown" aria-expanded="false" title="Notifications" onclick="togglePortalDropdown(this, event)">
+                    <button type="button" class="btn notif-icon-btn position-relative" id="notifDropdown" aria-expanded="false" title="Notifications" onclick="togglePortalDropdown('notifDropdownMenu', event)">
                         <i class="far fa-bell fs-5 text-secondary"></i>
                         <?php if ($unreadNotifCount > 0): ?>
                             <span class="notif-pulse-badge">
@@ -39,7 +39,7 @@ $isRegisterActive = ($currentScript === 'register.php');
                             </span>
                         <?php endif; ?>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2 notif-dropdown-menu" style="max-height: 400px; overflow-y: auto;" aria-labelledby="notifDropdown">
+                    <ul class="portal-dropdown-menu notif-dropdown-menu shadow-lg border-0 p-2" id="notifDropdownMenu" aria-labelledby="notifDropdown">
                         <li class="d-flex justify-content-between align-items-center px-2 py-1 mb-2 border-bottom">
                             <span class="fw-bold small text-uppercase text-muted">Notifications</span>
                             <span class="badge bg-light text-dark border"><?php echo $unreadNotifCount; ?> New</span>
@@ -79,7 +79,7 @@ $isRegisterActive = ($currentScript === 'register.php');
                 $displayEmail = $currentUser['email'] ?? ($_SESSION['user_email'] ?? '');
                 ?>
                 <div class="dropdown position-relative">
-                    <button type="button" class="btn user-profile-capsule d-flex align-items-center gap-1 gap-sm-2 text-dark shadow-2xs" id="userDropdown" aria-expanded="false" onclick="togglePortalDropdown(this, event)">
+                    <button type="button" class="btn user-profile-capsule d-flex align-items-center gap-1 gap-sm-2 text-dark shadow-2xs" id="userDropdown" aria-expanded="false" onclick="togglePortalDropdown('userDropdownMenu', event)">
                         <div class="user-avatar-circle">
                             <?php echo strtoupper(substr($displayName, 0, 1)); ?>
                         </div>
@@ -91,7 +91,7 @@ $isRegisterActive = ($currentScript === 'register.php');
                         </div>
                         <i class="fas fa-chevron-down text-muted small ms-1" style="font-size:0.62rem;"></i>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 user-dropdown-menu" aria-labelledby="userDropdown">
+                    <ul class="portal-dropdown-menu user-dropdown-menu shadow border-0" id="userDropdownMenu" aria-labelledby="userDropdown">
                         <li class="px-3 py-2 border-bottom">
                             <div class="fw-bold small"><?php echo e($displayName); ?></div>
                             <?php if ($displayEmail): ?>
@@ -123,56 +123,65 @@ $isRegisterActive = ($currentScript === 'register.php');
                 </div>
             </div>
 
-            <!-- Precision Instant Fail-Safe Dropdown Logic (Zero external dependencies or cache delays) -->
+            <!-- Bulletproof Fail-Safe Dropdown Logic (Completely independent from Bootstrap clearMenus) -->
             <script>
-            window.togglePortalDropdown = function(btn, ev) {
-                if (ev) {
-                    if (ev.preventDefault) ev.preventDefault();
-                    if (ev.stopPropagation) ev.stopPropagation();
-                }
-                var parent = btn.closest('.dropdown');
-                if (!parent) return false;
-                var menu = parent.querySelector('.dropdown-menu');
-                if (!menu) return false;
+            (function() {
+                var lastToggleTime = 0;
 
-                var isOpen = menu.classList.contains('show');
-
-                // Close any other open dropdowns
-                var allMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
-                for (var i = 0; i < allMenus.length; i++) {
-                    if (allMenus[i] !== menu) {
-                        allMenus[i].classList.remove('show');
-                        var p = allMenus[i].closest('.dropdown');
-                        var b = p ? p.querySelector('#notifDropdown, #userDropdown, button, a') : null;
-                        if (b) b.setAttribute('aria-expanded', 'false');
+                window.togglePortalDropdown = function(menuId, ev) {
+                    if (ev) {
+                        if (ev.preventDefault) ev.preventDefault();
+                        if (ev.stopPropagation) ev.stopPropagation();
                     }
-                }
+                    lastToggleTime = Date.now();
 
-                if (isOpen) {
-                    menu.classList.remove('show');
-                    btn.setAttribute('aria-expanded', 'false');
-                } else {
-                    menu.classList.add('show');
-                    btn.setAttribute('aria-expanded', 'true');
-                }
-                return false;
-            };
+                    var targetMenu = document.getElementById(menuId);
+                    if (!targetMenu) return false;
 
-            if (!window._portalDropdownDocListenerAdded) {
-                window._portalDropdownDocListenerAdded = true;
-                var closeAll = function(e) {
-                    if (!e.target.closest || !e.target.closest('.navbar-medicycle .dropdown')) {
-                        var openMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
+                    var isAlreadyOpen = targetMenu.classList.contains('is-open');
+
+                    // Close any other open portal dropdowns
+                    var allMenus = document.querySelectorAll('.portal-dropdown-menu');
+                    for (var i = 0; i < allMenus.length; i++) {
+                        allMenus[i].classList.remove('is-open');
+                        var triggerBtn = document.querySelector('[onclick*="' + allMenus[i].id + '"]');
+                        if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'false');
+                    }
+
+                    // Toggle state
+                    if (!isAlreadyOpen) {
+                        targetMenu.classList.add('is-open');
+                        var activeBtn = document.querySelector('[onclick*="' + menuId + '"]');
+                        if (activeBtn) activeBtn.setAttribute('aria-expanded', 'true');
+                    }
+                    return false;
+                };
+
+                var handleOutsideClick = function(e) {
+                    // Debounce: ignore delayed touch/click synthetic events fired within 450ms of button tap
+                    if (Date.now() - lastToggleTime < 450) {
+                        return;
+                    }
+
+                    var clickedInsideMenu = e.target.closest && e.target.closest('.portal-dropdown-menu');
+                    var clickedInsideTrigger = e.target.closest && e.target.closest('#notifDropdown, #userDropdown');
+
+                    if (!clickedInsideMenu && !clickedInsideTrigger) {
+                        var openMenus = document.querySelectorAll('.portal-dropdown-menu.is-open');
                         for (var j = 0; j < openMenus.length; j++) {
-                            openMenus[j].classList.remove('show');
-                            var pr = openMenus[j].closest('.dropdown');
-                            var bt = pr ? pr.querySelector('#notifDropdown, #userDropdown, button, a') : null;
-                            if (bt) bt.setAttribute('aria-expanded', 'false');
+                            openMenus[j].classList.remove('is-open');
+                            var btn = document.querySelector('[onclick*="' + openMenus[j].id + '"]');
+                            if (btn) btn.setAttribute('aria-expanded', 'false');
                         }
                     }
                 };
-                document.addEventListener('click', closeAll);
-            }
+
+                if (!window._portalDropdownDocListenerAdded) {
+                    window._portalDropdownDocListenerAdded = true;
+                    document.addEventListener('click', handleOutsideClick);
+                    document.addEventListener('touchend', handleOutsideClick, { passive: true });
+                }
+            })();
             </script>
         <?php else: ?>
             <!-- Public Header: Modern Animated 3-Lines Hamburger Button -->
