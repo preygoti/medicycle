@@ -1015,7 +1015,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // -------------------------------------------------------------------------
-    // 22. Single-Page Collection Pass Printer (Exact 1 Physical Page)
+    // 22. Single-Page Collection Pass Printer (Exact 1 Physical Page, 100% Full)
     // -------------------------------------------------------------------------
     window.printCollectionPass = function (btn) {
         const card = (btn && (btn.closest('.handshake-pass-card') || btn.closest('.modal-body') || btn.closest('.modal-content'))) 
@@ -1025,15 +1025,45 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        document.querySelectorAll('.printable-pass-target').forEach(el => el.classList.remove('printable-pass-target'));
-        card.classList.add('printable-pass-target');
+        let printSection = document.getElementById('print-section');
+        if (!printSection) {
+            printSection = document.createElement('div');
+            printSection.id = 'print-section';
+            document.body.appendChild(printSection);
+        }
 
-        window.print();
+        // Clone the pass cleanly so modal DOM is never modified
+        printSection.innerHTML = '';
+        const clone = card.cloneNode(true);
 
+        // Remove interactive buttons and alerts from printed paper pass
+        clone.querySelectorAll('button, .btn, .alert, .btn-close').forEach(function (el) {
+            el.remove();
+        });
+
+        printSection.appendChild(clone);
+
+        // Allow microtask tick for DOM paint, then launch print dialog
         setTimeout(function () {
-            card.classList.remove('printable-pass-target');
-        }, 1500);
+            window.print();
+        }, 80);
     };
+
+    // Clean up print section after print dialog completes
+    window.addEventListener('afterprint', function () {
+        const ps = document.getElementById('print-section');
+        if (ps) ps.innerHTML = '';
+    });
+
+    // -------------------------------------------------------------------------
+    // 23. Move Active Modals to Direct Children of <body> for Crystal-Clear Display
+    // -------------------------------------------------------------------------
+    document.addEventListener('show.bs.modal', function (e) {
+        const modalEl = e.target;
+        if (modalEl && modalEl.classList && modalEl.classList.contains('modal') && modalEl.parentElement !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+    });
 });
 
 
