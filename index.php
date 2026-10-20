@@ -10,7 +10,7 @@ try {
     $statSupplies = $pdo->query("SELECT COUNT(*) FROM medical_supplies WHERE status = 'Available'")->fetchColumn();
     $statOrgs = $pdo->query("SELECT COUNT(*) FROM organizations WHERE verification_status = 'verified'")->fetchColumn();
     $statTransfers = $pdo->query("SELECT COUNT(*) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
-    $statUnits = $pdo->query("SELECT COALESCE(SUM(quantity), 0) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
+    $statUnits = $pdo->query("SELECT COALESCE(SUM(requested_quantity), 0) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
     $statWaste = $pdo->query("SELECT COALESCE(SUM(estimated_waste_avoided), 0) FROM impact_metrics")->fetchColumn();
 
 } catch (PDOException $e) {
