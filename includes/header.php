@@ -37,6 +37,9 @@ $canonicalUrl = BASE_URL . ($_SERVER['REQUEST_URI'] ?? '/');
     <meta property="og:title" content="<?php echo e($pageTitle); ?>">
     <meta property="og:description" content="<?php echo e($metaDescription); ?>">
     <meta property="og:image" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    <meta property="og:image:secure_url" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="MediCycle Official Logo">
     <meta property="og:site_name" content="MediCycle">
     
     <!-- Twitter Cards -->
@@ -46,31 +49,51 @@ $canonicalUrl = BASE_URL . ($_SERVER['REQUEST_URI'] ?? '/');
     <meta name="twitter:description" content="<?php echo e($metaDescription); ?>">
     <meta name="twitter:image" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
     
+    <!-- Google Search Engine Thumbnail -->
+    <meta name="thumbnail" content="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    
     <!-- Google Search Console Verification Meta Tag -->
     <meta name="google-site-verification" content="nfmJ_SXLJ_zElY9VsFkJAryz3zJy1shhjIPzwJUamcU" />
 
-    <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets -->
+    <!-- Schema.org JSON-LD Structured Data for Google Rich Snippets & Official Brand Logo -->
     <?php if (!$isPortalPage): ?>
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "MediCycle",
-      "url": "<?php echo BASE_URL; ?>/",
-      "description": "Smart Medical Supply Redistribution System connecting hospitals, suppliers, and NGOs to eliminate medical waste.",
-      "applicationCategory": "HealthApplication",
-      "operatingSystem": "All",
-      "author": {
-        "@type": "Organization",
-        "name": "MediCycle",
-        "url": "<?php echo BASE_URL; ?>/"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "<?php echo BASE_URL; ?>/#organization",
+          "name": "MediCycle",
+          "url": "<?php echo BASE_URL; ?>/",
+          "logo": {
+            "@type": "ImageObject",
+            "@id": "<?php echo BASE_URL; ?>/#logo",
+            "url": "<?php echo BASE_URL; ?>/assets/images/logo-icon.png",
+            "caption": "MediCycle Logo"
+          },
+          "image": "<?php echo BASE_URL; ?>/assets/images/logo-icon.png",
+          "description": "Smart Medical Supply Redistribution System connecting hospitals, suppliers, and NGOs to eliminate medical waste."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "<?php echo BASE_URL; ?>/#website",
+          "url": "<?php echo BASE_URL; ?>/",
+          "name": "MediCycle",
+          "publisher": {
+            "@id": "<?php echo BASE_URL; ?>/#organization"
+          }
+        }
+      ]
     }
     </script>
     <?php endif; ?>
 
-    <!-- MediCycle Favicon -->
-    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>/assets/images/favicon.png">
+    <!-- MediCycle Multi-Format Icons for Googlebot & Mobile Browsers -->
+    <link rel="icon" type="image/png" sizes="32x32" href="<?php echo BASE_URL; ?>/assets/images/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="<?php echo BASE_URL; ?>/assets/images/logo-icon.png">
+    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>/favicon.ico">
     
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
