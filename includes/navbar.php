@@ -31,15 +31,15 @@ $isRegisterActive = ($currentScript === 'register.php');
             <div class="d-flex align-items-center gap-1 gap-sm-2 gap-md-3">
                 <!-- Modern Notification Bell Dropdown -->
                 <div class="dropdown position-relative">
-                    <a class="nav-link notif-icon-btn position-relative" href="javascript:void(0)" id="notifDropdown" role="button" data-header-toggle="dropdown" aria-expanded="false" title="Notifications">
+                    <button type="button" class="btn notif-icon-btn position-relative" id="notifDropdown" aria-expanded="false" title="Notifications" onclick="togglePortalDropdown(this, event)">
                         <i class="far fa-bell fs-5 text-secondary"></i>
                         <?php if ($unreadNotifCount > 0): ?>
                             <span class="notif-pulse-badge">
                                 <?php echo $unreadNotifCount; ?>
                             </span>
                         <?php endif; ?>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="width: min(320px, calc(100vw - 20px)); max-height: 400px; overflow-y: auto;" aria-labelledby="notifDropdown">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2 notif-dropdown-menu" style="max-height: 400px; overflow-y: auto;" aria-labelledby="notifDropdown">
                         <li class="d-flex justify-content-between align-items-center px-2 py-1 mb-2 border-bottom">
                             <span class="fw-bold small text-uppercase text-muted">Notifications</span>
                             <span class="badge bg-light text-dark border"><?php echo $unreadNotifCount; ?> New</span>
@@ -79,7 +79,7 @@ $isRegisterActive = ($currentScript === 'register.php');
                 $displayEmail = $currentUser['email'] ?? ($_SESSION['user_email'] ?? '');
                 ?>
                 <div class="dropdown position-relative">
-                    <a class="nav-link user-profile-capsule d-flex align-items-center gap-1 gap-sm-2 text-dark shadow-2xs" href="javascript:void(0)" id="userDropdown" role="button" data-header-toggle="dropdown" aria-expanded="false">
+                    <button type="button" class="btn user-profile-capsule d-flex align-items-center gap-1 gap-sm-2 text-dark shadow-2xs" id="userDropdown" aria-expanded="false" onclick="togglePortalDropdown(this, event)">
                         <div class="user-avatar-circle">
                             <?php echo strtoupper(substr($displayName, 0, 1)); ?>
                         </div>
@@ -90,8 +90,8 @@ $isRegisterActive = ($currentScript === 'register.php');
                             <?php endif; ?>
                         </div>
                         <i class="fas fa-chevron-down text-muted small ms-1" style="font-size:0.62rem;"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 user-dropdown-menu" aria-labelledby="userDropdown">
                         <li class="px-3 py-2 border-bottom">
                             <div class="fw-bold small"><?php echo e($displayName); ?></div>
                             <?php if ($displayEmail): ?>
@@ -122,6 +122,59 @@ $isRegisterActive = ($currentScript === 'register.php');
                     </ul>
                 </div>
             </div>
+
+            <!-- Precision Instant Fail-Safe Dropdown Logic (Zero external dependencies or cache delays) -->
+            <script>
+            window.togglePortalDropdown = function(btn, ev) {
+                if (ev) {
+                    if (ev.preventDefault) ev.preventDefault();
+                    if (ev.stopPropagation) ev.stopPropagation();
+                }
+                var parent = btn.closest('.dropdown');
+                if (!parent) return false;
+                var menu = parent.querySelector('.dropdown-menu');
+                if (!menu) return false;
+
+                var isOpen = menu.classList.contains('show');
+
+                // Close any other open dropdowns
+                var allMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
+                for (var i = 0; i < allMenus.length; i++) {
+                    if (allMenus[i] !== menu) {
+                        allMenus[i].classList.remove('show');
+                        var p = allMenus[i].closest('.dropdown');
+                        var b = p ? p.querySelector('#notifDropdown, #userDropdown, button, a') : null;
+                        if (b) b.setAttribute('aria-expanded', 'false');
+                    }
+                }
+
+                if (isOpen) {
+                    menu.classList.remove('show');
+                    btn.setAttribute('aria-expanded', 'false');
+                } else {
+                    menu.classList.add('show');
+                    btn.setAttribute('aria-expanded', 'true');
+                }
+                return false;
+            };
+
+            if (!window._portalDropdownDocListenerAdded) {
+                window._portalDropdownDocListenerAdded = true;
+                var closeAll = function(e) {
+                    if (!e.target.closest || !e.target.closest('.navbar-medicycle .dropdown')) {
+                        var openMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
+                        for (var j = 0; j < openMenus.length; j++) {
+                            openMenus[j].classList.remove('show');
+                            var pr = openMenus[j].closest('.dropdown');
+                            var bt = pr ? pr.querySelector('#notifDropdown, #userDropdown, button, a') : null;
+                            if (bt) bt.setAttribute('aria-expanded', 'false');
+                        }
+                    }
+                };
+                document.addEventListener('click', closeAll);
+                document.addEventListener('touchend', closeAll, { passive: true });
+            }
+            </script>
         <?php else: ?>
             <!-- Public Header: Modern Animated 3-Lines Hamburger Button -->
             <button class="navbar-toggler modern-hamburger-btn d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">

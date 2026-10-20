@@ -865,57 +865,56 @@ document.addEventListener('DOMContentLoaded', function () {
     // -------------------------------------------------------------------------
     // 18. Fail-Safe Portal Header Dropdowns (Bell & User Profile)
     // -------------------------------------------------------------------------
-    (function initPortalDropdowns() {
-        const portalToggles = document.querySelectorAll('.navbar-medicycle [data-header-toggle="dropdown"], .navbar-medicycle #notifDropdown, .navbar-medicycle #userDropdown');
+    if (typeof window.togglePortalDropdown !== 'function') {
+        window.togglePortalDropdown = function(btn, ev) {
+            if (ev) {
+                if (ev.preventDefault) ev.preventDefault();
+                if (ev.stopPropagation) ev.stopPropagation();
+            }
+            var parent = btn.closest('.dropdown');
+            if (!parent) return false;
+            var menu = parent.querySelector('.dropdown-menu');
+            if (!menu) return false;
 
-        portalToggles.forEach(function (toggle) {
-            const handleToggle = function (e) {
-                e.preventDefault();
-                e.stopPropagation();
+            var isOpen = menu.classList.contains('show');
 
-                const parent = toggle.closest('.dropdown');
-                const menu = parent ? parent.querySelector('.dropdown-menu') : toggle.nextElementSibling;
-                if (!menu) return;
-
-                const isAlreadyOpen = menu.classList.contains('show');
-
-                // Close all other dropdowns in the navbar
-                document.querySelectorAll('.navbar-medicycle .dropdown-menu').forEach(function (m) {
-                    m.classList.remove('show');
-                    const t = m.previousElementSibling || (m.closest('.dropdown') ? m.closest('.dropdown').querySelector('a, button') : null);
-                    if (t) {
-                        t.setAttribute('aria-expanded', 'false');
-                        t.classList.remove('show');
-                    }
-                });
-
-                if (!isAlreadyOpen) {
-                    menu.classList.add('show');
-                    toggle.setAttribute('aria-expanded', 'true');
-                    toggle.classList.add('show');
+            var allMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
+            for (var i = 0; i < allMenus.length; i++) {
+                if (allMenus[i] !== menu) {
+                    allMenus[i].classList.remove('show');
+                    var p = allMenus[i].closest('.dropdown');
+                    var b = p ? p.querySelector('#notifDropdown, #userDropdown, button, a') : null;
+                    if (b) b.setAttribute('aria-expanded', 'false');
                 }
-            };
+            }
 
-            toggle.addEventListener('click', handleToggle);
-        });
+            if (isOpen) {
+                menu.classList.remove('show');
+                btn.setAttribute('aria-expanded', 'false');
+            } else {
+                menu.classList.add('show');
+                btn.setAttribute('aria-expanded', 'true');
+            }
+            return false;
+        };
+    }
 
-        // Close on outside click or touch
-        const closeAllPortalDropdowns = function (e) {
-            if (!e.target.closest('.navbar-medicycle .dropdown')) {
-                document.querySelectorAll('.navbar-medicycle .dropdown-menu.show').forEach(function (m) {
-                    m.classList.remove('show');
-                    const t = m.previousElementSibling || (m.closest('.dropdown') ? m.closest('.dropdown').querySelector('a, button') : null);
-                    if (t) {
-                        t.setAttribute('aria-expanded', 'false');
-                        t.classList.remove('show');
-                    }
-                });
+    if (!window._portalDropdownDocListenerAdded) {
+        window._portalDropdownDocListenerAdded = true;
+        var closeAll = function(e) {
+            if (!e.target.closest || !e.target.closest('.navbar-medicycle .dropdown')) {
+                var openMenus = document.querySelectorAll('.navbar-medicycle .dropdown-menu.show');
+                for (var j = 0; j < openMenus.length; j++) {
+                    openMenus[j].classList.remove('show');
+                    var pr = openMenus[j].closest('.dropdown');
+                    var bt = pr ? pr.querySelector('#notifDropdown, #userDropdown, button, a') : null;
+                    if (bt) bt.setAttribute('aria-expanded', 'false');
+                }
             }
         };
-
-        document.addEventListener('click', closeAllPortalDropdowns);
-        document.addEventListener('touchend', closeAllPortalDropdowns, { passive: true });
-    })();
+        document.addEventListener('click', closeAll);
+        document.addEventListener('touchend', closeAll, { passive: true });
+    }
 });
 
 
