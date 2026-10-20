@@ -1774,7 +1774,7 @@ input[type="date"].form-control:focus {
    COMPREHENSIVE RESPONSIVE SYSTEM FOR ALL DEVICES & MODAL POP-UPS
    ========================================================================= */
 
-/* 1. Universal Modal Pop-Up Perfection on All Devices */
+/* 1. Universal Modal Pop-Up Perfection - Always Centered in the Middle of Screen on All Devices */
 .modal {
     padding-left: 0 !important;
     padding-right: 0 !important;
@@ -1784,10 +1784,17 @@ input[type="date"].form-control:focus {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    min-height: calc(100% - 3rem) !important;
-    margin: 1.5rem auto !important;
-    max-width: 540px;
-    width: calc(100% - 2rem);
+    min-height: calc(100% - 2.5rem) !important;
+    margin: 1.25rem auto !important;
+    max-width: 520px;
+    width: calc(100% - 1.5rem);
+}
+
+.modal-dialog-centered {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: calc(100% - 2.5rem) !important;
 }
 
 .modal-dialog.modal-lg {
@@ -1803,90 +1810,149 @@ input[type="date"].form-control:focus {
 }
 
 .modal-content {
-    border-radius: 18px !important;
-    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(15, 23, 42, 0.06) !important;
     border: 1px solid rgba(226, 232, 240, 0.95) !important;
     overflow: hidden;
     max-height: calc(100vh - 3rem);
     display: flex;
     flex-direction: column;
+    margin: auto !important;
+    background: #ffffff;
 }
 
 .modal-header {
     flex-shrink: 0;
-    padding: 1rem 1.25rem !important;
+    padding: 1.15rem 1.4rem !important;
     background: #ffffff;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-title {
+    font-size: 1.12rem !important;
+    font-weight: 700 !important;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .modal-body {
     flex: 1 1 auto;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding: 1.25rem !important;
+    padding: 1.35rem 1.4rem !important;
     overscroll-behavior: contain;
+    color: #334155;
 }
 
 .modal-footer {
     flex-shrink: 0;
-    padding: 0.75rem 1.25rem !important;
+    padding: 1rem 1.4rem !important;
     background: #f8fafc;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid #f1f5f9 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.75rem !important;
 }
 
-/* Mobile Pop-Up / Modal Adaptations - Opens Full Screen like a Native App Page */
+/* Beautiful, Consistent Modal Buttons across All Modals */
+.modal-footer .btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.45rem !important;
+    font-size: 0.92rem !important;
+    font-weight: 600 !important;
+    padding: 0.6rem 1.35rem !important;
+    border-radius: 50px !important;
+    min-height: 42px !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+}
+
+/* Cancel Button: Crisp Border & Subdued Background */
+.modal-footer .btn-light,
+.modal-footer .btn-secondary,
+.modal-footer [data-bs-dismiss="modal"] {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #475569 !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+.modal-footer .btn-light:hover,
+.modal-footer .btn-secondary:hover,
+.modal-footer [data-bs-dismiss="modal"]:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+/* Confirm / Action Buttons */
+.modal-footer .btn-success,
+.modal-footer .btn-teal,
+.modal-footer button[type="submit"]:not(.btn-danger) {
+    background-color: #0f766e !important;
+    border-color: #0f766e !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(15, 118, 110, 0.25) !important;
+}
+
+.modal-footer .btn-success:hover,
+.modal-footer .btn-teal:hover,
+.modal-footer button[type="submit"]:not(.btn-danger):hover {
+    background-color: #0d655e !important;
+    border-color: #0d655e !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3) !important;
+}
+
+.modal-footer .btn-danger {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25) !important;
+}
+
+.modal-footer .btn-danger:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* Mobile Pop-Up: Perfectly Centered on Mobile without Full-Screen Stretching */
 @media (max-width: 575.98px) {
     .modal-dialog {
-        margin: 0 !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        height: 100% !important;
-        min-height: 100vh !important;
-    }
-    
-    .modal-dialog-centered {
-        min-height: 100% !important;
+        margin: 1rem auto !important;
+        width: calc(100% - 1.25rem) !important;
+        max-width: calc(100% - 1.25rem) !important;
+        min-height: calc(100% - 2rem) !important;
     }
     
     .modal-content {
-        border-radius: 0 !important;
-        height: 100% !important;
-        min-height: 100vh !important;
-        max-height: 100vh !important;
-        border: none !important;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .modal-header {
-        border-radius: 0 !important;
-        position: sticky;
-        top: 0;
-        z-index: 1055;
-        background: #ffffff;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        padding: 0.85rem 1rem !important;
-    }
-    
-    .modal-title {
-        font-size: 1.1rem !important;
-    }
-    
-    .modal-body {
-        flex: 1 1 auto;
-        overflow-y: auto;
-        padding: 1.15rem 1rem !important;
-        -webkit-overflow-scrolling: touch;
+        border-radius: 18px !important;
+        max-height: calc(100vh - 2.5rem) !important;
     }
     
     .modal-footer {
-        border-radius: 0 !important;
-        position: sticky;
-        bottom: 0;
-        z-index: 1055;
-        background: #ffffff;
-        box-shadow: 0 -1px 4px rgba(0,0,0,0.06);
-        padding: 0.75rem 1rem !important;
+        padding: 0.85rem 1rem !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.65rem !important;
+    }
+    
+    .modal-footer .btn {
+        flex: 1 1 50% !important;
+        font-size: 0.85rem !important;
+        padding: 0.55rem 0.75rem !important;
+        white-space: nowrap !important;
     }
 }
 
