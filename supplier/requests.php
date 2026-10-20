@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
 
                 $pdo->commit();
-                set_flash('success', "Clinic requirement accepted! Handover Code #{$handoverCode} generated. The clinic has been notified.");
+                set_flash('success', "Clinic requirement accepted! Secure verification PIN issued to the clinic for handover verification.");
                 header('Location: ' . BASE_URL . '/supplier/requests.php?tab=broadcasts');
                 exit;
 
@@ -449,8 +449,8 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <?php echo status_badge($cr['status']); ?>
                                                 <?php if (!empty($cr['handover_code'])): ?>
                                                     <div class="mt-1">
-                                                        <span class="badge rounded-pill text-white fw-bold px-2 py-1 shadow-2xs" style="background:#0f766e; font-size:0.68rem;">
-                                                            <i class="fas fa-qrcode me-1"></i> Code: <?php echo e($cr['handover_code']); ?>
+                                                        <span class="badge rounded-pill bg-light text-secondary border px-2 py-0.5" style="font-size:0.68rem;" title="Secure PIN issued to clinic for collection verification">
+                                                            <i class="fas fa-lock text-teal me-1"></i>PIN Kept by Clinic
                                                         </span>
                                                     </div>
                                                 <?php endif; ?>
@@ -524,7 +524,7 @@ include __DIR__ . '/../includes/navbar.php';
                                                             <div class="modal-footer border-top py-3">
                                                                 <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
                                                                 <button type="submit" class="btn btn-teal text-white rounded-pill px-4 shadow-xs fw-semibold" style="background:#0f766e;">
-                                                                    <i class="fas fa-check-circle me-1"></i> Accept & Issue Handover Code
+                                                                    <i class="fas fa-check-circle me-1"></i> Accept & Send PIN to Clinic
                                                                 </button>
                                                             </div>
                                                         </form>
