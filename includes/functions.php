@@ -405,18 +405,23 @@ function lookup_handover_consignment($pdo, $rawInput, $currentUser = null) {
     }
 
     try {
-        $sql = "SELECT r.*, ms.supply_name, ms.unit, ms.expiry_date, ms.condition_status, ms.batch_number, ms.supplier_id,
+        $sql = "SELECT r.*, 
+                       COALESCE(ms.supply_name, (SELECT req_s.supply_name FROM requirements req_s WHERE req_s.handover_code = r.handover_code LIMIT 1), r.purpose) AS supply_name,
+                       COALESCE(ms.unit, (SELECT req_u.unit FROM requirements req_u WHERE req_u.handover_code = r.handover_code LIMIT 1), 'Units') AS unit,
+                       ms.expiry_date, ms.condition_status, ms.batch_number,
+                       COALESCE(ms.supplier_id, (SELECT req_sup.fulfilled_by_supplier_id FROM requirements req_sup WHERE req_sup.handover_code = r.handover_code LIMIT 1)) AS supplier_id,
                        c.category_name,
                        su.name AS supplier_name, su.email AS supplier_email, su.phone AS supplier_phone,
                        so.organization_name AS supplier_org, so.address AS supplier_address, so.city AS supplier_city,
                        nu.name AS requester_name, nu.email AS requester_email, nu.phone AS requester_phone,
                        no.organization_name AS requester_org, no.address AS requester_address, no.city AS requester_city,
                        d.id AS delivery_id, d.delivery_status, d.pickup_status, d.assigned_at, d.delivered_at,
-                       del_u.name AS courier_name, del_u.phone AS courier_phone
+                       del_u.name AS courier_name, del_u.phone AS courier_phone,
+                       'request' AS record_source
                 FROM requests r
-                JOIN medical_supplies ms ON r.supply_id = ms.id
+                LEFT JOIN medical_supplies ms ON r.supply_id = ms.id
                 LEFT JOIN categories c ON ms.category_id = c.id
-                JOIN users su ON ms.supplier_id = su.id
+                LEFT JOIN users su ON (ms.supplier_id = su.id OR su.id = (SELECT req_f.fulfilled_by_supplier_id FROM requirements req_f WHERE req_f.handover_code = r.handover_code LIMIT 1))
                 LEFT JOIN organizations so ON su.id = so.user_id
                 JOIN users nu ON r.requester_id = nu.id
                 LEFT JOIN organizations no ON nu.id = no.user_id
@@ -434,6 +439,33 @@ function lookup_handover_consignment($pdo, $rawInput, $currentUser = null) {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $consignment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Fallback: If not found in requests, search requirements directly
+        if (!$consignment) {
+            $reqSql = "SELECT req.id, req.handover_code, req.supply_name, req.unit, req.required_quantity AS requested_quantity,
+                              req.urgency, req.status, req.fulfilled_at AS approved_at, req.created_at,
+                              req.organization_id AS requester_id, req.fulfilled_by_supplier_id AS supplier_id,
+                              c.category_name,
+                              su.name AS supplier_name, su.email AS supplier_email, su.phone AS supplier_phone,
+                              so.organization_name AS supplier_org, so.address AS supplier_address, so.city AS supplier_city,
+                              nu.name AS requester_name, nu.email AS requester_email, nu.phone AS requester_phone,
+                              no.organization_name AS requester_org, no.address AS requester_address, no.city AS requester_city,
+                              NULL AS delivery_id, NULL AS delivery_status, NULL AS pickup_status, NULL AS assigned_at, NULL AS delivered_at,
+                              NULL AS courier_name, NULL AS courier_phone, NULL AS batch_number, NULL AS expiry_date, NULL AS condition_status,
+                              CONCAT('Fulfilled Clinical Requirement: ', req.supply_name) AS purpose,
+                              'requirement' AS record_source
+                       FROM requirements req
+                       LEFT JOIN categories c ON req.category_id = c.id
+                       LEFT JOIN users su ON req.fulfilled_by_supplier_id = su.id
+                       LEFT JOIN organizations so ON su.id = so.user_id
+                       JOIN users nu ON req.organization_id = nu.id
+                       LEFT JOIN organizations no ON nu.id = no.user_id
+                       WHERE req.handover_code = ?
+                       LIMIT 1";
+            $reqStmt = $pdo->prepare($reqSql);
+            $reqStmt->execute([$code]);
+            $consignment = $reqStmt->fetch(PDO::FETCH_ASSOC);
+        }
 
         if (!$consignment) {
             return [
@@ -497,18 +529,23 @@ function verify_and_complete_handover($pdo, $rawInput, $currentUser = null) {
     }
 
     try {
-        $sql = "SELECT r.*, ms.supply_name, ms.unit, ms.expiry_date, ms.condition_status, ms.batch_number, ms.supplier_id,
+        $sql = "SELECT r.*, 
+                       COALESCE(ms.supply_name, (SELECT req_s.supply_name FROM requirements req_s WHERE req_s.handover_code = r.handover_code LIMIT 1), r.purpose) AS supply_name,
+                       COALESCE(ms.unit, (SELECT req_u.unit FROM requirements req_u WHERE req_u.handover_code = r.handover_code LIMIT 1), 'Units') AS unit,
+                       ms.expiry_date, ms.condition_status, ms.batch_number,
+                       COALESCE(ms.supplier_id, (SELECT req_sup.fulfilled_by_supplier_id FROM requirements req_sup WHERE req_sup.handover_code = r.handover_code LIMIT 1)) AS supplier_id,
                        c.category_name,
                        su.name AS supplier_name, su.email AS supplier_email, su.phone AS supplier_phone,
                        so.organization_name AS supplier_org, so.address AS supplier_address, so.city AS supplier_city,
                        nu.name AS requester_name, nu.email AS requester_email, nu.phone AS requester_phone,
                        no.organization_name AS requester_org, no.address AS requester_address, no.city AS requester_city,
                        d.id AS delivery_id, d.delivery_status, d.pickup_status, d.assigned_at, d.delivered_at,
-                       del_u.name AS courier_name, del_u.phone AS courier_phone
+                       del_u.name AS courier_name, del_u.phone AS courier_phone,
+                       'request' AS record_source
                 FROM requests r
-                JOIN medical_supplies ms ON r.supply_id = ms.id
+                LEFT JOIN medical_supplies ms ON r.supply_id = ms.id
                 LEFT JOIN categories c ON ms.category_id = c.id
-                JOIN users su ON ms.supplier_id = su.id
+                LEFT JOIN users su ON (ms.supplier_id = su.id OR su.id = (SELECT req_f.fulfilled_by_supplier_id FROM requirements req_f WHERE req_f.handover_code = r.handover_code LIMIT 1))
                 LEFT JOIN organizations so ON su.id = so.user_id
                 JOIN users nu ON r.requester_id = nu.id
                 LEFT JOIN organizations no ON nu.id = no.user_id
@@ -527,6 +564,33 @@ function verify_and_complete_handover($pdo, $rawInput, $currentUser = null) {
         $stmt->execute($params);
         $consignment = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Fallback: If not in requests table, check requirements table
+        if (!$consignment) {
+            $reqSql = "SELECT req.id, req.handover_code, req.supply_name, req.unit, req.required_quantity AS requested_quantity,
+                              req.urgency, req.status, req.fulfilled_at AS approved_at, req.created_at,
+                              req.organization_id AS requester_id, req.fulfilled_by_supplier_id AS supplier_id,
+                              c.category_name,
+                              su.name AS supplier_name, su.email AS supplier_email, su.phone AS supplier_phone,
+                              so.organization_name AS supplier_org, so.address AS supplier_address, so.city AS supplier_city,
+                              nu.name AS requester_name, nu.email AS requester_email, nu.phone AS requester_phone,
+                              no.organization_name AS requester_org, no.address AS requester_address, no.city AS requester_city,
+                              NULL AS delivery_id, NULL AS delivery_status, NULL AS pickup_status, NULL AS assigned_at, NULL AS delivered_at,
+                              NULL AS courier_name, NULL AS courier_phone, NULL AS batch_number, NULL AS expiry_date, NULL AS condition_status,
+                              CONCAT('Fulfilled Clinical Requirement: ', req.supply_name) AS purpose,
+                              'requirement' AS record_source
+                       FROM requirements req
+                       LEFT JOIN categories c ON req.category_id = c.id
+                       LEFT JOIN users su ON req.fulfilled_by_supplier_id = su.id
+                       LEFT JOIN organizations so ON su.id = so.user_id
+                       JOIN users nu ON req.organization_id = nu.id
+                       LEFT JOIN organizations no ON nu.id = no.user_id
+                       WHERE req.handover_code = ?
+                       LIMIT 1";
+            $reqStmt = $pdo->prepare($reqSql);
+            $reqStmt->execute([$code]);
+            $consignment = $reqStmt->fetch(PDO::FETCH_ASSOC);
+        }
+
         // 1. Code is Wrong (Does not exist in DB)
         if (!$consignment) {
             return [
@@ -544,12 +608,12 @@ function verify_and_complete_handover($pdo, $rawInput, $currentUser = null) {
                 'error_type' => 'already_completed',
                 'code' => $code,
                 'consignment' => $consignment,
-                'error' => "Security Notice: Handshake Code Already Used! Consignment ({$consignment['supply_name']}) was already verified and delivery completed on " . format_datetime($consignment['completed_at']) . ". Handshake codes are strictly single-use and cannot be used a second time."
+                'error' => "Security Notice: Handshake Code Already Used! Consignment ({$consignment['supply_name']}) was already verified and delivery completed on " . format_datetime($consignment['completed_at'] ?? $consignment['updated_at'] ?? 'now') . ". Handshake codes are strictly single-use and cannot be used a second time."
             ];
         }
 
-        // 3. Status check: ensure consignment is approved / ready
-        if (!in_array($consignment['status'], ['Approved', 'Ready for Handover', 'Accepted', 'In Transit', 'Collected'])) {
+        // 3. Status check: ensure consignment is approved / ready / fulfilled
+        if (!in_array($consignment['status'], ['Approved', 'Ready for Handover', 'Accepted', 'In Transit', 'Collected', 'Fulfilled'])) {
             return [
                 'success' => false,
                 'error_type' => 'invalid_status',
@@ -562,63 +626,88 @@ function verify_and_complete_handover($pdo, $rawInput, $currentUser = null) {
         // 4. Code MATCHES and is ready -> Mark delivery as COMPLETED!
         $pdo->beginTransaction();
 
-        $lockStmt = $pdo->prepare("SELECT r.id, r.status, r.requested_quantity, ms.unit, ms.supply_name, ms.supplier_id, r.requester_id 
-                                   FROM requests r 
-                                   JOIN medical_supplies ms ON r.supply_id = ms.id 
-                                   WHERE r.id = ? FOR UPDATE");
-        $lockStmt->execute([$consignment['id']]);
-        $lockedReq = $lockStmt->fetch(PDO::FETCH_ASSOC);
+        $reqRecordId = null;
+        if (($consignment['record_source'] ?? '') === 'request') {
+            $lockStmt = $pdo->prepare("SELECT id, status, requested_quantity, supply_id FROM requests WHERE id = ? FOR UPDATE");
+            $lockStmt->execute([$consignment['id']]);
+            $lockedReq = $lockStmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($lockedReq['status'] === 'Completed') {
-            $pdo->rollBack();
-            return [
-                'success' => false,
-                'error_type' => 'already_completed',
-                'code' => $code,
-                'consignment' => $consignment,
-                'error' => "Security Notice: Handshake Code Already Used! This consignment was already verified and completed. This code cannot be used a second time."
-            ];
+            if ($lockedReq && $lockedReq['status'] === 'Completed') {
+                $pdo->rollBack();
+                return [
+                    'success' => false,
+                    'error_type' => 'already_completed',
+                    'code' => $code,
+                    'consignment' => $consignment,
+                    'error' => "Security Notice: Handshake Code Already Used! This consignment was already verified and completed. This code cannot be used a second time."
+                ];
+            }
+
+            // 1. Mark Request Completed
+            $updReq = $pdo->prepare("UPDATE requests SET status = 'Completed', completed_at = NOW() WHERE id = ?");
+            $updReq->execute([$consignment['id']]);
+            $reqRecordId = $consignment['id'];
+
+            // 2. Mark Delivery Delivered (if delivery consignment exists)
+            $actorName = $currentUser['name'] ?? ($currentUser['role'] ?? 'System User');
+            $updDel = $pdo->prepare("UPDATE deliveries SET delivery_status = 'Delivered', pickup_status = 'Picked Up', delivered_at = NOW(), tracking_notes = CONCAT(COALESCE(tracking_notes, ''), '\n[', NOW(), '] Verified via handshake code by ', ?) WHERE request_id = ?");
+            $updDel->execute([$actorName, $consignment['id']]);
+
+            // 2b. Mark Medical Supply as Transferred if quantity is depleted
+            if (!empty($consignment['supply_id'])) {
+                $suppStmt = $pdo->prepare("SELECT id, quantity FROM medical_supplies WHERE id = ?");
+                $suppStmt->execute([$consignment['supply_id']]);
+                $suppRow = $suppStmt->fetch(PDO::FETCH_ASSOC);
+                if ($suppRow && (int)$suppRow['quantity'] <= 0) {
+                    $updSupp = $pdo->prepare("UPDATE medical_supplies SET status = 'Transferred', updated_at = NOW() WHERE id = ?");
+                    $updSupp->execute([$consignment['supply_id']]);
+                }
+            }
         }
 
-        // 1. Mark Request Completed
-        $updReq = $pdo->prepare("UPDATE requests SET status = 'Completed', completed_at = NOW() WHERE id = ?");
-        $updReq->execute([$consignment['id']]);
+        // Also synchronize requirements table if matching handover code exists
+        $updReqClinic = $pdo->prepare("UPDATE requirements SET status = 'Fulfilled', fulfilled_at = COALESCE(fulfilled_at, NOW()) WHERE handover_code = ?");
+        $updReqClinic->execute([$code]);
 
-        // 2. Mark Delivery Delivered (if delivery consignment exists)
-        $actorName = $currentUser['name'] ?? ($currentUser['role'] ?? 'System User');
-        $updDel = $pdo->prepare("UPDATE deliveries SET delivery_status = 'Delivered', pickup_status = 'Picked Up', delivered_at = NOW(), tracking_notes = CONCAT(COALESCE(tracking_notes, ''), '\n[', NOW(), '] Verified via handshake code by ', ?) WHERE request_id = ?");
-        $updDel->execute([$actorName, $consignment['id']]);
-
-        // 2b. Mark Medical Supply as Transferred if quantity is depleted
-        $suppStmt = $pdo->prepare("SELECT id, quantity FROM medical_supplies WHERE id = ?");
-        $suppStmt->execute([$consignment['supply_id']]);
-        $suppRow = $suppStmt->fetch(PDO::FETCH_ASSOC);
-        if ($suppRow && (int)$suppRow['quantity'] <= 0) {
-            $updSupp = $pdo->prepare("UPDATE medical_supplies SET status = 'Transferred', updated_at = NOW() WHERE id = ?");
-            $updSupp->execute([$consignment['supply_id']]);
+        // If from requirements record directly and no request row existed, create or update request for audit/impact
+        if (($consignment['record_source'] ?? '') === 'requirement') {
+            $checkExistingReq = $pdo->prepare("SELECT id FROM requests WHERE handover_code = ? LIMIT 1");
+            $checkExistingReq->execute([$code]);
+            $foundReq = $checkExistingReq->fetch(PDO::FETCH_ASSOC);
+            if ($foundReq) {
+                $updReq = $pdo->prepare("UPDATE requests SET status = 'Completed', completed_at = NOW() WHERE id = ?");
+                $updReq->execute([$foundReq['id']]);
+                $reqRecordId = $foundReq['id'];
+            }
         }
 
         // 3. Record Impact
         $qty = (int)$consignment['requested_quantity'];
-        record_impact($pdo, $consignment['id'], $qty);
+        if ($reqRecordId) {
+            record_impact($pdo, $reqRecordId, $qty);
+        }
 
         // 4. Notify Supplier
-        create_notification(
-            $pdo,
-            $consignment['supplier_id'],
-            'Handover Completed & Verified!',
-            "Consignment for {$qty} {$consignment['unit']} of {$consignment['supply_name']} delivery was successfully verified with 6-digit handshake code. Stock officially transferred.",
-            'supplier/history.php'
-        );
+        if (!empty($consignment['supplier_id'])) {
+            create_notification(
+                $pdo,
+                $consignment['supplier_id'],
+                'Handover Completed & Verified!',
+                "Consignment for {$qty} {$consignment['unit']} of {$consignment['supply_name']} delivery was successfully verified with 6-digit handshake code. Stock officially transferred.",
+                'supplier/history.php'
+            );
+        }
 
         // 5. Notify Recipient Clinic
-        create_notification(
-            $pdo,
-            $consignment['requester_id'],
-            'Supplies Received & Delivery Completed!',
-            "Your clinic has verified and received {$qty} {$consignment['unit']} of {$consignment['supply_name']}. Verification complete.",
-            'ngo/history.php'
-        );
+        if (!empty($consignment['requester_id'])) {
+            create_notification(
+                $pdo,
+                $consignment['requester_id'],
+                'Supplies Received & Delivery Completed!',
+                "Your clinic has verified and received {$qty} {$consignment['unit']} of {$consignment['supply_name']}. Verification complete.",
+                'ngo/history.php'
+            );
+        }
 
         $pdo->commit();
 

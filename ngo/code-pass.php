@@ -17,12 +17,15 @@ $selectedCode = clean($_GET['code'] ?? '');
 
 // Fetch active collection passes awaiting pickup/handover
 $activeStmt = $pdo->prepare("
-    SELECT r.*, ms.supply_name, ms.unit, ms.batch_number, ms.expiry_date,
+    SELECT r.*, 
+           COALESCE(ms.supply_name, (SELECT req_s.supply_name FROM requirements req_s WHERE req_s.handover_code = r.handover_code LIMIT 1), r.purpose) AS supply_name,
+           COALESCE(ms.unit, (SELECT req_u.unit FROM requirements req_u WHERE req_u.handover_code = r.handover_code LIMIT 1), 'Units') AS unit,
+           ms.batch_number, ms.expiry_date,
            su.name AS supplier_name, su.phone AS supplier_phone,
            so.organization_name AS supplier_org, so.address AS supplier_address, so.city AS supplier_city
     FROM requests r
-    JOIN medical_supplies ms ON r.supply_id = ms.id
-    JOIN users su ON ms.supplier_id = su.id
+    LEFT JOIN medical_supplies ms ON r.supply_id = ms.id
+    LEFT JOIN users su ON (ms.supplier_id = su.id OR su.id = (SELECT req_f.fulfilled_by_supplier_id FROM requirements req_f WHERE req_f.handover_code = r.handover_code LIMIT 1))
     LEFT JOIN organizations so ON su.id = so.user_id
     WHERE r.requester_id = :userId
       AND r.handover_code IS NOT NULL
@@ -34,17 +37,20 @@ $activePasses = $activeStmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch recently completed handovers
 $historyStmt = $pdo->prepare("
-    SELECT r.*, ms.supply_name, ms.unit, ms.batch_number,
+    SELECT r.*, 
+           COALESCE(ms.supply_name, (SELECT req_s.supply_name FROM requirements req_s WHERE req_s.handover_code = r.handover_code LIMIT 1), r.purpose) AS supply_name,
+           COALESCE(ms.unit, (SELECT req_u.unit FROM requirements req_u WHERE req_u.handover_code = r.handover_code LIMIT 1), 'Units') AS unit,
+           ms.batch_number,
            su.name AS supplier_name, so.organization_name AS supplier_org,
            COALESCE(r.completed_at, d.delivered_at, r.updated_at) AS completed_at
     FROM requests r
-    JOIN medical_supplies ms ON r.supply_id = ms.id
-    JOIN users su ON ms.supplier_id = su.id
+    LEFT JOIN medical_supplies ms ON r.supply_id = ms.id
+    LEFT JOIN users su ON (ms.supplier_id = su.id OR su.id = (SELECT req_f.fulfilled_by_supplier_id FROM requirements req_f WHERE req_f.handover_code = r.handover_code LIMIT 1))
     LEFT JOIN organizations so ON su.id = so.user_id
     LEFT JOIN deliveries d ON r.id = d.request_id
     WHERE r.requester_id = :userId
       AND r.status = 'Completed'
-    ORDER BY r.updated_at DESC
+    ORDER BY completed_at DESC
     LIMIT 10
 ");
 $historyStmt->execute(['userId' => $userId]);
@@ -248,7 +254,7 @@ include __DIR__ . '/../includes/navbar.php';
                                         <th>Donor / Facility</th>
                                         <th>Completed On</th>
                                         <th>Status</th>
-                                        <th class="text-end pe-4">Action</th>
+                                        <th class="text-end pe-4 text-nowrap" style="min-width: 120px;">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -273,9 +279,9 @@ include __DIR__ . '/../includes/navbar.php';
                                                 <td>
                                                     <span class="badge bg-success text-white px-2 py-1"><i class="fas fa-check-double me-1"></i>Verified & Received</span>
                                                 </td>
-                                                <td class="text-end pe-4">
-                                                    <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $cp['id']; ?>" class="btn btn-xs btn-outline-secondary px-2.5 py-1 rounded-pill">
-                                                        View Receipt
+                                                <td class="text-end pe-4 text-nowrap">
+                                                    <a href="<?php echo BASE_URL; ?>/ngo/request-details.php?id=<?php echo $cp['id']; ?>" class="btn btn-xs rounded-pill px-2.5 py-1 fw-semibold shadow-2xs d-inline-flex align-items-center gap-1" style="background:#f0fdfa; color:#0f766e; border:1px solid #99f6e4; font-size:0.75rem; white-space:nowrap !important; line-height:1.2;">
+                                                        <i class="fas fa-file-invoice"></i> View Receipt
                                                     </a>
                                                 </td>
                                             </tr>

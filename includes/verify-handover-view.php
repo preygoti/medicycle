@@ -96,19 +96,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // Fetch pending consignments awaiting handover for this user
-$pendingSql = "SELECT r.*, ms.supply_name, ms.unit, ms.batch_number, ms.expiry_date,
+$pendingSql = "SELECT r.*, 
+                      COALESCE(ms.supply_name, (SELECT req_s.supply_name FROM requirements req_s WHERE req_s.handover_code = r.handover_code LIMIT 1), r.purpose) AS supply_name,
+                      COALESCE(ms.unit, (SELECT req_u.unit FROM requirements req_u WHERE req_u.handover_code = r.handover_code LIMIT 1), 'Units') AS unit,
+                      ms.batch_number, ms.expiry_date,
                       su.name AS supplier_name, so.organization_name AS supplier_org, so.city AS supplier_city,
                       nu.name AS requester_name, no.organization_name AS requester_org, no.city AS requester_city
                FROM requests r
-               JOIN medical_supplies ms ON r.supply_id = ms.id
-               JOIN users su ON ms.supplier_id = su.id
+               LEFT JOIN medical_supplies ms ON r.supply_id = ms.id
+               LEFT JOIN users su ON (ms.supplier_id = su.id OR su.id = (SELECT req_f.fulfilled_by_supplier_id FROM requirements req_f WHERE req_f.handover_code = r.handover_code LIMIT 1))
                LEFT JOIN organizations so ON su.id = so.user_id
                JOIN users nu ON r.requester_id = nu.id
                LEFT JOIN organizations no ON nu.id = no.user_id
                WHERE r.status IN ('Approved', 'Ready for Handover', 'In Transit', 'Accepted')";
 
 if ($role === 'supplier') {
-    $pendingSql .= " AND ms.supplier_id = {$userId}";
+    $pendingSql .= " AND (ms.supplier_id = {$userId} OR (SELECT req_f2.fulfilled_by_supplier_id FROM requirements req_f2 WHERE req_f2.handover_code = r.handover_code LIMIT 1) = {$userId})";
 } elseif ($role === 'ngo') {
     $pendingSql .= " AND r.requester_id = {$userId}";
 } elseif ($role === 'delivery') {

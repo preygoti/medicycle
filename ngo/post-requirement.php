@@ -205,14 +205,9 @@ include __DIR__ . '/../includes/navbar.php';
                                 <span>Required By Date *</span>
                                 <span class="text-muted fw-normal" style="font-size:0.75rem;">(Expected by)</span>
                             </label>
-                            <div class="input-group">
-                                <input type="date" class="form-control" id="required_by" name="required_by" 
-                                       value="<?php echo e($formData['required_by']); ?>" 
-                                       min="<?php echo date('Y-m-d'); ?>" required>
-                                <button type="button" class="btn btn-outline-secondary" onclick="triggerDatePicker('required_by')" title="Open Calendar Picker">
-                                    <i class="fas fa-calendar-alt text-teal"></i>
-                                </button>
-                            </div>
+                            <input type="date" class="form-control" id="required_by" name="required_by" 
+                                   value="<?php echo e($formData['required_by']); ?>" 
+                                   min="<?php echo date('Y-m-d'); ?>" required>
                             <!-- Quick-Pick Date Pill Shortcuts -->
                             <div class="d-flex flex-wrap align-items-center gap-1 mt-1">
                                 <span class="text-muted small me-1" style="font-size:0.72rem;">Quick pick:</span>

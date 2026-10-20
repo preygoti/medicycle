@@ -21,6 +21,14 @@ if (!$requirement) {
     exit;
 }
 
+// Lock fulfilled / accepted requirements from being edited
+$isReqLocked = in_array(strtolower($requirement['status'] ?? ''), ['fulfilled', 'partially fulfilled', 'accepted', 'completed']) || !empty($requirement['handover_code']);
+if ($isReqLocked) {
+    set_flash('warning', 'This clinical requirement has already been accepted or fulfilled and cannot be edited.');
+    header('Location: ' . BASE_URL . '/ngo/my-requirements.php');
+    exit;
+}
+
 $categories = $pdo->query("SELECT * FROM categories ORDER BY category_name ASC")->fetchAll();
 
 $formData = [
@@ -161,12 +169,7 @@ include __DIR__ . '/../includes/navbar.php';
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-semibold d-flex justify-content-between align-items-center">
-                                <span>Required By *</span>
-                                <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none text-teal fw-semibold" onclick="document.getElementById('edit_required_by').showPicker && document.getElementById('edit_required_by').showPicker();">
-                                    <i class="fas fa-calendar-day me-1"></i>Pick
-                                </button>
-                            </label>
+                            <label class="form-label small fw-semibold">Required By *</label>
                             <input type="date" class="form-control" id="edit_required_by" name="required_by" value="<?php echo e($formData['required_by']); ?>" required>
                             <div class="d-flex flex-wrap gap-1 mt-1">
                                 <span class="badge bg-light text-dark border cursor-pointer" role="button" onclick="setEditDays(3)">+3d</span>

@@ -16,9 +16,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     } else {
         $delId = (int)($_POST['requirement_id'] ?? 0);
         try {
-            $delStmt = $pdo->prepare("DELETE FROM requirements WHERE id = ? AND organization_id = ?");
-            $delStmt->execute([$delId, $userId]);
-            set_flash('success', 'Requirement removed successfully.');
+            // Guard: Check if requirement is already accepted or fulfilled
+            $chkStmt = $pdo->prepare("SELECT status, handover_code FROM requirements WHERE id = ? AND organization_id = ?");
+            $chkStmt->execute([$delId, $userId]);
+            $chkRow = $chkStmt->fetch();
+
+            if (!$chkRow) {
+                set_flash('danger', 'Requirement not found.');
+            } elseif (in_array(strtolower($chkRow['status'] ?? ''), ['fulfilled', 'partially fulfilled', 'accepted', 'completed']) || !empty($chkRow['handover_code'])) {
+                set_flash('warning', 'This requirement has already been accepted or fulfilled and cannot be deleted.');
+            } else {
+                $delStmt = $pdo->prepare("DELETE FROM requirements WHERE id = ? AND organization_id = ?");
+                $delStmt->execute([$delId, $userId]);
+                set_flash('success', 'Requirement removed successfully.');
+            }
         } catch (PDOException $e) {
             error_log("Delete requirement error: " . $e->getMessage());
             set_flash('danger', 'Error deleting requirement.');
@@ -76,7 +87,6 @@ include __DIR__ . '/../includes/navbar.php';
                                 <th>Quantity Needed</th>
                                 <th>Urgency</th>
                                 <th>Required By</th>
-                                <th>Smart Matches</th>
                                 <th>Status</th>
                                 <th class="text-start pe-4">Actions</th>
                             </tr>
@@ -110,15 +120,6 @@ include __DIR__ . '/../includes/navbar.php';
                                         <td><?php echo priority_badge($r['urgency']); ?></td>
                                         <td class="small text-muted"><?php echo format_date($r['required_by']); ?></td>
                                         <td>
-                                            <?php if ($matchCount > 0): ?>
-                                                <button type="button" class="btn btn-sm btn-outline-success py-0 px-2" data-bs-toggle="modal" data-bs-target="#matchModal<?php echo $r['id']; ?>">
-                                                    <i class="fas fa-brain me-1"></i> <?php echo $matchCount; ?> Available
-                                                </button>
-                                            <?php else: ?>
-                                                <span class="badge bg-light text-muted border">No match yet</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
                                             <?php echo status_badge($r['status']); ?>
                                             <?php if (!empty($r['handover_code'])): ?>
                                                 <div class="mt-1">
@@ -128,20 +129,29 @@ include __DIR__ . '/../includes/navbar.php';
                                                 </div>
                                             <?php endif; ?>
                                         </td>
+                                        <?php
+                                            $isLocked = in_array(strtolower($r['status'] ?? ''), ['fulfilled', 'partially fulfilled', 'accepted', 'completed']) || !empty($r['handover_code']);
+                                        ?>
                                         <td class="text-start pe-4">
-                                            <div class="d-inline-flex align-items-center justify-content-start gap-2">
-                                                <a href="<?php echo BASE_URL; ?>/ngo/edit-requirement.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-primary rounded-2 px-2 py-1 shadow-xs" title="Edit Requirement">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form action="<?php echo BASE_URL; ?>/ngo/my-requirements.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this requirement post?');">
-                                                    <?php echo csrf_field(); ?>
-                                                    <input type="hidden" name="action" value="delete">
-                                                    <input type="hidden" name="requirement_id" value="<?php echo $r['id']; ?>">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 shadow-xs" title="Delete">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
+                                            <?php if ($isLocked): ?>
+                                                <span class="badge bg-light text-muted border px-2.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-2xs" style="font-size:0.75rem;" title="Accepted / Fulfilled requirements cannot be edited or deleted">
+                                                    <i class="fas fa-lock text-secondary"></i> Locked
+                                                </span>
+                                            <?php else: ?>
+                                                <div class="d-inline-flex align-items-center justify-content-start gap-2">
+                                                    <a href="<?php echo BASE_URL; ?>/ngo/edit-requirement.php?id=<?php echo $r['id']; ?>" class="btn btn-sm btn-outline-primary rounded-2 px-2 py-1 shadow-xs" title="Edit Requirement">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form action="<?php echo BASE_URL; ?>/ngo/my-requirements.php" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this requirement post?');">
+                                                        <?php echo csrf_field(); ?>
+                                                        <input type="hidden" name="action" value="delete">
+                                                        <input type="hidden" name="requirement_id" value="<?php echo $r['id']; ?>">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-2 px-2 py-1 shadow-xs" title="Delete">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
 
@@ -182,7 +192,7 @@ include __DIR__ . '/../includes/navbar.php';
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
+                                    <td colspan="7" class="text-center py-5 text-muted">
                                         <i class="fas fa-clipboard-list fs-2 text-secondary mb-2 d-block"></i>
                                         You haven't posted any clinical requirements yet.
                                     </td>

@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // If a supply from inventory was chosen
                 $selectedSupply = null;
+                $supplyRecordId = null;
                 if ($supplyId > 0) {
                     $supStmt = $pdo->prepare("SELECT * FROM medical_supplies WHERE id = ? AND supplier_id = ? AND status = 'Available' LIMIT 1");
                     $supStmt->execute([$supplyId, $userId]);
@@ -53,7 +54,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $newStatus = ($remainingQty == 0) ? 'Reserved' : 'Available';
                         $updSupply = $pdo->prepare("UPDATE medical_supplies SET quantity = ?, status = ?, updated_at = NOW() WHERE id = ?");
                         $updSupply->execute([$remainingQty, $newStatus, $supplyId]);
+                        $supplyRecordId = $selectedSupply['id'];
                     }
+                }
+
+                // If not allocated from existing inventory, create a fulfilled consignment supply entry so joins and tracking remain 100% intact
+                if (!$supplyRecordId) {
+                    $city = !empty($_SESSION['org_city']) ? $_SESSION['org_city'] : ($clinicReq['clinic_city'] ?? 'General');
+                    $location = !empty($_SESSION['org_address']) ? $_SESSION['org_address'] : ($clinicReq['clinic_address'] ?? 'Pharmacy Dispensing Center');
+                    $expiry = !empty($clinicReq['required_by']) ? $clinicReq['required_by'] : date('Y-m-d', strtotime('+6 months'));
+                    $batchNo = 'MC-FULFILL-' . strtoupper(substr(uniqid(), -6));
+
+                    $insSupply = $pdo->prepare("INSERT INTO medical_supplies 
+                        (supplier_id, category_id, supply_name, description, quantity, unit, listing_type, condition_status, packaging_status, expiry_date, batch_number, location, city, status, created_at)
+                        VALUES (?, ?, ?, ?, 0, ?, 'regular', 'New / Unopened', 'Original Factory Seal', ?, ?, ?, ?, 'Reserved', NOW())");
+                    $insSupply->execute([
+                        $userId,
+                        $clinicReq['category_id'],
+                        $clinicReq['supply_name'],
+                        'Supplied to fulfill clinical requirement #' . $requirementId . ' for ' . ($clinicReq['organization_name'] ?? $clinicReq['clinic_name']),
+                        $clinicReq['unit'],
+                        $expiry,
+                        $batchNo,
+                        $location,
+                        $city
+                    ]);
+                    $supplyRecordId = $pdo->lastInsertId();
                 }
 
                 // 1. Mark requirement as Fulfilled
@@ -65,7 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     (supply_id, requester_id, requested_quantity, purpose, urgency, status, supplier_remarks, handover_code, requested_at, approved_at) 
                     VALUES (?, ?, ?, ?, ?, 'Accepted', ?, ?, NOW(), NOW())");
                 $insReq->execute([
-                    $selectedSupply ? $selectedSupply['id'] : null,
+                    $supplyRecordId,
                     $clinicReq['organization_id'],
                     $clinicReq['required_quantity'],
                     'Fulfilled Clinical Requirement: ' . $clinicReq['supply_name'],
