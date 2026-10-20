@@ -23,69 +23,7 @@ $userRole = $currentUser['role'] ?? ($_SESSION['role'] ?? '');
         <?php echo strtoupper(e($userRole)); ?> PORTAL
     </div>
     <ul class="nav flex-column mb-auto">
-        <?php if ($userRole === 'admin'): ?>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('dashboard.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/dashboard.php">
-                    <i class="fas fa-chart-line"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('users.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/users.php">
-                    <i class="fas fa-users"></i> User Accounts
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('organizations.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/organizations.php">
-                    <i class="fas fa-building-circle-check"></i> Organizations
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('supplies.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/supplies.php">
-                    <i class="fas fa-boxes-stacked"></i> All Supplies
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('requirements.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/requirements.php">
-                    <i class="fas fa-clipboard-list"></i> Requirements
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('requests.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/requests.php">
-                    <i class="fas fa-hand-holding-medical"></i> Supply Requests
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('deliveries.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/deliveries.php">
-                    <i class="fas fa-truck-fast"></i> Deliveries
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('verify-handover.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/verify-handover.php">
-                    <i class="fas fa-qrcode text-warning"></i> Verify Handover
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('categories.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/categories.php">
-                    <i class="fas fa-tags"></i> Categories
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('reports.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/reports.php">
-                    <i class="fas fa-file-invoice"></i> Reports
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('analytics.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/analytics.php">
-                    <i class="fas fa-chart-pie"></i> Analytics
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link <?php echo is_active_link('settings.php', 'admin'); ?>" href="<?php echo BASE_URL; ?>/admin/settings.php">
-                    <i class="fas fa-sliders"></i> System Settings
-                </a>
-            </li>
-
-        <?php elseif ($userRole === 'supplier'): ?>
+        <?php if ($userRole === 'supplier'): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo is_active_link('dashboard.php', 'supplier'); ?>" href="<?php echo BASE_URL; ?>/supplier/dashboard.php">
                     <i class="fas fa-th-large"></i> Dashboard

@@ -12,7 +12,6 @@ require_once __DIR__ . '/session.php';
 function get_role_dashboard(?string $role = null): string {
     $role = $role ?? ($_SESSION['role'] ?? null);
     return match($role) {
-        'admin'    => BASE_URL . '/admin/dashboard.php',
         'supplier' => BASE_URL . '/supplier/dashboard.php',
         'ngo'      => BASE_URL . '/ngo/dashboard.php',
         'delivery' => BASE_URL . '/delivery/dashboard.php',

@@ -60,7 +60,7 @@ try {
         $pStmt = $pdo->prepare("SELECT COUNT(*) FROM requests WHERE requester_id = ? AND status = 'Pending'");
         $pStmt->execute([$userId]);
         $pendingCount = (int)$pStmt->fetchColumn();
-    } elseif ($role === 'supplier' || $role === 'admin') {
+    } elseif ($role === 'supplier') {
         $pStmt = $pdo->query("SELECT COUNT(*) FROM requests WHERE status = 'Pending'");
         $pendingCount = (int)($pStmt ? $pStmt->fetchColumn() : 0);
     }

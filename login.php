@@ -73,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                         
                         $dashUrl = match($user['role']) {
-                            'admin' => BASE_URL . '/admin/dashboard.php',
                             'supplier' => BASE_URL . '/supplier/dashboard.php',
                             'ngo' => BASE_URL . '/ngo/dashboard.php',
                             'delivery' => BASE_URL . '/delivery/dashboard.php',

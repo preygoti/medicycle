@@ -27,19 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($errors)) {
             $success = true;
-            // For a college OEP demo, log message or notify admin
-            try {
-                create_notification(
-                    $pdo,
-                    1, // Admin
-                    "New Contact Inquiry: {$subject}",
-                    "From {$name} ({$email}): " . substr($message, 0, 100) . '...',
-                    'admin/dashboard.php'
-                );
-            } catch (Exception $e) {
-                // notification optional
-            }
-            // Reset fields
+            // Inquiry submitted successfully
             $name = $email = $subject = $message = '';
         }
     }

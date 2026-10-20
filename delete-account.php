@@ -39,16 +39,6 @@ if (!$user || !password_verify($confirmPassword, $user['password'])) {
     exit;
 }
 
-// Safety check: Prevent deleting the primary admin account if it's the last admin
-if ($user['role'] === 'admin') {
-    $adminCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND status = 'active'")->fetchColumn();
-    if ($adminCount <= 1) {
-        set_flash('danger', 'Cannot delete account: System requires at least one active Administrator.');
-        header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? get_role_dashboard()));
-        exit;
-    }
-}
-
 try {
     $pdo->beginTransaction();
 

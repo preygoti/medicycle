@@ -4,7 +4,7 @@
  */
 // Check if the current page is an authenticated portal/dashboard page
 $currentDir = basename(dirname($_SERVER['PHP_SELF'] ?? ''));
-$isPortalPage = in_array($currentDir, ['admin', 'supplier', 'ngo', 'delivery']) || !empty($hideFooter);
+$isPortalPage = in_array($currentDir, ['supplier', 'ngo', 'delivery']) || !empty($hideFooter);
 ?>
 
 <?php if (!$isPortalPage): ?>

@@ -16,7 +16,7 @@ if ($currentUser && isset($pdo)) {
 $currentScript = basename($_SERVER['PHP_SELF'] ?? '');
 $currentDir = basename(dirname($_SERVER['PHP_SELF'] ?? ''));
 
-$isPublicPage = !in_array($currentDir, ['admin', 'supplier', 'ngo', 'delivery']);
+$isPublicPage = !in_array($currentDir, ['supplier', 'ngo', 'delivery']);
 $isLoginActive = ($currentScript === 'login.php');
 $isRegisterActive = ($currentScript === 'register.php');
 ?>
@@ -121,8 +121,6 @@ $isRegisterActive = ($currentScript === 'register.php');
                                 <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/supplier/profile.php"><i class="fas fa-id-card me-2 text-muted"></i> Organization Profile</a></li>
                             <?php elseif ($currentUser['role'] === 'ngo'): ?>
                                 <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/ngo/profile.php"><i class="fas fa-id-card me-2 text-muted"></i> Clinic / NGO Profile</a></li>
-                            <?php elseif ($currentUser['role'] === 'admin'): ?>
-                                <li><a class="dropdown-item" href="<?php echo BASE_URL; ?>/admin/settings.php"><i class="fas fa-sliders me-2 text-muted"></i> System Settings</a></li>
                             <?php endif; ?>
                             <li>
                                 <a class="dropdown-item" href="<?php echo BASE_URL; ?>/login.php?switch=1">
