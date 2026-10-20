@@ -50,10 +50,11 @@
     background: transparent !important;
 }
 
-html {
+html, :root {
     min-height: 100%;
-    scroll-behavior: smooth;
+    scroll-behavior: auto !important; /* Overrides Bootstrap 5 :root smooth scroll for ultra-responsive native 60fps mobile touch scrolling */
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
 }
@@ -71,9 +72,11 @@ body {
     line-height: 1.6;
     display: flex;
     flex-direction: column;
-    overflow-x: clip;
+    overflow-x: hidden;
     width: 100%;
     position: relative;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: auto;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
 }
@@ -121,7 +124,8 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.65rem 0;
     position: sticky;
     top: 0;
-    z-index: 1030;
+    z-index: 99999 !important;
+    overflow: visible !important;
 }
 
 .navbar-brand {
@@ -1504,9 +1508,17 @@ footer.medicycle-footer .footer-title {
     right: 0 !important;
     left: auto !important;
     margin-top: 0.45rem !important;
-    z-index: 1065 !important;
+    z-index: 100000 !important;
     float: none !important;
     box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 118, 110, 0.1) !important;
+}
+
+.navbar-medicycle .dropdown-menu.show {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
 }
 
 /* Precision Mobile Positioning for Notification Bell Dropdown (stays fully visible inside screen) */
@@ -2479,11 +2491,18 @@ input[type="date"].form-control:focus {
 .reveal-stagger > *:nth-child(5) { transition-delay: 0.36s; }
 .reveal-stagger > *:nth-child(6) { transition-delay: 0.44s; }
 
-/* Mobile & Tablet Safe Animations - Never allow horizontal translateX to cause overflow or off-center alignment */
+/* Mobile & Tablet Safe Animations - Ultra-smooth 60fps scrolling without GPU layer exhaustion */
 @media (max-width: 991.98px) {
+    .reveal-on-scroll,
+    .reveal-fade-left,
+    .reveal-fade-right,
+    .reveal-zoom-in {
+        will-change: auto !important;
+        transition-duration: 0.35s !important;
+    }
     .reveal-fade-left,
     .reveal-fade-right {
-        transform: translateY(24px) !important;
+        transform: translateY(16px) !important;
     }
     .reveal-fade-left.is-revealed,
     .reveal-fade-right.is-revealed {

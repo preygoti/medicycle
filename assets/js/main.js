@@ -863,10 +863,59 @@ document.addEventListener('DOMContentLoaded', function () {
     })();
 
     // -------------------------------------------------------------------------
-    // 18. Mobile Header Dropdowns (Bell & Profile): Ensure pointer cursor & smooth toggle
+    // 18. Fail-Safe Portal Header Dropdowns (Bell & User Profile)
     // -------------------------------------------------------------------------
-    // Bootstrap 5 natively handles [data-bs-toggle="dropdown"] on mobile & desktop via data-api.
-    // Custom click listeners with e.stopPropagation() or manual toggle() cause instant closing race conditions.
+    (function initPortalDropdowns() {
+        const portalToggles = document.querySelectorAll('.navbar-medicycle [data-header-toggle="dropdown"], .navbar-medicycle #notifDropdown, .navbar-medicycle #userDropdown');
+
+        portalToggles.forEach(function (toggle) {
+            const handleToggle = function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const parent = toggle.closest('.dropdown');
+                const menu = parent ? parent.querySelector('.dropdown-menu') : toggle.nextElementSibling;
+                if (!menu) return;
+
+                const isAlreadyOpen = menu.classList.contains('show');
+
+                // Close all other dropdowns in the navbar
+                document.querySelectorAll('.navbar-medicycle .dropdown-menu').forEach(function (m) {
+                    m.classList.remove('show');
+                    const t = m.previousElementSibling || (m.closest('.dropdown') ? m.closest('.dropdown').querySelector('a, button') : null);
+                    if (t) {
+                        t.setAttribute('aria-expanded', 'false');
+                        t.classList.remove('show');
+                    }
+                });
+
+                if (!isAlreadyOpen) {
+                    menu.classList.add('show');
+                    toggle.setAttribute('aria-expanded', 'true');
+                    toggle.classList.add('show');
+                }
+            };
+
+            toggle.addEventListener('click', handleToggle);
+        });
+
+        // Close on outside click or touch
+        const closeAllPortalDropdowns = function (e) {
+            if (!e.target.closest('.navbar-medicycle .dropdown')) {
+                document.querySelectorAll('.navbar-medicycle .dropdown-menu.show').forEach(function (m) {
+                    m.classList.remove('show');
+                    const t = m.previousElementSibling || (m.closest('.dropdown') ? m.closest('.dropdown').querySelector('a, button') : null);
+                    if (t) {
+                        t.setAttribute('aria-expanded', 'false');
+                        t.classList.remove('show');
+                    }
+                });
+            }
+        };
+
+        document.addEventListener('click', closeAllPortalDropdowns);
+        document.addEventListener('touchend', closeAllPortalDropdowns, { passive: true });
+    })();
 });
 
 
