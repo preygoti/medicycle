@@ -886,7 +886,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
             const clickedInsideMenu = e.target.closest && e.target.closest('.portal-dropdown-menu');
-            const clickedInsideTrigger = e.target.closest && e.target.closest('#notifDropdown, #userDropdown');
+            const clickedInsideTrigger = e.target.closest && e.target.closest('#notifDropdown, #userDropdown, .notif-icon-btn, .user-profile-capsule');
 
             if (!clickedInsideMenu && !clickedInsideTrigger) {
                 const openMenus = document.querySelectorAll('.portal-dropdown-menu.is-open');
@@ -901,7 +901,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!window._portalDropdownDocListenerAdded) {
             window._portalDropdownDocListenerAdded = true;
             document.addEventListener('click', handleOutsideClick);
-            document.addEventListener('touchend', handleOutsideClick, { passive: true });
         }
     }
 });

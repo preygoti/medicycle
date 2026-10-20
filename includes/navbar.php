@@ -164,7 +164,7 @@ $isRegisterActive = ($currentScript === 'register.php');
                     }
 
                     var clickedInsideMenu = e.target.closest && e.target.closest('.portal-dropdown-menu');
-                    var clickedInsideTrigger = e.target.closest && e.target.closest('#notifDropdown, #userDropdown');
+                    var clickedInsideTrigger = e.target.closest && e.target.closest('#notifDropdown, #userDropdown, .notif-icon-btn, .user-profile-capsule');
 
                     if (!clickedInsideMenu && !clickedInsideTrigger) {
                         var openMenus = document.querySelectorAll('.portal-dropdown-menu.is-open');
@@ -179,7 +179,6 @@ $isRegisterActive = ($currentScript === 'register.php');
                 if (!window._portalDropdownDocListenerAdded) {
                     window._portalDropdownDocListenerAdded = true;
                     document.addEventListener('click', handleOutsideClick);
-                    document.addEventListener('touchend', handleOutsideClick, { passive: true });
                 }
             })();
             </script>

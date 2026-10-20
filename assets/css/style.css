@@ -216,6 +216,9 @@ h1, h2, h3, h4, h5, h6 {
     -webkit-tap-highlight-color: transparent;
     transition: all 0.2s ease;
 }
+.user-profile-capsule > * {
+    pointer-events: none;
+}
 .user-profile-capsule:hover {
     background: #F1F5F9;
     border-color: #CBD5E1;
@@ -1560,11 +1563,12 @@ footer.medicycle-footer .footer-title {
 
     .navbar-medicycle .user-dropdown-menu,
     .navbar-medicycle .portal-dropdown-menu.user-dropdown-menu {
-        position: absolute !important;
-        top: calc(100% + 8px) !important;
-        right: 0 !important;
+        position: fixed !important;
+        top: 56px !important;
+        right: 10px !important;
         left: auto !important;
-        min-width: 215px !important;
+        width: auto !important;
+        min-width: 220px !important;
         max-width: calc(100vw - 20px) !important;
         z-index: 100001 !important;
         border-radius: 16px !important;
