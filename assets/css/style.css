@@ -1076,7 +1076,7 @@ footer.medicycle-footer .footer-title {
         height: 34px !important;
     }
 
-    /* Modern Animated 3-Lines Hamburger Button */
+    /* Classic 3-Lines Hamburger Button (Always 3 lines, no confusing cross) */
     .modern-hamburger-btn {
         width: 38px !important;
         height: 38px !important;
@@ -1090,7 +1090,7 @@ footer.medicycle-footer .footer-title {
         border: 1.5px solid rgba(15, 118, 110, 0.22) !important;
         border-radius: 10px !important;
         cursor: pointer !important;
-        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        transition: all 0.2s ease !important;
         box-shadow: none !important;
         outline: none !important;
     }
@@ -1110,22 +1110,8 @@ footer.medicycle-footer .footer-title {
         height: 2.2px !important;
         background: #0f766e !important;
         border-radius: 4px !important;
-        transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, width 0.2s ease !important;
-        transform-origin: center !important;
-    }
-
-    /* Animate 3 Lines into a clean 'X' when open */
-    .modern-hamburger-btn:not(.collapsed) .top-bar {
-        transform: translateY(6.7px) rotate(45deg) !important;
-    }
-
-    .modern-hamburger-btn:not(.collapsed) .mid-bar {
-        opacity: 0 !important;
-        transform: scaleX(0) !important;
-    }
-
-    .modern-hamburger-btn:not(.collapsed) .bot-bar {
-        transform: translateY(-6.7px) rotate(-45deg) !important;
+        transform: none !important;
+        opacity: 1 !important;
     }
 
     /* Floating Modern Mobile Navbar Dropdown */
@@ -1482,28 +1468,33 @@ footer.medicycle-footer .footer-title {
     outline: none !important;
 }
 
-/* Modern Dropdown Floating Menu with Blur & Elevation */
+/* Modern Dropdown Floating Menu with Elevation */
 .dropdown-menu {
     border-radius: 16px !important;
     border: 1px solid rgba(15, 118, 110, 0.14) !important;
-    box-shadow: 0 22px 45px -8px rgba(15, 23, 42, 0.16), 0 8px 18px -4px rgba(15, 118, 110, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.8) inset !important;
+    box-shadow: 0 20px 45px -8px rgba(15, 23, 42, 0.18), 0 8px 18px -4px rgba(15, 118, 110, 0.08) !important;
     padding: 0.6rem !important;
-    backdrop-filter: blur(18px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
-    background: rgba(255, 255, 255, 0.97) !important;
-    animation: modernDropdownEntrance 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    transform-origin: top right;
+    background: #ffffff !important;
+    z-index: 1060 !important;
+    animation: modernDropdownFadeIn 0.16s ease forwards;
 }
 
-@keyframes modernDropdownEntrance {
+@keyframes modernDropdownFadeIn {
     from {
         opacity: 0;
-        transform: translateY(-8px) scale(0.96);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
     }
+}
+
+.navbar-medicycle .dropdown-menu {
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    margin-top: 0.45rem !important;
+    z-index: 1065 !important;
+    box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 118, 110, 0.1) !important;
 }
 
 .dropdown-item {
