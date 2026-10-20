@@ -2081,6 +2081,38 @@ input[type="date"].form-control:focus {
         width: auto !important;
         color: inherit !important;
     }
+    .app-sidebar button.nav-link {
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        cursor: pointer;
+        line-height: inherit;
+    }
+    .app-sidebar .nav-link.nav-link-signout,
+    .app-sidebar .nav-link.nav-link-delete {
+        background-color: rgba(239, 68, 68, 0.12) !important;
+        color: #fca5a5 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    }
+    .app-sidebar .nav-link.nav-link-signout:hover,
+    .app-sidebar .nav-link.nav-link-signout:active {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #ef4444 !important;
+    }
+    .app-sidebar .nav-link.nav-link-delete:hover,
+    .app-sidebar .nav-link.nav-link-delete:active {
+        background-color: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+    }
+    .app-sidebar .nav-link.nav-link-signout i,
+    .app-sidebar .nav-link.nav-link-delete i {
+        color: inherit !important;
+    }
+    .sidebar-footer {
+        display: none !important;
+    }
     .app-content {
         padding: 1rem !important;
     }
@@ -2181,19 +2213,10 @@ input[type="date"].form-control:focus {
     transform: translateY(0) scale(0.98) !important;
 }
 
-/* Mobile Sidebar Footer Adaptation */
-@media (max-width: 768px) {
+/* Mobile Sidebar Footer: Hidden on mobile and tablets since Sign Out & Delete Account are integrated at the end of the horizontal scrolling nav row */
+@media (max-width: 991.98px) {
     .sidebar-footer {
-        padding: 0.5rem 0.75rem !important;
-        display: flex !important;
-        gap: 0.5rem !important;
-    }
-    .sidebar-footer .btn-sidebar-signout,
-    .sidebar-footer .btn-sidebar-delete {
-        margin-bottom: 0 !important;
-        flex: 1 1 50% !important;
-        padding: 0.42rem 0.5rem !important;
-        font-size: 0.78rem !important;
+        display: none !important;
     }
 }
 

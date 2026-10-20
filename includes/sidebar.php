@@ -119,9 +119,23 @@ $userRole = $currentUser['role'] ?? ($_SESSION['role'] ?? '');
                 </a>
             </li>
         <?php endif; ?>
+
+        <!-- Mobile/Small Devices: Action items placed at the end of the horizontal scroll, styled as pills like the other tabs -->
+        <li class="nav-item d-lg-none">
+            <a class="nav-link nav-link-signout" href="<?php echo BASE_URL; ?>/logout.php">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sign Out</span>
+            </a>
+        </li>
+        <li class="nav-item d-lg-none">
+            <button type="button" class="nav-link nav-link-delete" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                <i class="fas fa-trash-can"></i>
+                <span>Delete Account</span>
+            </button>
+        </li>
     </ul>
 
-    <div class="sidebar-footer mt-auto">
+    <div class="sidebar-footer mt-auto d-none d-lg-flex">
         <a href="<?php echo BASE_URL; ?>/logout.php" class="btn-sidebar-signout">
             <i class="fas fa-sign-out-alt"></i>
             <span>Sign Out</span>
