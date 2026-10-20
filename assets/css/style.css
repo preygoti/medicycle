@@ -1047,118 +1047,191 @@ footer.medicycle-footer .footer-title {
 
     /* Sleek Mobile Navbar Header (Zero Wasted Space) */
     .navbar-medicycle {
-        padding: 0.42rem 0 !important;
+        padding: 0.46rem 0 !important;
     }
 
     .navbar-brand {
-        font-size: 1.15rem !important;
-        gap: 0.45rem !important;
+        font-size: 1.18rem !important;
+        gap: 0.5rem !important;
     }
 
     .navbar-brand img {
-        width: 32px !important;
-        height: 32px !important;
+        width: 34px !important;
+        height: 34px !important;
     }
 
-    .navbar-toggler {
-        padding: 0.28rem 0.55rem !important;
-        font-size: 0.92rem !important;
-        border-radius: 8px !important;
-        border: 1.5px solid rgba(15, 118, 110, 0.25) !important;
+    /* Modern Animated 3-Lines Hamburger Button */
+    .modern-hamburger-btn {
+        width: 38px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        display: inline-flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 4.5px !important;
+        background: rgba(15, 118, 110, 0.06) !important;
+        border: 1.5px solid rgba(15, 118, 110, 0.22) !important;
+        border-radius: 10px !important;
+        cursor: pointer !important;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
         box-shadow: none !important;
+        outline: none !important;
     }
 
-    /* Compact, Sleek Mobile Navbar Dropdown (No Giant Gaps or Hidden Text) */
+    .modern-hamburger-btn:hover,
+    .modern-hamburger-btn:focus,
+    .modern-hamburger-btn:active {
+        background: rgba(15, 118, 110, 0.12) !important;
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15) !important;
+        outline: none !important;
+    }
+
+    .modern-hamburger-btn .hamburger-bar {
+        display: block !important;
+        width: 19px !important;
+        height: 2.2px !important;
+        background: #0f766e !important;
+        border-radius: 4px !important;
+        transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, width 0.2s ease !important;
+        transform-origin: center !important;
+    }
+
+    /* Animate 3 Lines into a clean 'X' when open */
+    .modern-hamburger-btn:not(.collapsed) .top-bar {
+        transform: translateY(6.7px) rotate(45deg) !important;
+    }
+
+    .modern-hamburger-btn:not(.collapsed) .mid-bar {
+        opacity: 0 !important;
+        transform: scaleX(0) !important;
+    }
+
+    .modern-hamburger-btn:not(.collapsed) .bot-bar {
+        transform: translateY(-6.7px) rotate(-45deg) !important;
+    }
+
+    /* Floating Modern Mobile Navbar Dropdown */
     .navbar-medicycle .navbar-collapse {
         background: #ffffff !important;
         border: 1px solid rgba(226, 232, 240, 0.95) !important;
-        border-top: 1px solid #f1f5f9 !important;
         border-radius: 16px !important;
-        margin-top: 0.45rem !important;
+        margin-top: 0.5rem !important;
         margin-bottom: 0.5rem !important;
-        padding: 0.65rem 0.85rem !important;
-        box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.16) !important;
-        max-height: calc(100vh - 80px) !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        animation: mobileMenuFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        padding: 0.75rem !important;
+        box-shadow: 0 18px 40px -8px rgba(15, 23, 42, 0.14) !important;
     }
 
-    @keyframes mobileMenuFadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-6px) scale(0.98);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+    .navbar-medicycle .navbar-collapse.collapsing {
+        padding: 0 0.75rem !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+        transition: height 0.26s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .navbar-medicycle .navbar-nav {
-        text-align: center;
-        align-items: center;
-        gap: 0.2rem !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.25rem !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        text-align: left !important;
     }
 
     .navbar-medicycle .navbar-nav .nav-link {
-        justify-content: center;
-        text-align: center;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+        gap: 0.75rem !important;
         font-size: 0.92rem !important;
-        padding: 0.48rem 1rem !important;
-        margin: 0.1rem 0 !important;
-        border-radius: 8px !important;
-        width: 100%;
-        max-width: 300px;
+        padding: 0.6rem 0.95rem !important;
+        margin: 0 !important;
+        border-radius: 10px !important;
+        width: 100% !important;
+        max-width: none !important;
         font-weight: 500 !important;
+        color: #334155 !important;
+        transition: all 0.18s ease !important;
+    }
+
+    .navbar-medicycle .navbar-nav .nav-link i {
+        width: 22px !important;
+        font-size: 0.95rem !important;
+        text-align: center !important;
+        color: #0f766e !important;
+        flex-shrink: 0 !important;
+    }
+
+    .navbar-medicycle .navbar-nav .nav-link:hover,
+    .navbar-medicycle .navbar-nav .nav-link:focus {
+        background: rgba(15, 118, 110, 0.06) !important;
+        color: #0f766e !important;
+    }
+
+    .navbar-medicycle .navbar-nav .nav-link.active {
+        background: rgba(15, 118, 110, 0.1) !important;
+        color: #0f766e !important;
+        font-weight: 600 !important;
     }
 
     .navbar-medicycle .navbar-nav .nav-link::after {
         display: none !important;
     }
 
-    .navbar-medicycle .navbar-collapse .ms-auto {
-        width: 100%;
-        margin-top: 0.45rem !important;
-        padding-top: 0.45rem !important;
-        border-top: 1px solid #f1f5f9 !important;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.45rem !important;
-    }
-
-    .navbar-medicycle .navbar-collapse .ms-auto .nav-item {
-        width: 100%;
-        text-align: center;
-    }
-
-    .navbar-medicycle .navbar-collapse .ms-auto .btn,
-    .navbar-medicycle .navbar-collapse .ms-auto .nav-link {
-        width: 100%;
-        max-width: 260px;
-        margin: 0 auto;
-        padding: 0.48rem 1rem !important;
-        font-size: 0.88rem !important;
-        border-radius: 50px !important;
-        font-weight: 600 !important;
-        justify-content: center;
-    }
-
-    /* Mobile user profile capsule and notifications centering */
-    .navbar-medicycle .navbar-collapse .user-profile-capsule {
-        justify-content: center;
-        margin: 0 auto;
-        max-width: 280px;
-    }
-    
-    .navbar-medicycle .navbar-collapse .dropdown-menu {
-        position: static !important;
-        float: none !important;
+    /* Mobile Auth Buttons Grid */
+    .navbar-medicycle .mobile-auth-actions-nav {
         width: 100% !important;
-        max-width: 320px;
-        margin: 0.5rem auto !important;
-        transform: none !important;
+        margin-top: 0.55rem !important;
+        padding-top: 0.65rem !important;
+        border-top: 1px solid #f1f5f9 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 0.55rem !important;
+    }
+
+    .navbar-medicycle .mobile-auth-actions-nav .auth-btn-item {
+        flex: 1 1 0 !important;
+        width: 100% !important;
+        text-align: center !important;
+        margin: 0 !important;
+    }
+
+    .navbar-medicycle .mobile-auth-actions-nav .btn {
+        width: 100% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.35rem !important;
+        padding: 0.52rem 0.75rem !important;
+        font-size: 0.88rem !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        text-align: center !important;
+    }
+
+    /* Portal header on mobile */
+    .navbar-medicycle .notif-icon-btn {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+    }
+
+    .navbar-medicycle .user-profile-capsule {
+        padding: 0.25rem 0.5rem 0.25rem 0.25rem !important;
+        border-radius: 10px !important;
+    }
+
+    .navbar-medicycle .user-avatar-circle {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.8rem !important;
+        border-radius: 7px !important;
     }
 }
 

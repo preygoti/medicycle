@@ -787,6 +787,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const navbarToggler = document.querySelector('.navbar-toggler');
 
         if (navbarCollapse) {
+            let menuOpenedTime = 0;
+            let menuOpenedScrollY = 0;
+
+            navbarCollapse.addEventListener('shown.bs.collapse', function () {
+                menuOpenedTime = Date.now();
+                menuOpenedScrollY = window.pageYOffset || document.documentElement.scrollTop;
+            });
+
             const closeMobileNav = function (e) {
                 // Check if mobile menu is currently open or opening
                 if (navbarCollapse.classList.contains('show')) {
@@ -801,9 +809,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
 
-            // Capture clicks and touch taps on document
+            // Capture clicks outside document
             document.addEventListener('click', closeMobileNav);
-            document.addEventListener('touchstart', closeMobileNav, { passive: true });
 
             // Close when clicking any nav item or button inside the collapse (unless it's a dropdown toggle)
             const menuActionLinks = navbarCollapse.querySelectorAll('a, button');
@@ -817,11 +824,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
 
-            // Also auto-close if user starts scrolling down the homepage
+            // Auto-close ONLY if user deliberately scrolls after opening (prevents instant closes)
             window.addEventListener('scroll', function () {
                 if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
-                    if (bsCollapse) bsCollapse.hide();
+                    if (Date.now() - menuOpenedTime < 350) return;
+                    const currentY = window.pageYOffset || document.documentElement.scrollTop;
+                    if (Math.abs(currentY - menuOpenedScrollY) > 60) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                        if (bsCollapse) bsCollapse.hide();
+                    }
                 }
             }, { passive: true });
         }
