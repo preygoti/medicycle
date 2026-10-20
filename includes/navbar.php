@@ -19,7 +19,7 @@ $isPublicPage = !$inPortal;
 $isLoginActive = ($currentScript === 'login.php');
 $isRegisterActive = ($currentScript === 'register.php');
 ?>
-<nav class="navbar <?php echo $isPublicPage ? 'navbar-expand-lg' : ''; ?> navbar-medicycle sticky-top shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-medicycle sticky-top shadow-sm">
     <div class="container-fluid px-2 px-sm-3 px-lg-4 d-flex align-items-center justify-content-between">
         <a class="navbar-brand d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/index.php">
             <img src="<?php echo BASE_URL; ?>/assets/images/logo-icon.png" width="34" height="34" alt="MediCycle" class="rounded-circle shadow-xs" style="object-fit: cover;">
@@ -31,7 +31,7 @@ $isRegisterActive = ($currentScript === 'register.php');
             <div class="d-flex align-items-center gap-1 gap-sm-2 gap-md-3">
                 <!-- Modern Notification Bell Dropdown -->
                 <div class="dropdown position-relative">
-                    <a class="nav-link notif-icon-btn position-relative" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" title="Notifications">
+                    <a class="nav-link notif-icon-btn position-relative" href="javascript:void(0)" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
                         <i class="far fa-bell fs-5 text-secondary"></i>
                         <?php if ($unreadNotifCount > 0): ?>
                             <span class="notif-pulse-badge">
@@ -79,7 +79,7 @@ $isRegisterActive = ($currentScript === 'register.php');
                 $displayEmail = $currentUser['email'] ?? ($_SESSION['user_email'] ?? '');
                 ?>
                 <div class="dropdown position-relative">
-                    <a class="nav-link user-profile-capsule d-flex align-items-center gap-1 gap-sm-2 text-dark shadow-2xs" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+                    <a class="nav-link user-profile-capsule d-flex align-items-center gap-1 gap-sm-2 text-dark shadow-2xs" href="javascript:void(0)" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="user-avatar-circle">
                             <?php echo strtoupper(substr($displayName, 0, 1)); ?>
                         </div>

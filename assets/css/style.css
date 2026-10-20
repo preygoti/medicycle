@@ -1489,11 +1489,13 @@ footer.medicycle-footer .footer-title {
 }
 
 .navbar-medicycle .dropdown-menu {
+    position: absolute !important;
     top: 100% !important;
     right: 0 !important;
     left: auto !important;
     margin-top: 0.45rem !important;
     z-index: 1065 !important;
+    float: none !important;
     box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.22), 0 0 0 1px rgba(15, 118, 110, 0.1) !important;
 }
 

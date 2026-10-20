@@ -861,6 +861,30 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }, { passive: false });
     })();
+
+    // -------------------------------------------------------------------------
+    // 18. Mobile Header Dropdowns (Bell & Profile): Flawless Touch & Click Trigger
+    // -------------------------------------------------------------------------
+    (function () {
+        const headerDropdownToggles = document.querySelectorAll('.navbar-medicycle [data-bs-toggle="dropdown"]');
+        headerDropdownToggles.forEach(function (toggleEl) {
+            const dd = bootstrap.Dropdown.getOrCreateInstance(toggleEl, {
+                autoClose: true
+            });
+
+            toggleEl.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                headerDropdownToggles.forEach(function (other) {
+                    if (other !== toggleEl) {
+                        const otherDd = bootstrap.Dropdown.getInstance(other);
+                        if (otherDd) otherDd.hide();
+                    }
+                });
+                dd.toggle();
+            });
+        });
+    })();
 });
 
 
