@@ -122,7 +122,7 @@ $userRole = $currentUser['role'] ?? ($_SESSION['role'] ?? '');
 
         <!-- Mobile/Small Devices: Action items placed at the end of the horizontal scroll, styled as pills like the other tabs -->
         <li class="nav-item d-lg-none">
-            <button type="button" class="nav-link nav-link-signout" data-bs-toggle="modal" data-bs-target="#signOutModal">
+            <button type="button" class="nav-link nav-link-signout" onclick="openSignOutModal(event)">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Sign Out</span>
             </button>
@@ -136,7 +136,7 @@ $userRole = $currentUser['role'] ?? ($_SESSION['role'] ?? '');
     </ul>
 
     <div class="sidebar-footer mt-auto d-none d-lg-flex">
-        <button type="button" class="btn-sidebar-signout" data-bs-toggle="modal" data-bs-target="#signOutModal">
+        <button type="button" class="btn-sidebar-signout" onclick="openSignOutModal(event)">
             <i class="fas fa-sign-out-alt"></i>
             <span>Sign Out</span>
         </button>

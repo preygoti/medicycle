@@ -1480,12 +1480,24 @@ footer.medicycle-footer .footer-title {
 }
 
 /* Deep, uniform background blur for the entire webpage whenever ANY modal is opened */
-body.modal-open > *:not(.modal):not(.modal-backdrop):not(#print-section) {
+body.modal-open .navbar-medicycle,
+body.modal-open .app-sidebar,
+body.modal-open .app-content > *:not(.modal),
+body.modal-open main,
+body.modal-open header,
+body.modal-open footer {
     filter: blur(8px) !important;
     -webkit-filter: blur(8px) !important;
     transition: filter 0.22s ease-out !important;
     pointer-events: none !important;
     user-select: none !important;
+}
+
+/* Ensure modal pop-up and its dialog remain completely unblurred and razor-sharp */
+.modal,
+.modal * {
+    filter: none;
+    -webkit-filter: none;
 }
 
 /* =========================================================================

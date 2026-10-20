@@ -907,6 +907,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // -------------------------------------------------------------------------
     // 19. Global Fail-Safe Modal Trigger (Ensures 1st-click response for all modals)
     // -------------------------------------------------------------------------
+    window.openSignOutModal = function (ev) {
+        if (ev) {
+            if (ev.preventDefault) ev.preventDefault();
+            if (ev.stopPropagation) ev.stopPropagation();
+        }
+        const modalEl = document.getElementById('signOutModal');
+        if (modalEl) {
+            const inst = bootstrap.Modal.getOrCreateInstance(modalEl);
+            inst.show();
+        } else {
+            window.location.href = (window.BASE_URL || '') + '/logout.php';
+        }
+        return false;
+    };
+
     document.addEventListener('click', function (e) {
         const trigger = e.target.closest && e.target.closest('[data-bs-toggle="modal"]');
         if (!trigger) return;
@@ -916,14 +931,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const targetModal = document.querySelector(targetSelector);
         if (!targetModal) return;
-
-        // Clean up any stale or orphaned backdrops if no modal is active
-        if (!document.querySelector('.modal.show')) {
-            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-            document.body.classList.remove('modal-open');
-            document.body.style.removeProperty('overflow');
-            document.body.style.removeProperty('padding-right');
-        }
 
         try {
             const modalInstance = bootstrap.Modal.getOrCreateInstance(targetModal);
@@ -1053,16 +1060,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('afterprint', function () {
         const ps = document.getElementById('print-section');
         if (ps) ps.innerHTML = '';
-    });
-
-    // -------------------------------------------------------------------------
-    // 23. Move Active Modals to Direct Children of <body> for Crystal-Clear Display
-    // -------------------------------------------------------------------------
-    document.addEventListener('show.bs.modal', function (e) {
-        const modalEl = e.target;
-        if (modalEl && modalEl.classList && modalEl.classList.contains('modal') && modalEl.parentElement !== document.body) {
-            document.body.appendChild(modalEl);
-        }
     });
 });
 
