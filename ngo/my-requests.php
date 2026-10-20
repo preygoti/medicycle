@@ -26,6 +26,7 @@ $stmt = $pdo->prepare("SELECT r.*, s.supply_name, s.unit, s.location as supply_l
                        JOIN users u_supp ON s.supplier_id = u_supp.id 
                        LEFT JOIN organizations o ON u_supp.id = o.user_id 
                        WHERE r.requester_id = ? 
+                         AND (r.purpose NOT LIKE 'Fulfilled Clinical Requirement%' OR r.purpose IS NULL)
                        ORDER BY r.requested_at DESC");
 $stmt->execute([$userId]);
 $requests = $stmt->fetchAll();

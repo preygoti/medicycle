@@ -23,7 +23,7 @@ try {
     // 3. Pending Incoming Requests
     $stmt = $pdo->prepare("SELECT COUNT(r.id) FROM requests r 
                            JOIN medical_supplies s ON r.supply_id = s.id 
-                           WHERE s.supplier_id = ? AND r.status = 'Pending'");
+                           WHERE s.supplier_id = ? AND r.status = 'Pending' AND (r.purpose NOT LIKE 'Fulfilled Clinical Requirement%' OR r.purpose IS NULL)");
     $stmt->execute([$userId]);
     $pendingRequests = $stmt->fetchColumn();
 
@@ -50,7 +50,7 @@ try {
                            JOIN medical_supplies s ON r.supply_id = s.id 
                            JOIN users u ON r.requester_id = u.id 
                            LEFT JOIN organizations o ON u.id = o.user_id 
-                           WHERE s.supplier_id = ? 
+                           WHERE s.supplier_id = ? AND (r.purpose NOT LIKE 'Fulfilled Clinical Requirement%' OR r.purpose IS NULL)
                            ORDER BY r.requested_at DESC LIMIT 5");
     $stmt->execute([$userId]);
     $recentRequests = $stmt->fetchAll();
@@ -59,7 +59,7 @@ try {
     $stmt = $pdo->prepare("SELECT s.*, c.category_name 
                            FROM medical_supplies s 
                            JOIN categories c ON s.category_id = c.id 
-                           WHERE s.supplier_id = ? 
+                           WHERE s.supplier_id = ?
                            ORDER BY s.created_at DESC LIMIT 5");
     $stmt->execute([$userId]);
     $recentSupplies = $stmt->fetchAll();

@@ -283,7 +283,8 @@ $sql = "SELECT r.*, s.supply_name, s.unit, s.quantity as available_qty, s.locati
         JOIN medical_supplies s ON r.supply_id = s.id 
         JOIN users u ON r.requester_id = u.id 
         LEFT JOIN organizations o ON u.id = o.user_id 
-        WHERE s.supplier_id = ?";
+        WHERE s.supplier_id = ?
+          AND (r.purpose NOT LIKE 'Fulfilled Clinical Requirement%' OR r.purpose IS NULL)";
 $params = [$userId];
 
 if (!empty($statusFilter)) {
@@ -369,23 +370,6 @@ include __DIR__ . '/../includes/navbar.php';
                 </a>
             </li>
         </ul>
-
-        <?php if ($currentTab !== 'broadcasts' && $activeClinicReqCount > 0): ?>
-            <!-- Alert Banner for Broadcast Clinical Needs -->
-            <div class="alert alert-info border-0 shadow-xs rounded-4 d-flex flex-wrap align-items-center justify-content-between mb-4 py-3 px-3 gap-2" style="background:#f0fdfa; border-left:4px solid #0f766e !important;">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="rounded-circle p-2 d-inline-flex" style="background:#ccfbf1; color:#0f766e;">
-                        <i class="fas fa-bullhorn"></i>
-                    </span>
-                    <span class="small fw-semibold text-dark">
-                        <strong><?php echo $activeClinicReqCount; ?> Clinic Requirement<?php echo $activeClinicReqCount > 1 ? 's' : ''; ?></strong> broadcast by recipient healthcare clinics waiting for supplier supplies.
-                    </span>
-                </div>
-                <a href="<?php echo BASE_URL; ?>/supplier/requests.php?tab=broadcasts" class="btn btn-sm text-white rounded-pill px-3 shadow-2xs fw-semibold" style="background:#0f766e;">
-                    View Clinic Needs <i class="fas fa-arrow-right ms-1"></i>
-                </a>
-            </div>
-        <?php endif; ?>
 
         <?php if ($currentTab === 'broadcasts'): ?>
             <!-- Clinic Requirements Broadcasts Table -->
