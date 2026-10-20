@@ -184,7 +184,7 @@ $userRole = $currentUser['role'] ?? ($_SESSION['role'] ?? '');
     </ul>
 
     <div class="sidebar-footer mt-auto">
-        <a href="<?php echo BASE_URL; ?>/logout.php" class="btn-sidebar-signout mb-2">
+        <a href="<?php echo BASE_URL; ?>/logout.php" class="btn-sidebar-signout mb-1.5">
             <i class="fas fa-sign-out-alt"></i>
             <span>Sign Out</span>
         </a>
