@@ -507,36 +507,41 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .app-sidebar {
-    width: 260px;
     background-color: var(--sidebar-bg);
     color: var(--sidebar-text);
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #1E293B;
-    position: sticky;
-    top: 68px;
-    height: calc(100vh - 68px);
-    max-height: calc(100vh - 68px);
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
     z-index: 1000;
 }
 
-/* Nav container fits cleanly without any scrolling or scrollbars */
-.app-sidebar .nav.flex-column {
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    flex: 1 1 auto;
-}
+@media (min-width: 992px) {
+    .app-sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #1E293B;
+        position: sticky;
+        top: 68px;
+        height: calc(100vh - 68px);
+        max-height: calc(100vh - 68px);
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+    }
 
-.app-sidebar .nav.flex-column::-webkit-scrollbar,
-.app-sidebar::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
+    /* Nav container fits cleanly without any scrolling or scrollbars on desktop */
+    .app-sidebar .nav.flex-column {
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        flex: 1 1 auto;
+    }
+
+    .app-sidebar .nav.flex-column::-webkit-scrollbar,
+    .app-sidebar::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
 }
 
 .app-sidebar .sidebar-heading {
@@ -1024,17 +1029,6 @@ footer.medicycle-footer .footer-title {
 
 /* Responsive adjustments */
 @media (max-width: 991.98px) {
-    .app-container {
-        flex-direction: column;
-    }
-    .app-sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #1E293B;
-    }
-    .app-content {
-        padding: 1.25rem;
-    }
     .hero-section::before,
     .hero-section::after {
         display: none !important;
@@ -1995,51 +1989,97 @@ input[type="date"].form-control:focus {
     }
 }
 
-/* 3. Mobile & Tablet App Navigation (Width <= 991.98px) */
+/* 3. Mobile & Tablet App Navigation (Width <= 991.98px) - High-Performance Horizontal Scroll */
 @media (max-width: 991.98px) {
     .app-container {
         flex-direction: column !important;
+        overflow-x: hidden !important;
     }
     .app-sidebar {
         width: 100% !important;
-        position: static !important;
+        position: sticky !important;
+        top: 56px !important;
+        z-index: 1020 !important;
         height: auto !important;
         max-height: none !important;
         border-right: none !important;
         border-bottom: 1px solid #1E293B !important;
-        padding-bottom: 0.35rem !important;
+        padding: 0.35rem 0 !important;
         background-color: var(--sidebar-bg) !important;
-        overflow: hidden !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x !important;
+        overscroll-behavior-x: contain !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    .app-sidebar::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
     }
     .app-sidebar .sidebar-heading {
         display: none !important;
     }
-    .app-sidebar .nav {
+    .app-sidebar .nav,
+    .app-sidebar .nav.flex-column {
+        display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
+        overflow-y: hidden !important;
         -webkit-overflow-scrolling: touch !important;
-        padding: 0.5rem 0.75rem !important;
-        gap: 0.35rem !important;
-        scrollbar-width: none;
+        touch-action: pan-x !important;
+        overscroll-behavior-x: contain !important;
+        padding: 0.35rem 0.75rem !important;
+        gap: 0.45rem !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+        width: max-content !important;
+        min-width: 100% !important;
+        margin-bottom: 0 !important;
     }
-    .app-sidebar .nav::-webkit-scrollbar {
-        display: none;
+    .app-sidebar .nav::-webkit-scrollbar,
+    .app-sidebar .nav.flex-column::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+    .app-sidebar .nav-item {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
     }
     .app-sidebar .nav-link {
         white-space: nowrap !important;
         margin: 0 !important;
-        padding: 0.45rem 0.85rem !important;
-        font-size: 0.82rem !important;
-        border-radius: 20px !important;
+        padding: 0.45rem 0.95rem !important;
+        font-size: 0.84rem !important;
+        border-radius: 50px !important;
         border-left: none !important;
         border-bottom: none !important;
-        background-color: rgba(255, 255, 255, 0.05) !important;
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: #CBD5E1 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.45rem !important;
+        flex-shrink: 0 !important;
+        transition: all 0.2s ease !important;
+    }
+    .app-sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.16) !important;
+        color: #FFFFFF !important;
     }
     .app-sidebar .nav-link.active {
         background-color: #0F766E !important;
         color: #FFFFFF !important;
-        border-left: none !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.4) !important;
+    }
+    .app-sidebar .nav-link i {
+        font-size: 0.85rem !important;
+        width: auto !important;
+        color: inherit !important;
     }
     .app-content {
         padding: 1rem !important;

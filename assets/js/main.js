@@ -778,6 +778,78 @@ document.addEventListener('DOMContentLoaded', function () {
             revealElements.forEach(el => el.classList.add('is-revealed'));
         }
     })();
+
+    // -------------------------------------------------------------------------
+    // 16. Mobile Navbar: Auto-Close Pop-Up Menu on Outside / Homepage Click
+    // -------------------------------------------------------------------------
+    (function () {
+        const navbarCollapse = document.getElementById('navbarMain');
+        const navbarToggler = document.querySelector('.navbar-toggler');
+
+        if (navbarCollapse) {
+            const closeMobileNav = function (e) {
+                // Check if mobile menu is currently open or opening
+                if (navbarCollapse.classList.contains('show')) {
+                    const isClickInsideMenu = navbarCollapse.contains(e.target);
+                    const isClickOnToggler = navbarToggler && navbarToggler.contains(e.target);
+
+                    // If clicked outside on the homepage or body, close the pop-up header menu
+                    if (!isClickInsideMenu && !isClickOnToggler) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                        bsCollapse.hide();
+                    }
+                }
+            };
+
+            // Capture clicks and touch taps on document
+            document.addEventListener('click', closeMobileNav);
+            document.addEventListener('touchstart', closeMobileNav, { passive: true });
+
+            // Close when clicking any nav item or button inside the collapse (unless it's a dropdown toggle)
+            const menuActionLinks = navbarCollapse.querySelectorAll('a, button');
+            menuActionLinks.forEach(function (link) {
+                link.addEventListener('click', function () {
+                    if (this.getAttribute('data-bs-toggle') === 'dropdown') return;
+                    if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                        bsCollapse.hide();
+                    }
+                });
+            });
+
+            // Also auto-close if user starts scrolling down the homepage
+            window.addEventListener('scroll', function () {
+                if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse);
+                    if (bsCollapse) bsCollapse.hide();
+                }
+            }, { passive: true });
+        }
+    })();
+
+    // -------------------------------------------------------------------------
+    // 17. Account Portal Mobile Sidebar: Smooth Horizontal Scrolling
+    // -------------------------------------------------------------------------
+    (function () {
+        const sidebarNav = document.querySelector('.app-sidebar .nav, .app-sidebar');
+        if (!sidebarNav) return;
+
+        // Auto-scroll the active tab into center view on mobile load
+        const activeItem = document.querySelector('.app-sidebar .nav-link.active');
+        if (activeItem && window.innerWidth < 992) {
+            setTimeout(function () {
+                activeItem.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }, 150);
+        }
+
+        // Enable horizontal mouse wheel scrolling on mobile/tablet screens
+        sidebarNav.addEventListener('wheel', function (e) {
+            if (window.innerWidth < 992 && e.deltaY !== 0) {
+                e.preventDefault();
+                this.scrollLeft += e.deltaY;
+            }
+        }, { passive: false });
+    })();
 });
 
 
