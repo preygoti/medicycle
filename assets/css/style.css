@@ -212,6 +212,22 @@ h1, h2, h3, h4, h5, h6 {
     border-color: #CBD5E1;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
 }
+.user-profile-name {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #1e293b;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+.user-profile-role {
+    font-size: 0.62rem;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    margin-top: 2px;
+}
 .user-avatar-circle {
     width: 32px;
     height: 32px;
@@ -1233,9 +1249,51 @@ footer.medicycle-footer .footer-title {
         font-size: 0.8rem !important;
         border-radius: 7px !important;
     }
+
+    .navbar-medicycle .user-profile-name {
+        font-size: 0.8rem !important;
+        max-width: 105px !important;
+    }
 }
 
 @media (max-width: 575.98px) {
+    .navbar-medicycle {
+        padding: 0.4rem 0 !important;
+    }
+
+    .navbar-medicycle .navbar-brand {
+        font-size: 1.1rem !important;
+        gap: 0.4rem !important;
+    }
+
+    .navbar-medicycle .navbar-brand img {
+        width: 30px !important;
+        height: 30px !important;
+    }
+
+    .navbar-medicycle .notif-icon-btn {
+        width: 34px !important;
+        height: 34px !important;
+        margin: 0 !important;
+    }
+
+    .navbar-medicycle .user-profile-capsule {
+        padding: 0.2rem 0.45rem 0.2rem 0.2rem !important;
+        gap: 0.35rem !important;
+    }
+
+    .navbar-medicycle .user-avatar-circle {
+        width: 26px !important;
+        height: 26px !important;
+        font-size: 0.74rem !important;
+        border-radius: 6px !important;
+    }
+
+    .navbar-medicycle .user-profile-name {
+        font-size: 0.76rem !important;
+        max-width: 82px !important;
+    }
+
     .hero-section {
         padding: 2.75rem 0 3.25rem !important;
     }

@@ -126,13 +126,6 @@ include __DIR__ . '/includes/navbar.php';
 
                     <?php echo render_flash_messages(); ?>
 
-                    <?php if (is_logged_in()): ?>
-                        <div class="alert alert-info py-2 px-3 small d-flex justify-content-between align-items-center mb-3 rounded-3 border-0" style="background:#ccfbf1; color:#0f766e;">
-                            <span><i class="fas fa-user-check me-1"></i> Active: <strong><?php echo e($_SESSION['user_name'] ?? ''); ?></strong> (<?php echo strtoupper(e($_SESSION['role'] ?? '')); ?>)</span>
-                            <a href="<?php echo get_role_dashboard(); ?>" class="btn btn-sm btn-teal py-1 px-2 text-white">Go to Dashboard</a>
-                        </div>
-                    <?php endif; ?>
-
                     <?php if (!empty($errors)): ?>
                         <div class="alert alert-danger shadow-sm">
                             <ul class="mb-0 ps-3 small">
