@@ -532,22 +532,22 @@ document.addEventListener('DOMContentLoaded', function () {
         async function refreshPageContent() {
             if (isRefreshing) return;
 
-            // Check if user is actively typing within the last 3 seconds
+            // Check if user is actively typing, has a modal open, or has a header dropdown open
             const isActivelyTyping = (Date.now() - lastKeystrokeTime < 3000) &&
                                      document.hasFocus() &&
                                      document.activeElement &&
                                      ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) &&
                                      !document.activeElement.classList.contains('otp-pin-input');
 
-            // Check if a form modal (like Accept/Reject/Add/Barcode) is open
             const openModal = document.querySelector('.modal.show');
             const isFormModalOpen = !!(openModal && openModal.querySelector('form'));
+            const hasOpenDropdown = !!document.querySelector('.navbar-medicycle .dropdown-menu.show');
 
-            if (isActivelyTyping || isFormModalOpen) {
+            if (isActivelyTyping || isFormModalOpen || hasOpenDropdown) {
                 pendingRefresh = true;
                 setTimeout(function() {
                     if (pendingRefresh) refreshPageContent();
-                }, 1500);
+                }, 2000);
                 return;
             }
 
@@ -560,7 +560,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 if (!res.ok) {
-                    window.location.reload();
                     return;
                 }
 
@@ -594,16 +593,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         currentSidebar.innerHTML = newSidebar.innerHTML;
                     }
 
-                    // Also sync navbar notification dropdown items if present
-                    const currentNotifBtn = document.getElementById('notifDropdown');
-                    const newNotifBtn = newDoc.getElementById('notifDropdown');
-                    if (currentNotifBtn && newNotifBtn && currentNotifBtn.parentElement && newNotifBtn.parentElement) {
-                        const isDropdownOpen = currentNotifBtn.classList.contains('show');
-                        if (!isDropdownOpen) {
-                            currentNotifBtn.parentElement.innerHTML = newNotifBtn.parentElement.innerHTML;
-                        }
-                    }
-
                     window.scrollTo(0, scrollY);
 
                     // Re-bind Bootstrap tooltips
@@ -616,11 +605,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     showSyncPill('Live Synchronized');
-                } else {
-                    window.location.reload();
                 }
             } catch (err) {
-                window.location.reload();
+                // Silently ignore background fetch errors, never reload page automatically
             } finally {
                 isRefreshing = false;
                 pendingRefresh = false;
@@ -913,7 +900,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         };
         document.addEventListener('click', closeAll);
-        document.addEventListener('touchend', closeAll, { passive: true });
     }
 });
 

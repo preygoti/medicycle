@@ -172,7 +172,6 @@ $isRegisterActive = ($currentScript === 'register.php');
                     }
                 };
                 document.addEventListener('click', closeAll);
-                document.addEventListener('touchend', closeAll, { passive: true });
             }
             </script>
         <?php else: ?>
