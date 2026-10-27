@@ -87,13 +87,13 @@ include __DIR__ . '/../includes/navbar.php';
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-3">
                 <form action="<?php echo BASE_URL; ?>/ngo/search-supplies.php" method="GET" class="row g-2 align-items-center">
-                    <div class="col-md-4">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-12">
                         <div class="input-group">
-                            <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
-                            <input type="text" class="form-control" name="search" value="<?php echo e($search); ?>" placeholder="Search gloves, masks, gauze, bandages...">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" class="form-control border-start-0" name="search" value="<?php echo e($search); ?>" placeholder="Search gloves, masks, gauze, bandages...">
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-xl-3 col-lg-3 col-md-6 col-12">
                         <select class="form-select" name="category">
                             <option value="">All Categories</option>
                             <?php foreach ($categories as $cat): ?>
@@ -103,7 +103,7 @@ include __DIR__ . '/../includes/navbar.php';
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">
                         <select class="form-select" name="city">
                             <option value="">All Locations</option>
                             <?php foreach ($cities as $c): ?>
@@ -111,7 +111,7 @@ include __DIR__ . '/../includes/navbar.php';
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-xl-2 col-lg-2 col-md-4 col-sm-6 col-12">
                         <select class="form-select" name="priority">
                             <option value="">All Priorities</option>
                             <option value="High" <?php echo $priority === 'High' ? 'selected' : ''; ?>>High Priority</option>
@@ -119,15 +119,17 @@ include __DIR__ . '/../includes/navbar.php';
                             <option value="Low" <?php echo $priority === 'Low' ? 'selected' : ''; ?>>Low Priority</option>
                         </select>
                     </div>
-                    <div class="col-md-1 d-flex gap-1">
-                        <button type="submit" class="btn btn-teal w-100 text-white" style="background:#0f766e;">
-                            <i class="fas fa-filter"></i>
-                        </button>
-                        <?php if (!empty($search) || $categoryId > 0 || !empty($city) || !empty($priority)): ?>
-                            <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="btn btn-outline-secondary" title="Reset">
-                                <i class="fas fa-undo"></i>
-                            </a>
-                        <?php endif; ?>
+                    <div class="col-xl-2 col-lg-2 col-md-4 col-12">
+                        <div class="d-flex gap-2 w-100">
+                            <button type="submit" class="btn btn-teal text-white flex-grow-1 text-nowrap" style="background:#0f766e;" title="Apply Filter">
+                                <i class="fas fa-filter me-1"></i> Filter
+                            </button>
+                            <?php if (!empty($search) || $categoryId > 0 || !empty($city) || !empty($priority)): ?>
+                                <a href="<?php echo BASE_URL; ?>/ngo/search-supplies.php" class="btn btn-outline-secondary px-3 flex-shrink-0" title="Reset Search & Filters">
+                                    <i class="fas fa-undo"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </form>
             </div>

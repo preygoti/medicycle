@@ -1,5 +1,7 @@
-# ACADEMIC OPEN-ENDED PROJECT (OEP) REPORT
-## Web Technology & Database Management Systems
+# SARVAJANIK COLLEGE OF ENGINEERING AND TECHNOLOGY
+## COMPUTER ENGINEERING DEPARTMENT
+### B. Tech III, SEM V, Div- II (ODD 2026-27)
+### Subject Name: Web Technologies (BTCO13502)
 
 ---
 
@@ -10,7 +12,8 @@
 ---
 
 ### **Academic Submission Details**
-* **Project Type:** Web-Based Open-Ended Project (OEP)
+* **Project Type:** Open Ended Problem (OEP)
+* **Group No.:** 7
 * **Technology Stack:** PHP · MySQL · HTML5 · CSS3 (Bootstrap 5.3) · JavaScript (ES6)
 * **Evaluation / Submission Period:** **26/10/2026 to 30/10/2026**
 * **Live Production URL:** [http://medicycle.infinityfreeapp.com](http://medicycle.infinityfreeapp.com)
@@ -18,15 +21,15 @@
 
 ---
 
-## Group Members & Work Division (Group of 5)
+## Group Members & Work Division (Group 7)
 
-| Roll No. | Student Name | Assigned Role | Primary Module Responsibilities |
+| Enrollment No. | Student Name | Assigned Role | Primary Module Responsibilities |
 |---|---|---|---|
-| **STU-01** | *[Student 1 Name - Team Lead]* | System Architect & Backend Lead | Core Database Schema (`medicycle_db.sql`), Secure Session Management (`session.php`), Authentication Framework (`auth.php`), Production Cloud Deployment |
-| **STU-02** | *[Student 2 Name]* | Frontend & UI/UX Designer | Responsive Bootstrap 5.3 UI System, Global Theme CSS (`style.css`), Accessible Mobile Navigation, Frosted Glass Modal Pop-ups |
-| **STU-03** | *[Student 3 Name]* | Healthcare Supplier Module Lead | Supplier Inventory CRUD (`inventory.php`, `add-supply.php`, `edit-supply.php`), Batch Management, Requisition Approval Workflow |
-| **STU-04** | *[Student 4 Name]* | NGO / Clinic Module Lead | Supply Catalog Search & Multi-criteria Filtering (`catalog.php`), Clinical Requirements Broadcast CRUD (`post-requirement.php`), Request Tracking |
-| **STU-05** | *[Student 5 Name]* | Logistics & Security Specialist | Delivery Partner Transit Pipeline (`update-status.php`), Secure Handshake Verification Terminal (QR & 6-Digit PIN), Real-Time Polling Engine (`main.js`) |
+| **ET24BTCO145** | **RUDRA BHUVA** | System Architect & Backend Lead | Core Database Schema (`medicycle_db.sql`), Secure Session Management (`session.php`), Authentication Framework (`auth.php`), Production Cloud Deployment |
+| **ET24BTCO151** | **YAGNEN GHODADARA** | Frontend & UI/UX Designer | Responsive Bootstrap 5.3 UI System, Global Theme CSS (`style.css`), Accessible Mobile Navigation, Frosted Glass Modal Pop-ups |
+| **ET24BTCO154** | **RASES GORASIYA** | Healthcare Supplier Module Lead | Supplier Inventory CRUD (`inventory.php`, `add-supply.php`, `edit-supply.php`), Batch Management, Requisition Approval Workflow |
+| **ET24BTCO155** | **UTSAV GORASIYA** | NGO / Clinic Module Lead | Supply Catalog Search & Multi-criteria Filtering (`catalog.php`), Clinical Requirements Broadcast CRUD (`post-requirement.php`), Request Tracking |
+| **ET24BTCO156** | **PREY GOTI** | Logistics & Security Specialist | Delivery Partner Transit Pipeline (`update-status.php`), Secure Handshake Verification Terminal (QR & 6-Digit PIN), Real-Time Polling Engine (`main.js`) |
 
 ---
 

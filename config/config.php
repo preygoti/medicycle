@@ -27,16 +27,28 @@ if (!defined('BASE_URL')) {
         $protocol = $isHttps ? "https://" : "http://";
         $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
         
-        // Calculate relative path from DOCUMENT_ROOT to project directory
-        $docRoot = isset($_SERVER['DOCUMENT_ROOT']) ? str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'])) : '';
-        $appRoot = str_replace('\\', '/', APP_ROOT);
+        // Calculate relative path from DOCUMENT_ROOT to project directory (case-insensitive for Windows)
+        $rawDocRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+        $docRoot = !empty($rawDocRoot) ? str_replace('\\', '/', realpath($rawDocRoot) ?: $rawDocRoot) : '';
+        $appRoot = str_replace('\\', '/', realpath(APP_ROOT) ?: APP_ROOT);
         
-        if (!empty($docRoot) && strpos($appRoot, $docRoot) === 0) {
+        $docRootLower = strtolower($docRoot);
+        $appRootLower = strtolower($appRoot);
+        
+        if (!empty($docRoot) && strpos($appRootLower, $docRootLower) === 0) {
             $relativePath = substr($appRoot, strlen($docRoot));
             $baseUrl = rtrim($protocol . $host . $relativePath, '/');
         } else {
-            // Fallback or PHP built-in web server running directly in project root
-            $baseUrl = rtrim($protocol . $host, '/');
+            // Robust fallback via SCRIPT_NAME to dynamically detect subdirectory on localhost
+            $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+            $projectFolder = basename($appRoot);
+            $pos = stripos($scriptName, '/' . $projectFolder);
+            if ($pos !== false) {
+                $subPath = substr($scriptName, 0, $pos + strlen('/' . $projectFolder));
+                $baseUrl = rtrim($protocol . $host . $subPath, '/');
+            } else {
+                $baseUrl = rtrim($protocol . $host, '/');
+            }
         }
         define('BASE_URL', $baseUrl);
     }

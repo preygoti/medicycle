@@ -1,5 +1,4 @@
 -- MariaDB dump 10.19  Distrib 10.4.32-MariaDB, for Win64 (AMD64)
---
 -- Host: localhost    Database: medicycle_db
 -- ------------------------------------------------------
 -- Server version	10.4.32-MariaDB
@@ -40,7 +39,14 @@ CREATE TABLE `categories` (
 
 LOCK TABLES `categories` WRITE;
 /*!40000 ALTER TABLE `categories` DISABLE KEYS */;
-INSERT INTO `categories` VALUES (1,'Personal Protective Equipment','Gloves, face shields, surgical masks, gowns, and head covers','fa-head-side-mask','active','2026-10-08 17:52:11'),(2,'Wound Care & Dressings','Sterile bandages, gauze swabs, adhesive dressings, and crepe rolls','fa-bandage','active','2026-10-08 17:52:11'),(3,'Diagnostic Consumables','Test strips, disposable probe covers, lancets, and specimen containers','fa-vial','active','2026-10-08 17:52:11'),(4,'Sterilization & Antiseptics','Alcohol prep pads, sterile wraps, indicators, and surface prep wipes','fa-pump-medical','active','2026-10-08 17:52:11'),(5,'Non-Drug Administration','Sterile capped syringes, IV cannulas, infusion sets, and tubing','fa-syringe','active','2026-10-08 17:52:11'),(6,'First Aid & Emergency Kits','Unopened trauma dressings, splints, thermal blankets, and triangular bandages','fa-kit-medical','active','2026-10-08 17:52:11'),(7,'Orthopedic & Mobility Aids','Arm slings, cervical collars, crutch pads, and elastic limb supports','fa-crutch','active','2026-10-08 17:52:11');
+INSERT INTO `categories` VALUES 
+(1,'Personal Protective Equipment','Gloves, face shields, surgical masks, gowns, and head covers','fa-head-side-mask','active',NOW()),
+(2,'Wound Care & Dressings','Sterile bandages, gauze swabs, adhesive dressings, and crepe rolls','fa-bandage','active',NOW()),
+(3,'Diagnostic Consumables','Test strips, disposable probe covers, lancets, and specimen containers','fa-vial','active',NOW()),
+(4,'Sterilization & Antiseptics','Alcohol prep pads, sterile wraps, indicators, and surface prep wipes','fa-pump-medical','active',NOW()),
+(5,'Non-Drug Administration','Sterile capped syringes, IV cannulas, infusion sets, and tubing','fa-syringe','active',NOW()),
+(6,'First Aid & Emergency Kits','Unopened trauma dressings, splints, thermal blankets, and triangular bandages','fa-kit-medical','active',NOW()),
+(7,'Orthopedic & Mobility Aids','Arm slings, cervical collars, crutch pads, and elastic limb supports','fa-crutch','active',NOW());
 /*!40000 ALTER TABLE `categories` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -72,16 +78,15 @@ CREATE TABLE `deliveries` (
   KEY `idx_delivery_partner` (`delivery_partner_id`),
   CONSTRAINT `fk_delivery_partner` FOREIGN KEY (`delivery_partner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_delivery_request` FOREIGN KEY (`request_id`) REFERENCES `requests` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `deliveries`
+-- Dumping data for table `deliveries` (Clean Demonstration State)
 --
 
 LOCK TABLES `deliveries` WRITE;
 /*!40000 ALTER TABLE `deliveries` DISABLE KEYS */;
-INSERT INTO `deliveries` VALUES (1,1,NULL,'Surat','surat, ahmedabad','Picked Up','Delivered','\n[2026-10-10 14:29:27] Verified via 6-digit/QR handshake code by Prey Goti\n[2026-10-10 15:18:46] Verified via handshake code by City Hospital','2026-10-09 19:00:22',NULL,NULL,'2026-10-10 15:18:46','2026-10-09 13:30:22','2026-10-10 09:48:46');
 /*!40000 ALTER TABLE `deliveries` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -105,16 +110,15 @@ CREATE TABLE `email_otps` (
   PRIMARY KEY (`id`),
   KEY `idx_otp_lookup` (`email`,`otp_type`,`is_used`),
   KEY `idx_otp_expires` (`expires_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `email_otps`
+-- Dumping data for table `email_otps` (Clean Demonstration State)
 --
 
 LOCK TABLES `email_otps` WRITE;
 /*!40000 ALTER TABLE `email_otps` DISABLE KEYS */;
-INSERT INTO `email_otps` VALUES (2,2,'preygoti11@gmail.com','$2y$10$uc2ne0/jSG3zgjQMFneAueGF8HrGvofkR9aDbs5dSGa3cq8EPi46y','registration','2026-10-09 15:33:12',1,1,'2026-10-09 13:23:12'),(3,3,'preygoti.co24d2@scet.ac.in','$2y$10$gWn8X63XZ4PcViU1fw8BROvjMu1L3FfyyduQm5dw/YFYfgNUvnZH2','registration','2026-10-09 15:36:17',1,1,'2026-10-09 13:26:17');
 /*!40000 ALTER TABLE `email_otps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -136,16 +140,15 @@ CREATE TABLE `impact_metrics` (
   PRIMARY KEY (`id`),
   KEY `fk_impact_request` (`request_id`),
   CONSTRAINT `fk_impact_request` FOREIGN KEY (`request_id`) REFERENCES `requests` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `impact_metrics`
+-- Dumping data for table `impact_metrics` (Clean Demonstration State)
 --
 
 LOCK TABLES `impact_metrics` WRITE;
 /*!40000 ALTER TABLE `impact_metrics` DISABLE KEYS */;
-INSERT INTO `impact_metrics` VALUES (3,1,26,3.12,910.00,1,'2026-10-10 08:59:27'),(5,1,26,3.12,910.00,1,'2026-10-10 09:48:46'),(9,10,2,0.24,70.00,1,'2026-10-10 16:38:16');
 /*!40000 ALTER TABLE `impact_metrics` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -193,7 +196,7 @@ CREATE TABLE `medical_supplies` (
   KEY `idx_supply_listing_type` (`listing_type`),
   CONSTRAINT `fk_supply_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
   CONSTRAINT `fk_supply_supplier` FOREIGN KEY (`supplier_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -202,7 +205,13 @@ CREATE TABLE `medical_supplies` (
 
 LOCK TABLES `medical_supplies` WRITE;
 /*!40000 ALTER TABLE `medical_supplies` DISABLE KEYS */;
-INSERT INTO `medical_supplies` VALUES (2,2,1,'3-Ply Surgical Earloop Face Masks','BFE >= 98% splash resistant surgical masks',474,'Boxes (50 pcs)','disposal','New / Unopened','Original Factory Seal','Expired in inventory','Authorized Bio-Medical Waste Agency (CBMWTF)','2028-10-09','LOT-MSK-4402','Room Temperature','Surat','',NULL,1,'Disposed',70,'High',NULL,NULL,'2026-10-09 13:23:54','2026-10-10 14:19:02'),(19,2,4,'g','x',0,'Boxes (100 pcs)','surplus','Sterile Sealed','Original Factory Seal',NULL,NULL,'2027-04-10','','Standard Room Temperature (15-25°C)','ahmedabad','',NULL,1,'Transferred',70,'High',NULL,NULL,'2026-10-10 15:57:02','2026-10-10 16:38:16');
+INSERT INTO `medical_supplies` VALUES 
+(1,2,1,'3-Ply Surgical Earloop Face Masks','BFE >= 98% splash resistant triple-layer surgical masks, hypoallergenic with soft elastic ear loops.',500,'Boxes (50 pcs)','surplus','New / Unopened','Original Factory Seal',NULL,NULL,'2028-10-09','LOT-MSK-4402','Room Temperature (15-25°C)','Central Pharmacy Store, Room 102','Surat',NULL,1,'Available',75,'High',NULL,NULL,NOW(),NOW()),
+(2,2,1,'Sterile Nitrile Examination Gloves (Medium)','Powder-free medical examination gloves, textured fingertips, latex-free, non-sterile disposable.',300,'Boxes (100 pcs)','surplus','New / Unopened','Original Factory Seal',NULL,NULL,'2028-06-15','LOT-GLV-8821','Cool & Dry away from direct sunlight','Central Pharmacy Store, Room 102','Surat',NULL,1,'Available',70,'High',NULL,NULL,NOW(),NOW()),
+(3,2,2,'Sterile Gauze Swabs 10x10cm (12 Ply)','Pure 100% bleached cotton gauze swabs, gamma irradiated sterile packs of 25 pieces.',400,'Packs (25 pcs)','surplus','Sterile Sealed','Tamper Evident Packaging',NULL,NULL,'2028-04-20','LOT-GZ-2210','Standard Room Temperature','Inpatient Ward Store','Surat',NULL,1,'Available',65,'Medium',NULL,NULL,NOW(),NOW()),
+(4,2,5,'Disposable Capped Syringes 5ml (Sterile)','Non-drug administration syringes with luer slip nozzle, individually blister packed and ethylene oxide sterilized.',600,'Units','surplus','Sterile Sealed','Original Factory Seal',NULL,NULL,'2028-12-31','LOT-SYR-9041','Room Temperature','Dispensary Wing B','Surat',NULL,1,'Available',65,'Medium',NULL,NULL,NOW(),NOW()),
+(5,4,2,'Elastic Crepe Bandages 10cm x 4m','High-stretch supportive compression bandages for orthopedic joint immobilization and wound retention.',200,'Rolls','surplus','New / Unopened','Intact Outer Box',NULL,NULL,'2029-01-15','LOT-CR-3104','Dry Storage','Warehouse Block C','Surat',NULL,1,'Available',60,'Medium',NULL,NULL,NOW(),NOW()),
+(6,4,4,'Alcohol Prep Swabs (70% Isopropyl)','Sterile 2-ply non-woven skin cleansing prep pads saturated with 70% v/v Isopropyl alcohol.',800,'Boxes (100 pcs)','surplus','New / Unopened','Original Factory Seal',NULL,NULL,'2028-11-30','LOT-APS-1092','Cool Dry Place below 30°C','Warehouse Block A','Surat',NULL,1,'Available',70,'High',NULL,NULL,NOW(),NOW());
 /*!40000 ALTER TABLE `medical_supplies` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -224,7 +233,7 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `idx_notif_user_read` (`user_id`,`is_read`),
   CONSTRAINT `fk_notif_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,7 +242,11 @@ CREATE TABLE `notifications` (
 
 LOCK TABLES `notifications` WRITE;
 /*!40000 ALTER TABLE `notifications` DISABLE KEYS */;
-INSERT INTO `notifications` VALUES (1,2,'Welcome to MediCycle!','Your organization profile (prey) is set up. Verify your email to complete activation.','login.php',0,'2026-10-09 13:23:12'),(2,3,'Welcome to MediCycle!','Your organization profile (goti) is set up. Verify your email to complete activation.','login.php',0,'2026-10-09 13:26:17'),(3,2,'New Requisition Request','goti requested 26 Boxes (50 pcs) of 3-Ply Surgical Earloop Face Masks.','supplier/requests.php',0,'2026-10-09 13:29:28'),(4,3,'Request Approved by Supplier!','Your request for 26 Boxes (50 pcs) of 3-Ply Surgical Earloop Face Masks was approved! 6-Digit Handshake Code: 266896. Transport arranged.','ngo/my-requests.php',0,'2026-10-09 13:30:22'),(5,2,'Handover Completed & Verified!','Consignment #REQ-1 (26 Boxes (50 pcs) of 3-Ply Surgical Earloop Face Masks) physical handover was verified with 6-digit code. Stock successfully transferred.','supplier/history.php',0,'2026-10-10 08:59:27'),(6,3,'Supplies Received & Verified!','Your clinic has successfully received 26 Boxes (50 pcs) of 3-Ply Surgical Earloop Face Masks (Consignment #REQ-1). Verification complete.','ngo/history.php',0,'2026-10-10 08:59:27'),(7,2,'New Requisition Request','goti requested 200 200 of roti.','supplier/requests.php',0,'2026-10-10 09:01:45'),(8,3,'Request Approved by Supplier!','Your request for 200 200 of roti was approved! 6-Digit Handshake Code: 967944. Transport arranged.','ngo/my-requests.php',0,'2026-10-10 09:01:59'),(9,2,'Handover Completed & Verified!','Consignment #REQ-2 (200 200 of roti) physical handover was verified with 6-digit code. Stock successfully transferred.','supplier/history.php',0,'2026-10-10 09:17:22'),(10,3,'Supplies Received & Verified!','Your clinic has successfully received 200 200 of roti (Consignment #REQ-2). Verification complete.','ngo/history.php',0,'2026-10-10 09:17:22'),(11,2,'Handover Completed & Verified!','Consignment #REQ-1 (26 Boxes (50 pcs) of 3-Ply Surgical Earloop Face Masks) delivery was successfully verified with 6-digit handshake code. Stock officially transferred.','supplier/history.php',0,'2026-10-10 09:48:46'),(12,3,'Supplies Received & Delivery Completed!','Your clinic has verified and received 26 Boxes (50 pcs) of 3-Ply Surgical Earloop Face Masks (Consignment #REQ-1). Verification complete.','ngo/history.php',0,'2026-10-10 09:48:46'),(13,2,'New Requisition Request','goti requested 200 200 of ro.','supplier/requests.php',0,'2026-10-10 12:00:36'),(14,3,'Request Approved by Supplier!','Your request for 200 200 of ro was approved! 6-Digit Handshake Code: 227780. Transport arranged.','ngo/my-requests.php',0,'2026-10-10 12:01:34'),(15,2,'Collection Confirmed by Recipient','goti has confirmed physical collection of 200 200 of ro.','supplier/history.php',0,'2026-10-10 12:02:28'),(16,3,'Requisition Cancelled: Item Expired','Safety Alert: The requested supply \'Expired Diagnostic Reagents\' expired and has been segregated to quarantine. Requisition cancelled.','ngo/my-requests.php',0,'2026-10-10 14:14:01'),(18,2,'Handover Completed & Verified!','Consignment #REQ-7 (40 Pairs of Test Surgical Gloves Latex) delivery was successfully verified with 6-digit handshake code. Stock officially transferred.','supplier/history.php',0,'2026-10-10 14:17:08'),(19,3,'Supplies Received & Delivery Completed!','Your clinic has verified and received 40 Pairs of Test Surgical Gloves Latex (Consignment #REQ-7). Verification complete.','ngo/history.php',0,'2026-10-10 14:17:08'),(20,2,'Handover Completed & Verified!','Consignment #REQ-8 (80 Bags of Test Pediatric Saline IV) delivery was successfully verified with 6-digit handshake code. Stock officially transferred.','supplier/history.php',0,'2026-10-10 14:17:08'),(21,3,'Supplies Received & Delivery Completed!','Your clinic has verified and received 80 Bags of Test Pediatric Saline IV (Consignment #REQ-8). Verification complete.','ngo/history.php',0,'2026-10-10 14:17:08'),(22,3,'Requisition Cancelled: Item Expired','Safety Alert: The requested supply \'Expired Diagnostic Reagents\' expired and has been segregated to quarantine. Requisition cancelled.','ngo/my-requests.php',0,'2026-10-10 14:17:08'),(24,2,'New Requisition Request','goti requested 2 Boxes (100 pcs) of g.','supplier/requests.php',0,'2026-10-10 15:59:17'),(25,3,'Request Accepted by Supplier!','Your request for 2 Boxes (100 pcs) of g was accepted. Handover Code: 912971.','ngo/my-requests.php',0,'2026-10-10 16:13:17'),(26,2,'Handover Completed & Verified!','Consignment for 2 Boxes (100 pcs) of g delivery was successfully verified with 6-digit handshake code. Stock officially transferred.','supplier/history.php',0,'2026-10-10 16:38:16'),(27,3,'Supplies Received & Delivery Completed!','Your clinic has verified and received 2 Boxes (100 pcs) of g. Verification complete.','ngo/history.php',0,'2026-10-10 16:38:16');
+INSERT INTO `notifications` VALUES 
+(1,2,'Welcome to MediCycle!','Your hospital donor profile (City Care Hospital) is active. You have 4 surplus batches listed and ready for requisition.','supplier/inventory.php',0,NOW()),
+(2,3,'Welcome to MediCycle!','Your clinic profile (Hope Community Clinic) is verified. You can browse the supply catalog and post clinical needs.','catalog.php',0,NOW()),
+(3,4,'Welcome to MediCycle!','Your distributor profile (Prey Medical Distributors) is verified and ready for surplus declaration.','supplier/inventory.php',0,NOW()),
+(4,5,'Welcome to MediCycle!','Your clinic profile (SCET Community Health Center) is verified. Welcome to the redistribution network!','catalog.php',0,NOW());
 /*!40000 ALTER TABLE `notifications` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -263,7 +276,7 @@ CREATE TABLE `organizations` (
   KEY `idx_org_city` (`city`),
   KEY `idx_org_status` (`verification_status`),
   CONSTRAINT `fk_org_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,7 +285,11 @@ CREATE TABLE `organizations` (
 
 LOCK TABLES `organizations` WRITE;
 /*!40000 ALTER TABLE `organizations` DISABLE KEYS */;
-INSERT INTO `organizations` VALUES (1,2,'prey','Pharmacy Supplier','rhqeorhq','c.g road','ahmedabad','gujarat','1329123','verified',NULL,'2026-10-09 13:23:12','2026-10-09 13:23:12'),(2,3,'goti','Charitable NGO','rhqeorhq','surat','ahmedabad','gujarat','234123','verified',NULL,'2026-10-09 13:26:17','2026-10-09 13:26:17');
+INSERT INTO `organizations` VALUES 
+(1,2,'City Care Multi-Specialty Hospital','Hospital','HOSP-SURAT-2026-88','Ring Road, Near Civil Hospital Gate 2','Surat','Gujarat','395002','verified',NULL,NOW(),NOW()),
+(2,3,'Hope Community Healthcare Dispensary','Charitable Trust / NGO','NGO-SURAT-2026-42','45, Adajan Main Road, Opp. Community Hall','Surat','Gujarat','395009','verified',NULL,NOW(),NOW()),
+(3,4,'Prey Medical Surgical Distributors','Pharmacy Supplier','LIC-MED-2026-01','Ghoti Faliya, Katargam Main Road','Surat','Gujarat','395004','verified',NULL,NOW(),NOW()),
+(4,5,'SCET Community Health Outreach Center','Charitable Clinic / Dispensary','SCET-HLTH-2026','SCET Campus, Dr. R.K. Desai Marg, Athwalines','Surat','Gujarat','395001','verified',NULL,NOW(),NOW());
 /*!40000 ALTER TABLE `organizations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -285,39 +302,35 @@ DROP TABLE IF EXISTS `requests`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `requests` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `supply_id` int(11) DEFAULT NULL,
+  `supply_id` int(11) NOT NULL,
   `requester_id` int(11) NOT NULL,
   `requested_quantity` int(11) NOT NULL,
-  `purpose` varchar(255) DEFAULT NULL,
+  `purpose` text NOT NULL,
   `urgency` enum('Low','Medium','High','Critical') DEFAULT 'Medium',
-  `preferred_collection_date` date DEFAULT NULL,
-  `message` text DEFAULT NULL,
-  `smart_match_score` int(11) DEFAULT NULL,
-  `status` varchar(50) NOT NULL DEFAULT 'Pending',
+  `needed_by_date` date DEFAULT NULL,
+  `status` enum('Pending','Approved','Rejected','Cancelled','Ready for Handover','In Transit','Completed','Accepted','Collected') DEFAULT 'Pending',
   `supplier_remarks` text DEFAULT NULL,
-  `rejection_reason` text DEFAULT NULL,
-  `handover_code` varchar(30) DEFAULT NULL,
+  `handover_code` varchar(20) DEFAULT NULL,
   `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `approved_at` datetime DEFAULT NULL,
   `completed_at` datetime DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `fk_request_supply` (`supply_id`),
   KEY `fk_request_user` (`requester_id`),
   KEY `idx_request_status` (`status`),
+  KEY `idx_request_handover` (`handover_code`),
   CONSTRAINT `fk_request_supply` FOREIGN KEY (`supply_id`) REFERENCES `medical_supplies` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_request_user` FOREIGN KEY (`requester_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `requests`
+-- Dumping data for table `requests` (Clean Demonstration State)
 --
 
 LOCK TABLES `requests` WRITE;
 /*!40000 ALTER TABLE `requests` DISABLE KEYS */;
-INSERT INTO `requests` VALUES (1,2,3,26,'Rural Health Camp','Low','2027-02-01','hello',NULL,'Completed','',NULL,'307307','2026-10-09 13:29:28','2026-10-09 19:00:22','2026-10-10 15:18:46','2026-10-09 13:29:28','2026-10-10 09:48:46'),(10,19,3,2,'Rural Health Camp','Low','2027-04-12','',NULL,'Completed','',NULL,'912971','2026-10-10 15:59:17','2026-10-10 21:43:17','2026-10-10 22:08:16','2026-10-10 15:59:17','2026-10-10 16:38:16');
 /*!40000 ALTER TABLE `requests` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -353,7 +366,7 @@ CREATE TABLE `requirements` (
   KEY `idx_req_city` (`city`),
   CONSTRAINT `fk_req_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`),
   CONSTRAINT `fk_req_org` FOREIGN KEY (`organization_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -362,6 +375,8 @@ CREATE TABLE `requirements` (
 
 LOCK TABLES `requirements` WRITE;
 /*!40000 ALTER TABLE `requirements` DISABLE KEYS */;
+INSERT INTO `requirements` VALUES 
+(1,3,2,'Sterile Surgical Gauze Pads (10x10cm)',100,'Packs (25 pcs)','High',DATE_ADD(CURDATE(), INTERVAL 30 DAY),'Surat','Urgent requirement for free rural outpatient screening and minor wound dressing camp.','Active',NULL,NULL,NULL,NOW(),NOW());
 /*!40000 ALTER TABLE `requirements` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -389,7 +404,12 @@ CREATE TABLE `system_settings` (
 
 LOCK TABLES `system_settings` WRITE;
 /*!40000 ALTER TABLE `system_settings` DISABLE KEYS */;
-INSERT INTO `system_settings` VALUES (1,'platform_name','MediCycle','Application branding name','2026-10-08 17:52:11'),(2,'support_email','support@medicycle.org','Official contact email','2026-10-08 17:52:11'),(3,'waste_factor_kg_per_unit','0.12','Average kg of waste averted per consumable unit','2026-10-08 17:52:11'),(4,'avg_value_inr_per_unit','35.00','Average INR value per unit redistributed','2026-10-08 17:52:11'),(5,'min_shelf_life_days','30','Minimum remaining shelf life for supply approval','2026-10-08 17:52:11');
+INSERT INTO `system_settings` VALUES 
+(1,'platform_name','MediCycle','Application Name',NOW()),
+(2,'contact_email','support@medicycle.org','Platform Contact Email',NOW()),
+(3,'min_expiry_days','30','Minimum shelf life in days required for donation',NOW()),
+(4,'enable_registration','true','Allow public account registration',NOW()),
+(5,'maintenance_mode','false','Platform maintenance toggle',NOW());
 /*!40000 ALTER TABLE `system_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -415,7 +435,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`),
   KEY `idx_user_role` (`role`),
   KEY `idx_user_status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -424,11 +444,16 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'System Administrator','admin@medicycle.org','$2y$10$57k5GX/AqWPBarlfLNyJyucW1aSbZIVLi8Z8slmguCzZxph9hxh8i','+91 9800000001','admin',1,'active','2026-08-01 03:30:00','2026-10-08 17:52:11'),(2,'Prey Goti','preygoti11@gmail.com','$2y$10$NpQlTc7NRAyQnFaeCsYtpOOMmNNo3Y2Q3/LAfsQUGl8zmg2MSzy6C','+919510114943','supplier',1,'active','2026-10-09 13:23:12','2026-10-09 13:23:26'),(3,'Prey Goti','preygoti.co24d2@scet.ac.in','$2y$10$ttVa1kh3KUwOFxDJUrWFHO.fk49ljy7KODoxBrt6WKt91oGAfAri6','+919510114943','ngo',1,'active','2026-10-09 13:26:17','2026-10-09 13:26:27');
+INSERT INTO `users` VALUES 
+(1,'System Administrator','admin@medicycle.org','$2y$10$emW0aIE2Dx2UgmnjdINcr.JuskFGHk.NFml2Mzi356rWUz.aH5z8m','+91 9800000001','admin',1,'active',NOW(),NOW()),
+(2,'City Care Hospital (Supplier)','hospital@care.org','$2y$10$emW0aIE2Dx2UgmnjdINcr.JuskFGHk.NFml2Mzi356rWUz.aH5z8m','+91 9825012345','supplier',1,'active',NOW(),NOW()),
+(3,'Hope Community Clinic (NGO)','clinic@ngo.org','$2y$10$emW0aIE2Dx2UgmnjdINcr.JuskFGHk.NFml2Mzi356rWUz.aH5z8m','+91 9825067890','ngo',1,'active',NOW(),NOW()),
+(4,'Prey Goti (Supplier)','preygoti11@gmail.com','$2y$10$emW0aIE2Dx2UgmnjdINcr.JuskFGHk.NFml2Mzi356rWUz.aH5z8m','+91 9510114943','supplier',1,'active',NOW(),NOW()),
+(5,'Prey Goti (SCET NGO Clinic)','preygoti.co24d2@scet.ac.in','$2y$10$emW0aIE2Dx2UgmnjdINcr.JuskFGHk.NFml2Mzi356rWUz.aH5z8m','+91 9510114943','ngo',1,'active',NOW(),NOW());
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -437,4 +462,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-10-10 22:23:10
+-- Dump completed on 2026-10-27 10:15:00

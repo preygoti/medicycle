@@ -7,14 +7,17 @@ require_once __DIR__ . '/config/config.php';
 
 // Fetch dynamic platform impact metrics from the database
 try {
-    $statSupplies = $pdo->query("SELECT COUNT(*) FROM medical_supplies WHERE status = 'Available'")->fetchColumn();
-    $statOrgs = $pdo->query("SELECT COUNT(*) FROM organizations WHERE verification_status = 'verified'")->fetchColumn();
-    $statTransfers = $pdo->query("SELECT COUNT(*) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
-    $statUnits = $pdo->query("SELECT COALESCE(SUM(requested_quantity), 0) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
-    $statWaste = $pdo->query("SELECT COALESCE(SUM(estimated_waste_avoided), 0) FROM impact_metrics")->fetchColumn();
+    $statSupplies = (int)$pdo->query("SELECT COUNT(*) FROM medical_supplies WHERE status = 'Available'")->fetchColumn();
+    $statOrgs = (int)$pdo->query("SELECT COUNT(*) FROM organizations WHERE verification_status = 'verified'")->fetchColumn();
+    if ($statOrgs === 0) {
+        $statOrgs = (int)$pdo->query("SELECT COUNT(*) FROM organizations")->fetchColumn();
+    }
+    $statTransfers = (int)$pdo->query("SELECT COUNT(*) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
+    $statUnits = (int)$pdo->query("SELECT COALESCE(SUM(requested_quantity), 0) FROM requests WHERE status IN ('Completed', 'Received')")->fetchColumn();
+    $statWaste = (float)$pdo->query("SELECT COALESCE(SUM(estimated_waste_avoided), 0) FROM impact_metrics")->fetchColumn();
 
 } catch (PDOException $e) {
-    $statSupplies = 0; $statOrgs = 0; $statTransfers = 0; $statUnits = 0; $statWaste = 0;
+    $statSupplies = 0; $statOrgs = 0; $statTransfers = 0; $statUnits = 0; $statWaste = 0.0;
 }
 
 // Handle contact inquiry submission from unified #contact section
@@ -83,40 +86,58 @@ include __DIR__ . '/includes/navbar.php';
                 </div>
             </div>
             <div class="col-lg-5 reveal-fade-right">
-                <div class="card bg-white text-dark shadow-lg border-0 p-4 rounded-4">
+                <div class="card bg-white text-dark shadow-lg border-0 p-4 rounded-4 position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100" style="height: 4px; background: linear-gradient(90deg, #0d9488, #14b8a6, #3b82f6);"></div>
                     <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-                        <h6 class="fw-bold text-teal mb-0"><i class="fas fa-chart-line me-2"></i>Live Redistribution Metrics</h6>
-                        <span class="badge bg-success bg-opacity-10 text-success"><i class="fas fa-circle me-1 small"></i>Real-Time DB</span>
+                        <div class="d-flex align-items-center">
+                            <span class="rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 28px; height: 28px; background: rgba(13, 148, 136, 0.12); color: #0f766e;">
+                                <i class="fas fa-chart-line small"></i>
+                            </span>
+                            <h6 class="fw-bold text-teal mb-0">Live Redistribution Metrics</h6>
+                        </div>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1 small d-inline-flex align-items-center">
+                            <span class="spinner-grow spinner-grow-sm text-success me-1" style="width: 6px; height: 6px;" role="status"></span>
+                            <span id="live-db-badge">Live DB Synced</span>
+                        </span>
                     </div>
-                    <div class="row g-3 text-center">
+
+                    <div class="row g-3 text-center" id="live-metrics-grid">
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center">
-                                <div class="fs-2 fw-bold text-dark"><?php echo number_format($statSupplies); ?></div>
+                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center border border-light-subtle metric-tile transition-all">
+                                <div class="text-primary small mb-1"><i class="fas fa-boxes-stacked"></i></div>
+                                <div class="fs-2 fw-bold text-dark metric-num" id="live-stat-supplies"><?php echo number_format($statSupplies); ?></div>
                                 <div class="text-muted small fw-medium">Available Batches</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center">
-                                <div class="fs-2 fw-bold text-teal"><?php echo number_format($statOrgs); ?></div>
+                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center border border-light-subtle metric-tile transition-all">
+                                <div class="text-teal small mb-1"><i class="fas fa-building-circle-check"></i></div>
+                                <div class="fs-2 fw-bold text-teal metric-num" id="live-stat-orgs"><?php echo number_format($statOrgs); ?></div>
                                 <div class="text-muted small fw-medium">Verified Orgs</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center">
-                                <div class="fs-2 fw-bold text-primary"><?php echo number_format($statTransfers); ?></div>
+                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center border border-light-subtle metric-tile transition-all">
+                                <div class="text-info small mb-1"><i class="fas fa-handshake-angle"></i></div>
+                                <div class="fs-2 fw-bold text-primary metric-num" id="live-stat-transfers"><?php echo number_format($statTransfers); ?></div>
                                 <div class="text-muted small fw-medium">Direct Transfers</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center">
-                                <div class="fs-2 fw-bold text-success"><?php echo number_format($statWaste, 1); ?> kg</div>
+                            <div class="p-3 bg-light rounded-3 h-100 d-flex flex-column justify-content-center border border-light-subtle metric-tile transition-all">
+                                <div class="text-success small mb-1"><i class="fas fa-leaf"></i></div>
+                                <div class="fs-2 fw-bold text-success metric-num" id="live-stat-waste"><?php echo number_format($statWaste, 1); ?> <span class="fs-6 fw-normal text-muted">kg</span></div>
                                 <div class="text-muted small fw-medium">Waste Diverted</div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-3 text-center">
+
+                    <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between">
                         <small class="text-muted" style="font-size: 0.76rem;">
-                            <i class="fas fa-shield-alt text-success me-1"></i> Direct Handover Protocol with encrypted collection verification.
+                            <i class="fas fa-shield-alt text-success me-1"></i> Direct Handover Protocol with encrypted verification
+                        </small>
+                        <small class="text-muted small" id="live-stat-time" style="font-size: 0.72rem;">
+                            <i class="fas fa-clock me-1"></i>Live
                         </small>
                     </div>
                 </div>
@@ -524,5 +545,51 @@ include __DIR__ . '/includes/navbar.php';
         </div>
     </div>
 </section>
+
+<!-- Live Database Redistribution Metrics Auto-Sync Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const suppliesEl = document.getElementById('live-stat-supplies');
+    const orgsEl = document.getElementById('live-stat-orgs');
+    const transfersEl = document.getElementById('live-stat-transfers');
+    const wasteEl = document.getElementById('live-stat-waste');
+    const timeEl = document.getElementById('live-stat-time');
+
+    if (!suppliesEl) return;
+
+    function pollMetrics() {
+        fetch('<?php echo BASE_URL; ?>/api/poll_metrics.php', { cache: 'no-store' })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data && data.success) {
+                    if (suppliesEl.textContent.trim() !== String(data.supplies)) {
+                        suppliesEl.textContent = data.supplies;
+                        suppliesEl.classList.add('text-primary');
+                    }
+                    if (orgsEl.textContent.trim() !== String(data.orgs)) {
+                        orgsEl.textContent = data.orgs;
+                        orgsEl.classList.add('text-teal');
+                    }
+                    if (transfersEl.textContent.trim() !== String(data.transfers)) {
+                        transfersEl.textContent = data.transfers;
+                        transfersEl.classList.add('text-info');
+                    }
+                    const wasteHtml = Number(data.waste).toFixed(1) + ' <span class="fs-6 fw-normal text-muted">kg</span>';
+                    if (wasteEl.innerHTML.trim() !== wasteHtml.trim()) {
+                        wasteEl.innerHTML = wasteHtml;
+                    }
+                    if (timeEl && data.updated_at) {
+                        timeEl.innerHTML = '<i class="fas fa-rotate me-1 text-teal"></i>' + data.updated_at;
+                    }
+                }
+            })
+            .catch(function () {});
+    }
+
+    // Auto-poll every 8 seconds for live updates
+    setTimeout(pollMetrics, 3000);
+    setInterval(pollMetrics, 8000);
+});
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
